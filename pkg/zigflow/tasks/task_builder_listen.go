@@ -47,6 +47,7 @@ func NewListenTaskBuilder(
 		builder: builder[*model.ListenTask]{
 			doc:            doc,
 			name:           taskName,
+			neverSkipCAN:   true,
 			task:           task,
 			temporalWorker: temporalWorker,
 		},

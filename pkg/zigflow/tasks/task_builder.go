@@ -38,6 +38,7 @@ type TaskBuilder interface {
 	Build() (TemporalWorkflowFunc, error)
 	GetTask() model.Task
 	GetTaskName() string
+	NeverSkipCAN() bool
 	ParseMetadata(workflow.Context, *utils.State) error
 	PostLoad() error
 	ShouldRun(*utils.State) (bool, error)
@@ -48,6 +49,7 @@ type TemporalWorkflowFunc func(ctx workflow.Context, input any, state *utils.Sta
 type builder[T model.Task] struct {
 	doc            *model.Workflow
 	name           string
+	neverSkipCAN   bool
 	task           T
 	temporalWorker worker.Worker
 }
@@ -58,6 +60,11 @@ func (d *builder[T]) GetTask() model.Task {
 
 func (d *builder[T]) GetTaskName() string {
 	return d.name
+}
+
+// Some tasks should never be skipped when doing Continue-As-New
+func (d *builder[T]) NeverSkipCAN() bool {
+	return d.neverSkipCAN
 }
 
 func (d builder[T]) ParseMetadata(ctx workflow.Context, state *utils.State) error {

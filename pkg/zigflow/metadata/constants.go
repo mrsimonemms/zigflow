@@ -23,3 +23,5 @@ const (
 	MetadataScheduleWorkflowName string = "scheduleWorkflowName"
 	MetadataScheduleInput        string = "scheduleInput"
 )
+
+const MaxHistoryLengthAttribute string = "canMaxHistoryLength"

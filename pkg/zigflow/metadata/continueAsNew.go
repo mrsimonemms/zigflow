@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-package utils
+package metadata
 
-// Check if a variable can be cast to an integer
-func CanBeInt(v any) bool {
-	f, ok := v.(float64)
-	if !ok {
-		return false
+import (
+	"fmt"
+
+	"github.com/mrsimonemms/zigflow/pkg/utils"
+	"github.com/serverlessworkflow/sdk-go/v3/model"
+)
+
+func GetMaxHistoryLength(doc *model.Workflow) (int, error) {
+	if v, ok := doc.Document.Metadata[MaxHistoryLengthAttribute]; ok {
+		if !utils.CanBeInt(v) {
+			return 0, fmt.Errorf("document.metadata.%s value must be an integer", MaxHistoryLengthAttribute)
+		}
+		return int(v.(float64)), nil
 	}
-	return f == float64(int(f))
-}
-
-// Ptr returns a pointer to p.
-func Ptr[T any](p T) *T {
-	return &p
+	return 0, nil
 }

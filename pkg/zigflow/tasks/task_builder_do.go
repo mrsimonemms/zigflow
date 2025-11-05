@@ -31,13 +31,14 @@ import (
 type DoTaskOpts struct {
 	DisableRegisterWorkflow bool
 	Envvars                 map[string]any
+	MaxHistoryLength        int
 	Validator               *utils.Validator
 }
 
 func NewDoTaskBuilder(
 	temporalWorker worker.Worker,
 	task *model.DoTask,
-	taskName string,
+	workflowName string,
 	doc *model.Workflow,
 	opts ...DoTaskOpts,
 ) (*DoTaskBuilder, error) {
@@ -52,7 +53,8 @@ func NewDoTaskBuilder(
 	return &DoTaskBuilder{
 		builder: builder[*model.DoTask]{
 			doc:            doc,
-			name:           taskName,
+			name:           workflowName,
+			neverSkipCAN:   true,
 			task:           task,
 			temporalWorker: temporalWorker,
 		},
@@ -201,13 +203,41 @@ func (t *DoTaskBuilder) workflowExecutor(tasks []workflowFunc) TemporalWorkflowF
 	}
 }
 
+func (t *DoTaskBuilder) continueAsNew(
+	ctx workflow.Context, wfn, taskID string, input any, state *utils.State,
+) error {
+	logger := workflow.GetLogger(ctx)
+
+	err := workflow.Await(ctx, func() bool {
+		return workflow.AllHandlersFinished(ctx)
+	})
+	if err != nil {
+		logger.Error("Failed to wait for handers to finish", "error", err)
+		return fmt.Errorf("failed to wait for handlers to finish: %w", err)
+	}
+
+	logger.Info("Continuing as new", "taskId", taskID)
+	state.CANStartFrom = utils.Ptr(taskID)
+	return workflow.NewContinueAsNewError(ctx, wfn, input, state)
+}
+
 func (t *DoTaskBuilder) iterateTasks(
 	ctx workflow.Context, tasks []workflowFunc, input any, state *utils.State,
 ) error {
 	var nextTargetName *string
 	logger := workflow.GetLogger(ctx)
 
-	for _, task := range tasks {
+	for i, task := range tasks {
+		taskID := fmt.Sprintf("%s-%d", task.GetTaskName(), i)
+		if t.shouldContinueAsNew(ctx) {
+			logger.Debug("Task continue-as-new", "taskID", taskID, "workflow", t.name)
+			return t.continueAsNew(ctx, t.name, taskID, input, state)
+		}
+		if t.shouldSkip(taskID, task, state) {
+			logger.Debug("Skipping complete continue-as-new task", "taskID", taskID, "workflow", t.name)
+			continue
+		}
+
 		taskBase := task.GetTask().GetBase()
 
 		state.AddData(map[string]any{
@@ -256,32 +286,17 @@ func (t *DoTaskBuilder) iterateTasks(
 		ao.Summary = task.Name
 		ctx = workflow.WithActivityOptions(ctx, ao)
 
-		logger.Info("Running task", "name", task.Name)
-		output, err := task.Func(ctx, input, state)
-		if err != nil {
-			if temporal.IsCanceledError(err) {
-				logger.Debug("Task cancelled", "name", task.Name)
-				return nil
-			}
-
-			logger.Error("Error running task", "name", task.Name, "error", err)
+		if err := t.runTask(ctx, task, input, state); err != nil {
 			return err
 		}
 
-		// Set the output - this is only set if there's an export.as on the task
-		state.AddOutput(task.GetTask(), output)
-
-		if then := taskBase.Then; then != nil {
-			flowDirective := then.Value
-			if then.IsTermination() {
-				logger.Debug("Workflow to be terminated", "flow", flowDirective)
-				break
-			}
-			if !then.IsEnum() {
-				logger.Debug("Next task targeted", "nextTask", flowDirective)
-				nextTargetName = &flowDirective
-				continue
-			}
+		next, terminate := t.handleFlowDirective(ctx, taskBase)
+		if terminate {
+			break
+		}
+		if next != nil {
+			nextTargetName = next
+			continue
 		}
 	}
 
@@ -291,4 +306,90 @@ func (t *DoTaskBuilder) iterateTasks(
 	}
 
 	return nil
+}
+
+func (t *DoTaskBuilder) handleFlowDirective(
+	ctx workflow.Context, taskBase *model.TaskBase,
+) (next *string, terminate bool) {
+	logger := workflow.GetLogger(ctx)
+
+	if then := taskBase.Then; then != nil {
+		flowDirective := then.Value
+		if then.IsTermination() {
+			logger.Debug("Workflow to be terminated", "flow", flowDirective)
+			terminate = true
+		} else if !then.IsEnum() {
+			logger.Debug("Next task targeted", "nextTask", flowDirective)
+			next = &flowDirective
+		}
+	}
+
+	return
+}
+
+func (t *DoTaskBuilder) runTask(ctx workflow.Context, task workflowFunc, input any, state *utils.State) error {
+	logger := workflow.GetLogger(ctx)
+
+	logger.Info("Running task", "name", task.Name)
+	output, err := task.Func(ctx, input, state)
+	if err != nil {
+		if temporal.IsCanceledError(err) {
+			logger.Debug("Task cancelled", "name", task.Name)
+			return nil
+		}
+
+		logger.Error("Error running task", "name", task.Name, "error", err)
+		return err
+	}
+
+	// Set the output - this is only set if there's an export.as on the task
+	state.AddOutput(task.GetTask(), output)
+
+	return nil
+}
+
+func (t *DoTaskBuilder) shouldContinueAsNew(ctx workflow.Context) bool {
+	logger := workflow.GetLogger(ctx)
+	info := workflow.GetInfo(ctx)
+
+	currentHistoryLength := info.GetCurrentHistoryLength()
+	isSuggested := info.GetContinueAsNewSuggested()
+
+	logger.Debug("Checking continue-as-new state",
+		"suggested", isSuggested,
+		"maxHistoryOverride", t.opts.MaxHistoryLength,
+		"currentHistoryLength", currentHistoryLength,
+	)
+
+	// Temporal is suggesting CAN
+	if isSuggested {
+		return true
+	}
+
+	// We've overridden for testing purposes
+	if t.opts.MaxHistoryLength > 0 && currentHistoryLength > t.opts.MaxHistoryLength {
+		return true
+	}
+
+	return false
+}
+
+func (t *DoTaskBuilder) shouldSkip(taskID string, task workflowFunc, state *utils.State) bool {
+	if task.NeverSkipCAN() {
+		// Task should never be skipped - eg a query listener which needs to be reinitialised
+		return false
+	}
+	if targetID := state.CANStartFrom; targetID != nil {
+		// We've reached the task we stopped on - continue from here
+		shouldSkip := *targetID != taskID
+
+		if !shouldSkip {
+			// Matches - stop skipping skip anything else
+			state.CANStartFrom = nil
+		}
+
+		return shouldSkip
+	}
+
+	return false
 }

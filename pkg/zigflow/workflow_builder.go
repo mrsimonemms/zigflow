@@ -19,6 +19,7 @@ package zigflow
 import (
 	"fmt"
 
+	"github.com/mrsimonemms/zigflow/pkg/zigflow/metadata"
 	"github.com/mrsimonemms/zigflow/pkg/zigflow/tasks"
 	"github.com/rs/zerolog/log"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
@@ -29,14 +30,23 @@ func NewWorkflow(temporalWorker worker.Worker, doc *model.Workflow, envvars map[
 	workflowName := doc.Document.Name
 	l := log.With().Str("workflowName", workflowName).Logger()
 
+	maxHistoryLength, err := metadata.GetMaxHistoryLength(doc)
+	if err != nil {
+		return err
+	}
+
 	l.Debug().Msg("Creating new Do builder")
 	doBuilder, err := tasks.NewDoTaskBuilder(
 		temporalWorker,
 		&model.DoTask{Do: doc.Do},
 		workflowName,
 		doc,
-		// Pass the envvars - this will be passed to the state object
-		tasks.DoTaskOpts{Envvars: envvars},
+		tasks.DoTaskOpts{
+			// Pass the envvars - this will be passed to the state object
+			Envvars: envvars,
+			// Search for a max history length for CAN override
+			MaxHistoryLength: maxHistoryLength,
+		},
 	)
 	if err != nil {
 		l.Error().Err(err).Msg("Error creating Do builder")

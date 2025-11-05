@@ -29,10 +29,11 @@ import (
 )
 
 type State struct {
-	Data   map[string]any `json:"data"`            // Data stored along the way
-	Env    map[string]any `json:"env"`             // Available environment variables
-	Input  any            `json:"input,omitempty"` // The input given by the caller
-	Output map[string]any `json:"output"`          // What will be output to the caller
+	CANStartFrom *string        `json:"canStartFrom,omitempty"` // Continue-as-new from here
+	Data         map[string]any `json:"data"`                   // Data stored along the way
+	Env          map[string]any `json:"env"`                    // Available environment variables
+	Input        any            `json:"input,omitempty"`        // The input given by the caller
+	Output       map[string]any `json:"output"`                 // What will be output to the caller
 }
 
 func (s *State) init() *State {

@@ -5,6 +5,10 @@ document:
   version: 0.0.1
   title: Listener Workflow (Query)
   summary: Listen for Temporal query events
+  metadata:
+    # Acts as override to test out continue-as-new
+    # @link https://docs.temporal.io/develop/go/continue-as-new
+    canMaxHistoryLength: 5
 do:
   - queryState:
       listen:

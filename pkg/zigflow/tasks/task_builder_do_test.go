@@ -17,6 +17,7 @@
 package tasks
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/mrsimonemms/zigflow/pkg/utils"
@@ -213,6 +214,238 @@ func TestDoTaskBuilderIterateTasksFlowControl(t *testing.T) {
 	}
 }
 
+func TestDoTaskBuilderShouldContinueAsNew(t *testing.T) {
+	t.Helper()
+
+	tests := []struct {
+		name          string
+		opts          DoTaskOpts
+		historyLength int
+		suggested     bool
+		expectResult  bool
+	}{
+		{
+			name:          "no suggestion and no override stays in same run",
+			historyLength: 5,
+			expectResult:  false,
+		},
+		{
+			name:          "temporal suggestion forces continue-as-new",
+			suggested:     true,
+			historyLength: 3,
+			expectResult:  true,
+		},
+		{
+			name: "custom history limit forces continue-as-new",
+			opts: DoTaskOpts{
+				MaxHistoryLength: 10,
+			},
+			historyLength: 11,
+			expectResult:  true,
+		},
+	}
+
+	for i, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Helper()
+
+			builder := newTestDoTaskBuilder(fmt.Sprintf("should-continue-%d", i), tc.opts)
+
+			var s testsuite.WorkflowTestSuite
+			env := s.NewTestWorkflowEnvironment()
+			env.SetCurrentHistoryLength(tc.historyLength)
+			env.SetContinueAsNewSuggested(tc.suggested)
+
+			env.RegisterWorkflowWithOptions(func(ctx workflow.Context) (any, error) {
+				return builder.shouldContinueAsNew(ctx), nil
+			}, workflow.RegisterOptions{Name: builder.GetTaskName()})
+
+			env.ExecuteWorkflow(builder.GetTaskName())
+
+			assert.NoError(t, env.GetWorkflowError())
+
+			var result bool
+			assert.NoError(t, env.GetWorkflowResult(&result))
+			assert.Equal(t, tc.expectResult, result)
+		})
+	}
+}
+
+func TestDoTaskBuilderContinueAsNew(t *testing.T) {
+	t.Helper()
+
+	builder := newTestDoTaskBuilder("continue-as-new")
+	state := utils.NewState()
+
+	var s testsuite.WorkflowTestSuite
+	env := s.NewTestWorkflowEnvironment()
+	env.RegisterWorkflowWithOptions(func(ctx workflow.Context) (any, error) {
+		return nil, builder.continueAsNew(ctx, builder.GetTaskName(), "task-one-0", map[string]any{"request_id": "123"}, state)
+	}, workflow.RegisterOptions{Name: builder.GetTaskName()})
+
+	env.ExecuteWorkflow(builder.GetTaskName())
+
+	err := env.GetWorkflowError()
+	assert.Error(t, err)
+	assert.True(t, workflow.IsContinueAsNewError(err))
+	if assert.NotNil(t, state.CANStartFrom) {
+		assert.Equal(t, "task-one-0", *state.CANStartFrom)
+	}
+}
+
+func TestDoTaskBuilderIterateTasksContinueAsNew(t *testing.T) {
+	t.Helper()
+
+	builder := newTestDoTaskBuilder("iterate-continue-as-new")
+
+	runOrder := make([]string, 0)
+	state := utils.NewState()
+	tasks := []workflowFunc{
+		newSimpleWorkflowFunc("task-one", &model.TaskBase{}, &runOrder),
+	}
+
+	var s testsuite.WorkflowTestSuite
+	env := s.NewTestWorkflowEnvironment()
+	env.SetContinueAsNewSuggested(true)
+	env.RegisterWorkflowWithOptions(func(ctx workflow.Context) (any, error) {
+		return nil, builder.iterateTasks(ctx, tasks, nil, state)
+	}, workflow.RegisterOptions{Name: builder.GetTaskName()})
+
+	env.ExecuteWorkflow(builder.GetTaskName())
+
+	err := env.GetWorkflowError()
+	assert.Error(t, err)
+	assert.True(t, workflow.IsContinueAsNewError(err))
+	assert.Empty(t, runOrder)
+	if assert.NotNil(t, state.CANStartFrom) {
+		assert.Equal(t, "task-one-0", *state.CANStartFrom)
+	}
+}
+
+func TestDoTaskBuilderIterateTasksSkipsCompletedTasks(t *testing.T) {
+	t.Helper()
+
+	builder := newTestDoTaskBuilder("iterate-skip")
+
+	runOrder := make([]string, 0, 2)
+	state := utils.NewState()
+	state.CANStartFrom = utils.Ptr("task-two-1")
+
+	tasks := []workflowFunc{
+		newSimpleWorkflowFunc("task-one", &model.TaskBase{}, &runOrder),
+		newSimpleWorkflowFunc("task-two", &model.TaskBase{}, &runOrder),
+	}
+
+	var s testsuite.WorkflowTestSuite
+	env := s.NewTestWorkflowEnvironment()
+	env.RegisterWorkflowWithOptions(func(ctx workflow.Context) (any, error) {
+		return nil, builder.iterateTasks(ctx, tasks, nil, state)
+	}, workflow.RegisterOptions{Name: builder.GetTaskName()})
+
+	env.ExecuteWorkflow(builder.GetTaskName())
+
+	assert.NoError(t, env.GetWorkflowError())
+	assert.Equal(t, []string{"task-two"}, runOrder)
+	assert.Nil(t, state.CANStartFrom)
+}
+
+func TestDoTaskBuilderShouldSkip(t *testing.T) {
+	t.Helper()
+
+	builder := newTestDoTaskBuilder("skip-check")
+
+	tests := []struct {
+		name        string
+		task        workflowFunc
+		taskID      string
+		state       *utils.State
+		expectSkip  bool
+		expectedCAN *string
+	}{
+		{
+			name: "tasks flagged as never skip are always executed",
+			task: func() workflowFunc {
+				tb := newFakeTaskBuilder("query-listener", &model.TaskBase{})
+				tb.neverSkipCAN = true
+				return workflowFunc{
+					TaskBuilder: tb,
+					Name:        tb.GetTaskName(),
+				}
+			}(),
+			taskID: "query-listener-0",
+			state: func() *utils.State {
+				s := utils.NewState()
+				s.CANStartFrom = utils.Ptr("query-listener-0")
+				return s
+			}(),
+			expectSkip:  false,
+			expectedCAN: utils.Ptr("query-listener-0"),
+		},
+		{
+			name: "matching task ID resumes execution",
+			task: func() workflowFunc {
+				return workflowFunc{
+					TaskBuilder: newFakeTaskBuilder("task-two", &model.TaskBase{}),
+					Name:        "task-two",
+				}
+			}(),
+			taskID: "task-two-1",
+			state: func() *utils.State {
+				s := utils.NewState()
+				s.CANStartFrom = utils.Ptr("task-two-1")
+				return s
+			}(),
+			expectSkip:  false,
+			expectedCAN: nil,
+		},
+		{
+			name: "different task ID keeps skipping",
+			task: func() workflowFunc {
+				return workflowFunc{
+					TaskBuilder: newFakeTaskBuilder("task-one", &model.TaskBase{}),
+					Name:        "task-one",
+				}
+			}(),
+			taskID: "task-one-0",
+			state: func() *utils.State {
+				s := utils.NewState()
+				s.CANStartFrom = utils.Ptr("task-two-1")
+				return s
+			}(),
+			expectSkip:  true,
+			expectedCAN: utils.Ptr("task-two-1"),
+		},
+		{
+			name: "no continue-as-new state never skips",
+			task: func() workflowFunc {
+				return workflowFunc{
+					TaskBuilder: newFakeTaskBuilder("task-zero", &model.TaskBase{}),
+					Name:        "task-zero",
+				}
+			}(),
+			taskID:      "task-zero-0",
+			state:       utils.NewState(),
+			expectSkip:  false,
+			expectedCAN: nil,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Helper()
+
+			result := builder.shouldSkip(tc.taskID, tc.task, tc.state)
+
+			assert.Equal(t, tc.expectSkip, result)
+			if tc.expectedCAN == nil {
+				assert.Nil(t, tc.state.CANStartFrom)
+			} else if assert.NotNil(t, tc.state.CANStartFrom) {
+				assert.Equal(t, *tc.expectedCAN, *tc.state.CANStartFrom)
+			}
+		})
+	}
+}
+
 func newOutputWorkflowFuncs(runOrder *[]string, capturedState **utils.State) []workflowFunc {
 	taskOneBase := &model.TaskBase{
 		Export: &model.Export{
@@ -267,6 +500,7 @@ func newSimpleWorkflowFunc(name string, base *model.TaskBase, runOrder *[]string
 
 type fakeTaskBuilder struct {
 	name         string
+	neverSkipCAN bool
 	task         model.Task
 	shouldRun    bool
 	shouldRunErr error
@@ -275,9 +509,10 @@ type fakeTaskBuilder struct {
 
 func newFakeTaskBuilder(name string, base *model.TaskBase) *fakeTaskBuilder {
 	return &fakeTaskBuilder{
-		name:      name,
-		task:      &mockTask{base: base},
-		shouldRun: true,
+		name:         name,
+		neverSkipCAN: false,
+		task:         &mockTask{base: base},
+		shouldRun:    true,
 	}
 }
 
@@ -293,6 +528,10 @@ func (f *fakeTaskBuilder) GetTaskName() string {
 	return f.name
 }
 
+func (f *fakeTaskBuilder) NeverSkipCAN() bool {
+	return f.neverSkipCAN
+}
+
 func (f *fakeTaskBuilder) ParseMetadata(workflow.Context, *utils.State) error {
 	return f.parseErr
 }
@@ -306,4 +545,20 @@ func (f *fakeTaskBuilder) ShouldRun(*utils.State) (bool, error) {
 		return false, f.shouldRunErr
 	}
 	return f.shouldRun, nil
+}
+
+func newTestDoTaskBuilder(name string, opts ...DoTaskOpts) *DoTaskBuilder {
+	var doOpts DoTaskOpts
+	if len(opts) == 1 {
+		doOpts = opts[0]
+	}
+
+	return &DoTaskBuilder{
+		builder: builder[*model.DoTask]{
+			doc:  &model.Workflow{},
+			name: name,
+			task: &model.DoTask{},
+		},
+		opts: doOpts,
+	}
 }
