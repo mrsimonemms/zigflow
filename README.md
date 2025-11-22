@@ -14,6 +14,14 @@ reliability of Temporal.
 
 ---
 
+## 🛟 Help
+
+* [Homepage](https://zigflow.dev)
+* [Documentation](https://zigflow.dev/docs)
+* [Slack Community](https://temporalio.slack.com/archives/C09UMNG4YP7)
+
+---
+
 ## ✨ Features
 
 * ✅ **CNCF Standard** – fully aligned with Serverless Workflow v1.0+

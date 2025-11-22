@@ -10,7 +10,7 @@ header:
     - LICENSE
     - "**/.*"
     - "**/go.*"
-    - "**/*.{json,md,yml,yaml,txt,lock,toml}"
+    - "**/*.{json,md,yml,yaml,txt,lock,toml,mdx}"
     - "**/.gitkeep"
     - scripts/generate-authors.sh
   comment: on-failure

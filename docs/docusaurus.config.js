@@ -77,8 +77,7 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
-      // Replace with your project's social card
-      image: 'img/docusaurus-social-card.jpg',
+      image: 'img/social.png',
       colorMode: {
         respectPrefersColorScheme: true,
       },
@@ -86,14 +85,36 @@ const config = {
         title: 'Zigflow',
         logo: {
           alt: 'Zigflow',
-          src: 'img/logo.svg',
+          src: 'img/logo.png',
         },
         items: [
           {
             type: 'docSidebar',
-            sidebarId: 'tutorialSidebar',
+            sidebarId: 'docsSidebar',
             position: 'left',
-            label: 'Getting started',
+            label: 'Docs',
+          },
+          {
+            type: 'docSidebar',
+            sidebarId: 'dslSidebar',
+            position: 'left',
+            label: 'DSL',
+          },
+          {
+            type: 'docSidebar',
+            sidebarId: 'deploymentSidebar',
+            position: 'left',
+            label: 'Deploying',
+          },
+          {
+            label: '❤️ Sponsor',
+            position: 'right',
+            href: 'https://buymeacoffee.com/mrsimonemms',
+          },
+          {
+            label: 'Temporal',
+            position: 'right',
+            href: 'https://temporal.io',
           },
           {
             href: `https://github.com/${githubDomain}`,
@@ -106,20 +127,11 @@ const config = {
         style: 'dark',
         links: [
           {
-            title: 'Docs',
-            items: [
-              {
-                label: 'Getting started',
-                to: '/docs/getting-started/intro',
-              },
-            ],
-          },
-          {
             title: 'Community',
             items: [
               {
                 label: 'Slack',
-                href: 'https://t.mp/slack',
+                href: 'https://temporalio.slack.com/archives/C09UMNG4YP7',
               },
               {
                 label: 'GitHub Discussions',
@@ -131,13 +143,26 @@ const config = {
             title: 'More',
             items: [
               {
+                label: 'Temporal',
+                href: 'https://temporal.io',
+              },
+              {
+                label: 'Serverless Workflow',
+                href: 'https://serverlessworkflow.io',
+              },
+              {
                 label: 'GitHub',
                 href: `https://github.com/${githubDomain}`,
               },
             ],
           },
         ],
-        copyright: `Copyright &copy; ${new Date().getFullYear()} <a href="https://github.com/mrsimonemms/zigflow/graphs/contributors" target="_blank">Zigflow authors</a>. Built with Docusaurus.`,
+        copyright: `Licenced under <a href="https://github.com/mrsimonemms/zigflow/blob/main/LICENSE" target="_blank">Apache-2.0</a>
+        <br />
+        Ziggy mascot &copy; <a href="https://temporal.io" target="_blank">Temporal Technologies</a>
+        <br />
+        Copyright &copy; ${new Date().getFullYear()} <a href="https://github.com/mrsimonemms/zigflow/graphs/contributors" target="_blank">Zigflow authors</a>.
+        Built with Docusaurus.`,
       },
       prism: {
         theme: prismThemes.github,

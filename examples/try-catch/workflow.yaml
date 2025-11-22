@@ -18,11 +18,6 @@ do:
               method: get
               endpoint: https://jsonplaceholder.typicode.com/users/2000
       catch:
-        errors:
-          with:
-            type: https://serverlessworkflow.io/spec/1.0.0/errors/communication
-            status: 404
-        as: error
         do:
           - setError:
               export:

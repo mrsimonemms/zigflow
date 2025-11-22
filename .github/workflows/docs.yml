@@ -49,7 +49,7 @@ jobs:
 
   deploy:
     needs: build
-    if: needs.build.outputs.is_tag == 'true'
+    if: needs.build.outputs.is_tag == 'true' || needs.build.outputs.is_default == 'true'
     permissions:
       pages: write
       id-token: write
