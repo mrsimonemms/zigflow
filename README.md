@@ -9,7 +9,7 @@ Zigflow provides a **simple and declarative way** to define and manage
 [Temporal](https://temporal.io) workflows using the
 [CNCF Serverless Workflow](https://serverlessworkflow.io) specification. It
 enables **low-code** and **no-code** workflow creation that's
-**easy to visualize, share, and maintain**, without sacrificing the power and
+**easy to visualise, share, and maintain**, without sacrificing the power and
 reliability of Temporal.
 
 ---
@@ -35,8 +35,8 @@ reliability of Temporal.
 
 ## ⚡️ ZigFlow?
 
-Ziggy is [Temporal's official mascot](https://temporal.io/blog/temporal-in-space).
-They're a microscopic animal that is basically indestructible.
+Ziggy is a tardigrade and [Temporal's official mascot](https://temporal.io/blog/temporal-in-space).
+They're a microscopic animal that is [basically indestructible](https://en.wikipedia.org/wiki/Environmental_tolerance_in_tardigrades).
 
 Sound familiar?
 
@@ -192,10 +192,6 @@ format.
 </a>
 
 Made with [contrib.rocks](https://contrib.rocks).
-
----
-
-## ⭐️ Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=mrsimonemms/zigflow&type=date&legend=top-left)](https://www.star-history.com/#mrsimonemms/zigflow&type=date&legend=top-left)
 
