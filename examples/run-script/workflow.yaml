@@ -1,0 +1,22 @@
+# This is a simple Serverless Workflow that will be
+# translated into a Temporal workflow
+document:
+  dsl: 1.0.0
+  namespace: zigflow # Mapped to the task queue
+  name: run-script # Workflow name
+  version: 0.0.1
+  title: Run script
+  summary: An example of how to run a script
+do:
+  - script:
+      export:
+        as: js
+      run:
+        script:
+          language: js
+          arguments:
+            greeting: Hello from
+          environment:
+            NAME: JS
+          code: >
+            console.log(`${pgreeting} ${process.env.NAME}`);

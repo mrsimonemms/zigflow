@@ -30,6 +30,7 @@ A collection of examples
 | [Python](./python) | The basic example, but in Python |
 | [Listener Workflow (Query)](./query) | Listen for Temporal query events |
 | [Erroring Workflow](./raise) | Raise a bug |
+| [Run script](./run-script) | An example of how to run a script |
 | [Serverless Workflow](./schedule) | Schedule the tasks to be triggered automatically |
 | [Custom Search Attributes](./search-attributes) | An example of how to add custom search attribute data into your Temporal calls |
 | [Listener Workflow (Signal)](./signal) | Listen for Temporal signal events |
