@@ -17,6 +17,7 @@ reliability of Temporal.
 ## 🛟 Help
 
 * [Homepage](https://zigflow.dev)
+* [Helm chart](https://github.com/mrsimonemms/zigflow/tree/main/charts/zigflow)
 * [Documentation](https://zigflow.dev/docs)
 * [Slack Community](https://temporalio.slack.com/archives/C09UMNG4YP7)
 

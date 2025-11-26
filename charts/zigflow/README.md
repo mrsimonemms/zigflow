@@ -6,6 +6,14 @@ Turn your declarative YAML into production-ready Temporal workflows
 
 **Homepage:** <https://zigflow.dev>
 
+## TL;DR
+
+Be sure to set `${ZIGFLOW_VERSION}` with [your desired version](https://github.com/mrsimonemms/zigflow/pkgs/container/charts%2Fzigflow)
+
+```sh
+helm install myrelease oci://ghcr.io/mrsimonemms/charts/zigflow@${ZIGFLOW_VERSION}
+```
+
 ## Maintainers
 
 | Name | Email | Url |
