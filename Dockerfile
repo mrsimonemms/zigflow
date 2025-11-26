@@ -31,7 +31,7 @@ RUN go build \
 COPY --from=cosmtrek/air /go/bin/air /go/bin/air
 ENTRYPOINT [ "air" ]
 
-FROM scratch
+FROM alpine
 ARG GIT_COMMIT
 ARG VERSION
 ENV GIT_COMMIT="${GIT_COMMIT}"
@@ -40,4 +40,11 @@ ENV WORKFLOW_FILE=/workflow.yaml
 WORKDIR /app
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=builder /go/bin/app /app
+
+# Install Node and Python
+RUN apk add --no-cache nodejs python3 \
+  && node --version \
+  && python --version \
+fi
+
 ENTRYPOINT [ "/app/app" ]
