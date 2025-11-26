@@ -13,6 +13,7 @@ header:
     - "**/*.{json,md,yml,yaml,txt,lock,toml,mdx}"
     - "**/.gitkeep"
     - scripts/generate-authors.sh
+    - charts/*/README.tpl
   comment: on-failure
   language:
     Go:

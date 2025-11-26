@@ -50,6 +50,8 @@ repos:
     rev: v1.14.2
     hooks:
       - id: helm-docs-built
+        args:
+          - --template-files=./charts/zigflow/README.tpl
   - repo: https://github.com/gruntwork-io/pre-commit
     rev: v0.1.30
     hooks:
