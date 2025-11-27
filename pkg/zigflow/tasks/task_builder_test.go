@@ -103,3 +103,90 @@ func TestShouldRun(t *testing.T) {
 		})
 	}
 }
+
+func TestNewTaskBuilderFactory(t *testing.T) {
+	doc := &model.Workflow{}
+
+	tests := []struct {
+		name         string
+		task         model.Task
+		expectedType any
+		expectErr    bool
+	}{
+		{
+			name:         "call http",
+			task:         &model.CallHTTP{},
+			expectedType: &CallHTTPTaskBuilder{},
+		},
+		{
+			name:         "do task",
+			task:         &model.DoTask{},
+			expectedType: &DoTaskBuilder{},
+		},
+		{
+			name:         "for task",
+			task:         &model.ForTask{},
+			expectedType: &ForTaskBuilder{},
+		},
+		{
+			name:         "fork task",
+			task:         &model.ForkTask{},
+			expectedType: &ForkTaskBuilder{},
+		},
+		{
+			name:         "listen task",
+			task:         &model.ListenTask{},
+			expectedType: &ListenTaskBuilder{},
+		},
+		{
+			name:         "raise task",
+			task:         &model.RaiseTask{},
+			expectedType: &RaiseTaskBuilder{},
+		},
+		{
+			name:         "run task",
+			task:         &model.RunTask{},
+			expectedType: &RunTaskBuilder{},
+		},
+		{
+			name:         "set task",
+			task:         &model.SetTask{},
+			expectedType: &SetTaskBuilder{},
+		},
+		{
+			name:         "switch task",
+			task:         &model.SwitchTask{},
+			expectedType: &SwitchTaskBuilder{},
+		},
+		{
+			name:         "try task",
+			task:         &model.TryTask{},
+			expectedType: &TryTaskBuilder{},
+		},
+		{
+			name:         "wait task",
+			task:         &model.WaitTask{},
+			expectedType: &WaitTaskBuilder{},
+		},
+		{
+			name:      "unsupported task type",
+			task:      &mockTask{base: &model.TaskBase{}},
+			expectErr: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			builder, err := NewTaskBuilder(tc.name, tc.task, nil, doc)
+			if tc.expectErr {
+				assert.Error(t, err)
+				assert.Nil(t, builder)
+				return
+			}
+
+			assert.NoError(t, err)
+			assert.IsType(t, tc.expectedType, builder)
+			assert.Equal(t, tc.name, builder.GetTaskName())
+		})
+	}
+}
