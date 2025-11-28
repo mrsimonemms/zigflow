@@ -1,0 +1,57 @@
+name: Monthly Dependency Updates
+
+on:
+  schedule:
+    - cron: "0 0 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Update Go dependencies
+        run: |
+          go get -u ./...
+          go mod tidy
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+
+      - name: Update docs npm dependencies
+        working-directory: docs
+        run: |
+          npm install
+          npm update
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "chore: update dependencies"
+          title: "chore: monthly dependencies update"
+          body: |
+            Automated monthly dependency refresh.
+
+            - Go dependencies updated via `go get -u ./...` and `go mod tidy`
+            - Docs npm dependencies updated via `npm update` in `docs`
+          branch: chore/monthly-deps
+          delete-branch: true
+          labels: dependencies
