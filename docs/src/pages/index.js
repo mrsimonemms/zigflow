@@ -33,13 +33,20 @@ function HomepageHeader() {
         </Heading>
         <p className="hero__subtitle">{siteConfig.tagline}</p>
         <div className={styles.buttons}>
-          <Link
-            className="button button--secondary button--lg"
-            to="/docs/intro"
-          >
+          <Link className="button button--primary button--lg" to="/docs/intro">
             Getting Started - 5min ⏱️
           </Link>
         </div>
+      </div>
+
+      <div className={clsx(styles.credit, 'hidden-xs hidden-sm')}>
+        <a
+          href="https://unsplash.com/@hamburgmeinefreundin?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Photo by Wolfgang Weiser
+        </a>
       </div>
     </header>
   );
