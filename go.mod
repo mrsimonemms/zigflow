@@ -12,6 +12,7 @@ require (
 	github.com/itchyny/gojq v0.12.17
 	github.com/mrsimonemms/golang-helpers v0.4.1
 	github.com/mrsimonemms/temporal-codec-server/packages/golang v0.0.0-20250917111850-1e5f24c60fac
+	github.com/posthog/posthog-go v1.6.13
 	github.com/rs/zerolog v1.34.0
 	github.com/serverlessworkflow/sdk-go/v3 v3.1.2
 	github.com/spf13/cobra v1.10.1
@@ -41,6 +42,7 @@ require (
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.3 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.3 // indirect
+	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/itchyny/timefmt-go v0.1.7 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect

@@ -154,6 +154,34 @@ You can now run it with any [Temporal SDK](https://docs.temporal.io/encyclopedia
 
 ---
 
+## 📈 Telemetry
+
+Telemetry helps us understand if people are actually using Zigflow. Stars are
+great, but a tiny bit of usage data gives us a clearer picture of what’s happening
+out there.
+
+Zigflow creates a UUID (stored in `~/.config/zigflow`) and sends just two things:
+
+* that anonymous ID
+* the Zigflow version you’re running
+
+That's it.
+
+Telemetry is optional and easy to turn off. You can disable it by setting the
+environment variable:
+
+```sh
+DISABLE_TELEMETRY=true
+```
+
+or by running Zigflow with:
+
+```sh
+--disable-telemetry
+```
+
+---
+
 ## 🧭 Related Projects
 
 * [Temporal](https://temporal.io)
