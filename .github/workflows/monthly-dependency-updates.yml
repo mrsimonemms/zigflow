@@ -5,10 +5,6 @@ on:
     - cron: "0 0 1 * *"
   workflow_dispatch:
 
-permissions:
-  contents: write
-  pull-requests: write
-
 jobs:
   update-dependencies:
     runs-on: ubuntu-latest
@@ -32,7 +28,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: lts
           cache: npm
           cache-dependency-path: docs/package-lock.json
 
@@ -55,3 +51,4 @@ jobs:
           branch: chore/monthly-deps
           delete-branch: true
           labels: dependencies
+          token: ${{ secrets.MONTHLY_UPDATE_TOKEN }}
