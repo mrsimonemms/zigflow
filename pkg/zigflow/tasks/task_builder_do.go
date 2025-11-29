@@ -31,6 +31,7 @@ import (
 type DoTaskOpts struct {
 	DisableRegisterWorkflow bool
 	Envvars                 map[string]any
+	MaxHistoryLength        int
 	Validator               *utils.Validator
 }
 
@@ -201,6 +202,23 @@ func (t *DoTaskBuilder) workflowExecutor(tasks []workflowFunc) TemporalWorkflowF
 	}
 }
 
+func (t *DoTaskBuilder) continueAsNew(
+	ctx workflow.Context, wfn string, input any, state *utils.State,
+) error {
+	logger := workflow.GetLogger(ctx)
+
+	err := workflow.Await(ctx, func() bool {
+		return workflow.AllHandlersFinished(ctx)
+	})
+	if err != nil {
+		logger.Error("Failed to wait for handers to finish", "error", err)
+		return fmt.Errorf("failed to wait for handlers to finish: %w", err)
+	}
+
+	logger.Info("Continuing as new")
+	return workflow.NewContinueAsNewError(ctx, wfn, input, state)
+}
+
 func (t *DoTaskBuilder) iterateTasks(
 	ctx workflow.Context, tasks []workflowFunc, input any, state *utils.State,
 ) error {
@@ -208,7 +226,13 @@ func (t *DoTaskBuilder) iterateTasks(
 	logger := workflow.GetLogger(ctx)
 
 	for _, task := range tasks {
+		if t.shouldContinueAsNew(ctx) {
+			return t.continueAsNew(ctx, "basic", input, state)
+		}
+
 		taskBase := task.GetTask().GetBase()
+
+		fmt.Println(task.GetTaskName())
 
 		state.AddData(map[string]any{
 			"task": map[string]any{
@@ -291,4 +315,19 @@ func (t *DoTaskBuilder) iterateTasks(
 	}
 
 	return nil
+}
+
+func (t *DoTaskBuilder) shouldContinueAsNew(ctx workflow.Context) bool {
+	if workflow.GetInfo(ctx).GetContinueAsNewSuggested() {
+		return true
+	}
+
+	fmt.Println(workflow.GetInfo(ctx).GetCurrentHistoryLength())
+	t.opts.MaxHistoryLength = 14
+
+	if t.opts.MaxHistoryLength > 0 && workflow.GetInfo(ctx).GetCurrentHistoryLength() > t.opts.MaxHistoryLength {
+		return true
+	}
+
+	return false
 }
