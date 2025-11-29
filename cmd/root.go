@@ -24,6 +24,7 @@ import (
 	gh "github.com/mrsimonemms/golang-helpers"
 	"github.com/mrsimonemms/golang-helpers/temporal"
 	"github.com/mrsimonemms/temporal-codec-server/packages/golang/algorithms/aes"
+	"github.com/mrsimonemms/zigflow/pkg/telemetry"
 	"github.com/mrsimonemms/zigflow/pkg/utils"
 	"github.com/mrsimonemms/zigflow/pkg/zigflow"
 	"github.com/rs/zerolog"
@@ -38,6 +39,7 @@ import (
 var rootOpts struct {
 	ConvertData          bool
 	ConvertKeyPath       string
+	DisableTelemetry     bool
 	EnvPrefix            string
 	FilePath             string
 	HealthListenAddress  string
@@ -68,6 +70,15 @@ var rootCmd = &cobra.Command{
 		zerolog.SetGlobalLevel(level)
 
 		return nil
+	},
+	PreRun: func(cmd *cobra.Command, args []string) {
+		if !rootOpts.DisableTelemetry {
+			// Thank you - it helps us to see who's using it
+			if err := telemetry.Notify(Version); err != nil {
+				// Log the error, but that's all
+				log.Trace().Err(err).Msg("Failed to send anonymous telemetry - oh well")
+			}
+		}
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		defer func() {
@@ -230,6 +241,12 @@ func init() {
 	rootCmd.Flags().StringVar(
 		&rootOpts.ConvertKeyPath, "converter-key-path",
 		viper.GetString("converter_key_path"), "Path to AES conversion keys",
+	)
+
+	viper.SetDefault("disable_telemetry", false)
+	rootCmd.Flags().BoolVar(
+		&rootOpts.DisableTelemetry, "disable-telemetry", viper.GetBool("disable_telemetry"),
+		"Disables all anonymous usage reporting. No telemetry data will be sent.",
 	)
 
 	rootCmd.Flags().StringVarP(
