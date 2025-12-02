@@ -42,12 +42,12 @@ helm:
 # Put your custom values in here
 	@touch values.example.yaml
 	@helm upgrade \
-		--atomic \
 		--cleanup-on-fail \
 		--create-namespace \
 		--install \
 		--namespace zigflow \
 		--reset-values \
+		--rollback-on-failure \
 		--set image.pullPolicy=Always \
 		--set image.repository=${TMP_IMG} \
 		--set image.tag=${TMP_IMG_TAG} \
