@@ -62,6 +62,7 @@ helm install myrelease oci://ghcr.io/mrsimonemms/charts/zigflow@${ZIGFLOW_VERSIO
 | tolerations | list | `[]` | Node toleration |
 | volumeMounts | list | `[]` | Additional volumeMounts on the output Deployment definition. |
 | volumes | list | `[]` | Additional volumes on the output Deployment definition. |
+| workflow.enabled | bool | `true` | Don't add a workflow to the deployment. Useful if you have built an image with the workflow embedded |
 | workflow.file | string | `"/data/workflow.yaml"` | Location the workflow volumes is mapped |
 | workflow.inline | object | `{"do":[{"set":{"export":{"as":"data"},"set":{"message":"Hello from Ziggy"}}}],"document":{"dsl":"1.0.0","name":"simple-workflow","namespace":"zigflow","version":"1.0.0"}}` | Workflow YAML |
 | workflow.secret | string | `"workflow"` | Name of the secret containing `workflow.yaml` |
