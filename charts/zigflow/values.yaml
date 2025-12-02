@@ -35,6 +35,8 @@ envvars:
   #   value: some-value
 
 workflow:
+  # -- Don't add a workflow to the deployment. Useful if you have built an image with the workflow embedded
+  enabled: true
   # -- Use the inline workflow. If false, you must declare a secret with the workflow in `workflow.yaml`
   useInline: true
   # -- Name of the secret containing `workflow.yaml`

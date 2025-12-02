@@ -18,10 +18,12 @@ spec:
         # prometheus.io/scrape: "true"
         prometheus.io/path: "/metrics"
         prometheus.io/port: {{ .Values.service.metrics.port | quote }}
+        {{- if .Values.workflow.enabled }}
         {{- if .Values.workflow.useInline }}
         checksum/workflow-inline: {{ .Values.workflow.inline | toYaml | b64enc | sha256sum | quote }}
         {{- end }}
         checksum/workflow-secret: {{ .Values.workflow.secret | sha256sum | quote }}
+        {{- end }}
       {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -49,7 +51,9 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.Version }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
+          {{- if .Values.workflow.enabled }}
             - --file={{ .Values.workflow.file }}
+          {{- end}}
           {{- range $key, $value := .Values.config }}
             - {{ printf "--%s=%v" $key $value | quote }}
           {{- end }}
@@ -80,20 +84,28 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          {{- if or .Values.workflow.enabled .Values.volumes }}
           volumeMounts:
+          {{- if .Values.workflow.enabled }}
             - mountPath: {{ .Values.workflow.file | quote }}
               subPath: workflow.yaml
               name: workflow
               readOnly: true
+          {{- end }}
           {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          {{- end }}
+      {{- if or .Values.workflow.enabled .Values.volumes }}
       volumes:
+      {{- if .Values.workflow.enabled }}
         - name: workflow
           secret:
             secretName: {{ .Values.workflow.secret }}
+      {{- end }}
       {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
