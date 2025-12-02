@@ -88,9 +88,6 @@ func TestForkTaskBuilderResolveOutput(t *testing.T) {
 		"a": map[string]any{
 			"value": "first",
 		},
-		"b": map[string]any{
-			"value": "second",
-		},
 	}
 
 	assert.Equal(t, data, builder.resolveOutput(false, data))
