@@ -10,7 +10,7 @@ header:
     - LICENSE
     - "**/.*"
     - "**/go.*"
-    - "**/*.{json,md,yml,yaml,txt,lock,toml,mdx}"
+    - "**/*.{json,md,yml,yaml,txt,lock,toml,mdx,asc}"
     - "**/.gitkeep"
     - scripts/generate-authors.sh
     - charts/*/README.tpl

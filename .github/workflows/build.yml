@@ -204,6 +204,22 @@ jobs:
           yq -i '.version = "${{ steps.branch-name.outputs.tag }}"' charts/zigflow/Chart.yaml
           yq -i '.annotations."org.opencontainers.image.documentation" = "https://github.com/mrsimonemms/zigflow/blob/${{ steps.branch-name.outputs.tag }}/charts/zigflow/README.md"' charts/zigflow/Chart.yaml
 
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6
+        if: steps.branch-name.outputs.is_tag == 'true'
+        id: gpg
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+
+      # Helm requires the legacy GPG format
+      # @link https://helm.sh/docs/topics/provenance/#the-workflow
+      - name: Convert GPG v2 key
+        if: steps.branch-name.outputs.is_tag == 'true'
+        run: |
+          gpg --export > ~/.gnupg/pubring.gpg
+          gpg --batch --pinentry-mode loopback --yes --passphrase '${{ secrets.GPG_PASSPHRASE }}' --export-secret-key > ~/.gnupg/secring.gpg
+
       - name: Publish Helm chart
         if: steps.branch-name.outputs.is_tag == 'true'
         uses: appany/helm-oci-chart-releaser@v0.5.0
@@ -214,6 +230,9 @@ jobs:
           tag: ${{ steps.branch-name.outputs.tag }}
           registry_username: ${{ github.actor }}
           registry_password: ${{ secrets.GITHUB_TOKEN }}
+          sign: true
+          signing_key: ${{ steps.gpg.outputs.name }}
+          signing_passphrase: ${{ secrets.GPG_PASSPHRASE }}
           update_dependencies: true
 
       - name: Refresh Go Report Card
