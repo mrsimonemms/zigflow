@@ -95,6 +95,9 @@ func (t *ListenTaskBuilder) Build() (TemporalWorkflowFunc, error) {
 			}
 		}
 
+		var cancel workflow.CancelFunc
+		ctx, cancel = workflow.WithCancel(ctx)
+
 		for i, event := range events {
 			if isAll {
 				areAllComplete = append(areAllComplete, false)
@@ -109,7 +112,7 @@ func (t *ListenTaskBuilder) Build() (TemporalWorkflowFunc, error) {
 				}
 			case ListenTaskTypeSignal:
 				// Blocking
-				t.configureSignal(ctx, event, state, fn(i))
+				t.configureSignal(ctx, cancel, event, state, fn(i))
 			case ListenTaskTypeUpdate:
 				// Blocking
 				if err := t.configureUpdate(ctx, event, state, fn(i)); err != nil {
@@ -135,6 +138,9 @@ func (t *ListenTaskBuilder) await(
 
 	logger.Debug("Wait for listener", "task", t.GetTaskName())
 	ok, err := workflow.AwaitWithTimeout(ctx, timeout, func() bool {
+		if ctx.Err() != nil {
+			return true
+		}
 		// Calculate if the task has finished
 		if isAll {
 			logger.Debug("Waiting for all listeners to complete", "status", areAllComplete)
@@ -151,6 +157,10 @@ func (t *ListenTaskBuilder) await(
 		}
 		logger.Error("Error creating listener await", "error", err, "task", t.GetTaskName())
 		return err
+	}
+	if ctx.Err() != nil {
+		logger.Error("Context error", "error", ctx.Err())
+		return fmt.Errorf("cancelled")
 	}
 	if !ok {
 		logger.Warn("Await timeout", "task", t.GetTaskName())
@@ -175,7 +185,7 @@ func (t *ListenTaskBuilder) configureQuery(
 }
 
 func (t *ListenTaskBuilder) configureSignal(
-	ctx workflow.Context, event *model.EventFilter, state *utils.State, onSuccess func(),
+	ctx workflow.Context, cancel workflow.CancelFunc, event *model.EventFilter, state *utils.State, onSuccess func(),
 ) {
 	logger := workflow.GetLogger(ctx)
 	logger.Debug("Creating signal", "signal", event.With.ID)
@@ -186,14 +196,31 @@ func (t *ListenTaskBuilder) configureSignal(
 
 	// Wrap in a coroutine to allow Await to handle the timeout
 	workflow.Go(ctx, func(ctx workflow.Context) {
-		logger.Debug("Listening for signal")
-		_ = r.Receive(ctx, &inputData)
+		for {
+			logger.Debug("Listening for signal")
+			if more := r.Receive(ctx, &inputData); !more {
+				logger.Warn("Signal channel closed unexpectedly", "channel", event.With.ID)
+				cancel()
+				return
+			}
 
-		state.AddData(map[string]any{
-			t.GetTaskName(): inputData,
-		})
+			state.AddData(map[string]any{
+				t.GetTaskName(): inputData,
+			})
 
-		onSuccess()
+			isComplete, err := t.getAcceptIf(event, state)
+			if err != nil {
+				// Break the for loop
+				logger.Error("Error parsing signal complete status", "error", err)
+				cancel()
+				return
+			}
+
+			if isComplete {
+				onSuccess()
+				return
+			}
+		}
 	})
 }
 
@@ -210,9 +237,17 @@ func (t *ListenTaskBuilder) configureUpdate(
 			event.With.ID: data,
 		})
 
+		isComplete, err := t.getAcceptIf(event, state)
+		if err != nil {
+			logger.Error("Error parsing update complete status", "error", err)
+			return nil, err
+		}
+
 		res, err := t.processReply(ctx, event, state)
 
-		onSuccess()
+		if isComplete {
+			onSuccess()
+		}
 
 		return res, err
 	}
@@ -226,6 +261,37 @@ func (t *ListenTaskBuilder) configureUpdate(
 				return nil
 			},
 		})
+}
+
+// Search for an acceptIf
+func (t *ListenTaskBuilder) getAcceptIf(event *model.EventFilter, state *utils.State) (isComplete bool, err error) {
+	// Deep clone the additional map so we get the uninterpolated template out each time
+	additional := swUtil.DeepClone(event.With.Additional)
+
+	if tpl, ok := additional["acceptIf"]; ok {
+		templateKey := "template"
+
+		var obj map[string]any
+		obj, err = utils.TraverseAndEvaluateObj(
+			model.NewObjectOrRuntimeExpr(map[string]any{
+				// Put in a map as the template could be anything
+				templateKey: tpl,
+			}),
+			state,
+		)
+		if err != nil {
+			return
+		}
+
+		if v, isBool := obj[templateKey].(bool); isBool {
+			isComplete = v
+		}
+	} else {
+		// Nothing special to do - set to complete
+		isComplete = true
+	}
+
+	return
 }
 
 func (t *ListenTaskBuilder) listEvents() (events []*model.EventFilter, isAll bool, err error) {

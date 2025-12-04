@@ -17,6 +17,7 @@ do:
               id: approve
               # Temporal signal - used to make write request
               type: signal
+              acceptIf: ${ .data.approveListener }
   - outputSignal:
       export:
         as: response

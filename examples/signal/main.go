@@ -64,9 +64,20 @@ func exec() error {
 
 	go func() {
 		// Change how long we wait before triggering the signal - times out at 10 seconds
-		time.Sleep(time.Second * 5)
+		time.Sleep(time.Second * 3)
 
-		if err := c.SignalWorkflow(ctx, we.GetID(), "", "approve", "some data"); err != nil {
+		// This won't be approved - continue waiting
+		log.Info().Msg("Sending signal that it is not approved")
+		if err := c.SignalWorkflow(ctx, we.GetID(), "", "approve", false); err != nil {
+			// Fatal error in goroutine
+			log.Fatal().Err(err).Msg("Error signalling workflow")
+		}
+
+		time.Sleep(time.Second * 3)
+
+		// This is approved
+		log.Info().Msg("Approve")
+		if err := c.SignalWorkflow(ctx, we.GetID(), "", "approve", true); err != nil {
 			// Fatal error in goroutine
 			log.Fatal().Err(err).Msg("Error signalling workflow")
 		}
