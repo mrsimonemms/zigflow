@@ -34,6 +34,13 @@ e2e:
 	@go test -v -tags=e2e ./tests/e2e/...
 .PHONY: e2e
 
+generate-grpc:
+	@for dir in $(shell ls -d ./examples/external-calls/grpc/*); do \
+		rm -Rf $${dir}/v1; \
+		buf generate --template $${dir}/proto/buf.gen.yaml $${dir}/proto --output $${dir}/..; \
+	done
+.PHONY: generate-grpc
+
 helm_img:
 	@docker build -t ${TMP_IMG}:${TMP_IMG_TAG} .
 	@docker push ${TMP_IMG}:${TMP_IMG_TAG}

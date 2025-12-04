@@ -1,0 +1,38 @@
+document:
+  dsl: 1.0.0
+  namespace: zigflow # Mapped to the task queue
+  name: external-calls # Workflow name
+  version: 0.0.1
+  title: External Calls
+  summary: An example of how to use Serverless Workflow to make external calls
+do:
+  - fork:
+      export:
+        as: tasks
+      fork:
+        compete: false
+        branches:
+          - grpc:
+              call: grpc
+              export:
+                as: grpc
+              with:
+                proto:
+                  endpoint: file://grpc/basic/proto/basic/v1/basic.proto
+                service:
+                  name: BasicService
+                  host: grpc
+                  port: 3000
+                  # host: ${ .env.GRPC_ENDPOINT }
+                  # port: ${ .env.GRPC_PORT }
+                method: Command1
+                arguments:
+                  input1: hello
+                  input2: world
+          - http:
+              call: http
+              export:
+                as: http
+              with:
+                  method: get
+                  endpoint: https://jsonplaceholder.typicode.com/users/3
