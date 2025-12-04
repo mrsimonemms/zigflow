@@ -1,0 +1,55 @@
+// Copyright 2025 Zigflow authors <https://github.com/mrsimonemms/zigflow/graphs/contributors>
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package providers.v1;
+
+option go_package = "app/basic";
+
+// The basic service definition.
+service BasicService {
+  // Defines command1
+  rpc Command1(Command1Request) returns (Command1Response) {}
+  // Defines command2 - a streamed command
+  rpc Command2(Command2Request) returns (stream Command2Response) {}
+}
+
+// Request to run command1
+message Command1Request {
+  // the input
+  string input = 1;
+}
+
+// Response to a command1 request
+message Command1Response {
+  // the output
+  string output = 1;
+}
+
+// Request to run command2
+message Command2Request {
+  // the input
+  string input1 = 1;
+  // more input
+  string input2 = 2;
+}
+
+// Response to a command1 request
+message Command2Response {
+  // the message
+  string message = 1;
+  // the data
+  string data = 2;
+}

@@ -1,0 +1,11 @@
+version: v1
+plugins:
+  # Generate the Golang files for the service
+  - plugin: go
+    out: .
+    strategy: all
+    opt: paths=source_relative
+  - plugin: go-grpc
+    out: .
+    strategy: all
+    opt: paths=source_relative
