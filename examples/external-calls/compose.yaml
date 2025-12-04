@@ -1,0 +1,72 @@
+services:
+  temporal:
+    image: temporalio/temporal
+    ports:
+      - 8080:8233
+    command: server start-dev --ip 0.0.0.0 --search-attribute Step=text
+    healthcheck:
+      test: ["CMD-SHELL", "temporal operator cluster health"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+
+  grpc:
+    build:
+      context: ../../
+      target: builder
+    volumes:
+      - ../../:/go/app
+    working_dir: /go/app/examples/external-calls/grpc/basic
+    entrypoint: []
+    ports:
+      - 5001:3000
+    command:
+      - go
+      - run
+      - .
+
+  starter:
+    build:
+      context: ../../
+      target: builder
+    environment:
+      LOG_LEVEL: "${LOG_LEVEL:-debug}"
+      TEMPORAL_ADDRESS: ${TEMPORAL_ADDRESS:-temporal:7233}
+      TEMPORAL_NAMESPACE: ${TEMPORAL_NAMESPACE:-default}
+      TEMPORAL_API_KEY: ${TEMPORAL_API_KEY:-}
+      TEMPORAL_TLS: ${TEMPORAL_TLS:-false}
+    volumes:
+      - ../../:/go/app
+    working_dir: /go/app
+    links:
+      - temporal
+    depends_on:
+      temporal:
+        condition: service_healthy
+    entrypoint: []
+    command:
+      - go
+      - run
+      - ./examples/external-calls/starter/...
+
+  workflow:
+    build:
+      context: ../../
+      target: builder
+    environment:
+      ZIGGY_GRPC_ENDPOINT: grpc
+      ZIGGY_GRPC_PORT: 3000
+      LOG_LEVEL: "${LOG_LEVEL:-debug}"
+      TEMPORAL_ADDRESS: ${TEMPORAL_ADDRESS:-temporal:7233}
+      TEMPORAL_NAMESPACE: ${TEMPORAL_NAMESPACE:-default}
+      TEMPORAL_API_KEY: ${TEMPORAL_API_KEY:-}
+      TEMPORAL_TLS: ${TEMPORAL_TLS:-false}
+      WORKFLOW_FILE: ./examples/external-calls/workflow.yaml
+    volumes:
+      - ../../:/go/app
+    links:
+      - grpc
+      - temporal
+    depends_on:
+      temporal:
+        condition: service_healthy
