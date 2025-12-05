@@ -17,10 +17,14 @@
 package tasks
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"net/url"
+	"strings"
 	"time"
 
+	"github.com/fullstorydev/grpcurl"
 	"github.com/mrsimonemms/zigflow/pkg/utils"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
 	"go.temporal.io/sdk/activity"
@@ -87,17 +91,8 @@ func (t *CallGRPCTaskBuilder) Build() (TemporalWorkflowFunc, error) {
 	}, nil
 }
 
-func callGRPCActivity(ctx context.Context, task *model.CallGRPC, timeout time.Duration, state *utils.State) (res any, err error) {
+func callGRPCActivity(ctx context.Context, task *model.CallGRPC, timeout time.Duration, state *utils.State) (any, error) {
 	logger := activity.GetLogger(ctx)
-
-	// endpoint := t.task.With.Proto.Endpoint.String()
-
-	// u, err := url.Parse(endpoint)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// fmt.Println(u.Path)
 
 	address := fmt.Sprintf("%s:%d", task.With.Service.Host, task.With.Service.Port)
 
@@ -106,6 +101,7 @@ func callGRPCActivity(ctx context.Context, task *model.CallGRPC, timeout time.Du
 		logger.Error("Error creating gRPC connection", "error", err)
 		return nil, err
 	}
+	defer conn.Close()
 	defer func() {
 		err = conn.Close()
 		if err != nil {
@@ -113,7 +109,51 @@ func callGRPCActivity(ctx context.Context, task *model.CallGRPC, timeout time.Du
 		}
 	}()
 
-	res = address
+	u, err := url.Parse(task.With.Proto.Endpoint.String())
+	if err != nil {
+		return nil, err
+	}
 
-	return
+	descriptorSource, err := grpcurl.DescriptorSourceFromProtoFiles([]string{"/"}, u.Path)
+	if err != nil {
+		logger.Error("Error loading proto file", "error", err, "file", u.Path)
+		return nil, temporal.NewNonRetryableApplicationError("error loading protofile", "CallGRPC error", err)
+	}
+
+	fmt.Println(descriptorSource.ListServices())
+
+	jsonRequest := `{ "name": "goodbye, hello goodbye, you say stop and I say go go..." }`
+
+	options := grpcurl.FormatOptions{EmitJSONDefaultFields: true}
+	jsonRequestReader := strings.NewReader(jsonRequest)
+	rf, formatter, err := grpcurl.RequestParserAndFormatter(grpcurl.Format("json"), descriptorSource, jsonRequestReader, options)
+	if err != nil {
+		return nil, err
+	}
+	var output bytes.Buffer
+	eventHandler := &grpcurl.DefaultEventHandler{
+		Out:            &output,
+		Formatter:      formatter,
+		VerbosityLevel: 0,
+	}
+
+	methodFullName := fmt.Sprintf("%s/%s", task.With.Service.Name, task.With.Method)
+
+	fmt.Println(methodFullName)
+
+	if err := grpcurl.InvokeRPC(
+		ctx,
+		descriptorSource,
+		conn,
+		methodFullName,
+		[]string{},
+		eventHandler,
+		rf.Next,
+	); err != nil {
+		return nil, temporal.NewNonRetryableApplicationError("error loading protofile", "CallGRPC error", err)
+	}
+
+	fmt.Println(output.String())
+
+	return address, err
 }

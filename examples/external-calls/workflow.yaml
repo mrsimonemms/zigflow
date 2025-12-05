@@ -18,9 +18,9 @@ do:
                 as: grpc
               with:
                 proto:
-                  endpoint: file://grpc/basic/proto/basic/v1/basic.proto
+                  endpoint: file:///go/app/examples/external-calls/grpc/basic/proto/basic/v1/basic.proto
                 service:
-                  name: BasicService
+                  name: providers.v1.BasicService
                   host: grpc
                   port: 3000
                   # host: ${ .env.GRPC_ENDPOINT }
