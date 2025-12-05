@@ -24,6 +24,7 @@ import (
 	"github.com/rs/zerolog/log"
 	swUtils "github.com/serverlessworkflow/sdk-go/v3/impl/utils"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
+	"go.temporal.io/sdk/temporal"
 	"go.temporal.io/sdk/worker"
 	"go.temporal.io/sdk/workflow"
 )
@@ -52,6 +53,29 @@ type builder[T model.Task] struct {
 	neverSkipCAN   bool
 	task           T
 	temporalWorker worker.Worker
+}
+
+func (d *builder[T]) executeActivity(ctx workflow.Context, activity, input any, state *utils.State) (output any, err error) {
+	logger := workflow.GetLogger(ctx)
+	logger.Debug("Calling activity", "name", d.name)
+
+	var res any
+	if err := workflow.ExecuteActivity(ctx, activity, d.task, input, state).Get(ctx, &res); err != nil {
+		if temporal.IsCanceledError(err) {
+			return nil, nil
+		}
+
+		logger.Error("Error calling activity", "name", d.name, "error", err)
+		return nil, fmt.Errorf("error calling activity: %w", err)
+	}
+
+	// Add the result to the state's data
+	logger.Debug("Setting data to the state", "key", d.name)
+	state.AddData(map[string]any{
+		d.name: res,
+	})
+
+	return res, nil
 }
 
 func (d *builder[T]) GetTask() model.Task {
@@ -113,6 +137,8 @@ func NewTaskBuilder(taskName string, task model.Task, temporalWorker worker.Work
 			return NewCallActivityTaskBuilder(temporalWorker, t, taskName, doc)
 		}
 		return nil, fmt.Errorf("unsupported call type '%s' for task '%s'", t.Call, taskName)
+	case *model.CallGRPC:
+		return NewCallGRPCTaskBuilder(temporalWorker, t, taskName, doc)
 	case *model.CallHTTP:
 		return NewCallHTTPTaskBuilder(temporalWorker, t, taskName, doc)
 	case *model.DoTask:
@@ -143,6 +169,7 @@ func NewTaskBuilder(taskName string, task model.Task, temporalWorker worker.Work
 // Ensure the tasks meets the TaskBuilder type
 var (
 	_ TaskBuilder = &CallActivityTaskBuilder{}
+	_ TaskBuilder = &CallGRPCTaskBuilder{}
 	_ TaskBuilder = &CallHTTPTaskBuilder{}
 	_ TaskBuilder = &DoTaskBuilder{}
 	_ TaskBuilder = &ForTaskBuilder{}

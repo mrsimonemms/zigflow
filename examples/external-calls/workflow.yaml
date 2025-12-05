@@ -18,17 +18,14 @@ do:
                 as: grpc
               with:
                 proto:
-                  endpoint: file://grpc/basic/proto/basic/v1/basic.proto
+                  endpoint: file:///go/app/examples/external-calls/grpc/basic/proto/basic/v1/basic.proto
                 service:
-                  name: BasicService
+                  name: providers.v1.BasicService
                   host: grpc
                   port: 3000
-                  # host: ${ .env.GRPC_ENDPOINT }
-                  # port: ${ .env.GRPC_PORT }
                 method: Command1
                 arguments:
-                  input1: hello
-                  input2: world
+                  input: ${ .env.GRPC_INPUT }
           - http:
               call: http
               export:

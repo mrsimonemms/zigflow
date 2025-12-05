@@ -54,8 +54,7 @@ services:
       context: ../../
       target: builder
     environment:
-      ZIGGY_GRPC_ENDPOINT: grpc
-      ZIGGY_GRPC_PORT: 3000
+      ZIGGY_GRPC_INPUT: some-input
       LOG_LEVEL: "${LOG_LEVEL:-debug}"
       TEMPORAL_ADDRESS: ${TEMPORAL_ADDRESS:-temporal:7233}
       TEMPORAL_NAMESPACE: ${TEMPORAL_NAMESPACE:-default}

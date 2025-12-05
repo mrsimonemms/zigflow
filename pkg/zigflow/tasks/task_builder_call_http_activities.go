@@ -36,12 +36,12 @@ import (
 )
 
 func init() {
-	activitiesRegistry = append(activitiesRegistry, &CallActivities{})
+	activitiesRegistry = append(activitiesRegistry, &CallHTTPActivities{})
 }
 
-type CallActivities struct{}
+type CallHTTPActivities struct{}
 
-func (c *CallActivities) CallHTTPActivity(ctx context.Context, task *model.CallHTTP, input any, state *utils.State) (any, error) {
+func (c *CallHTTPActivities) CallHTTPActivity(ctx context.Context, task *model.CallHTTP, input any, state *utils.State) (any, error) {
 	logger := activity.GetLogger(ctx)
 	logger.Debug("Running call HTTP activity")
 
@@ -133,7 +133,7 @@ func (c *CallActivities) CallHTTPActivity(ctx context.Context, task *model.CallH
 	return c.parseOutput(task.With.Output, httpResponse, bodyRes), err
 }
 
-func (c *CallActivities) callHTTPAction(ctx context.Context, task *model.CallHTTP, timeout time.Duration, state *utils.State) (
+func (c *CallHTTPActivities) callHTTPAction(ctx context.Context, task *model.CallHTTP, timeout time.Duration, state *utils.State) (
 	resp *http.Response,
 	method, url string,
 	reqHeaders map[string]string,
@@ -195,7 +195,7 @@ func (c *CallActivities) callHTTPAction(ctx context.Context, task *model.CallHTT
 // parseHTTPArguments note that I looked at the github.com/go-viper/mapstructure/v2.Decode
 // function, but this wasn't able to decode some of the more complex data types. This is
 // more heavyweight than I'd like, but it's fine for now.
-func (c *CallActivities) parseHTTPArguments(task *model.CallHTTP, state *utils.State) (*model.HTTPArguments, error) {
+func (c *CallHTTPActivities) parseHTTPArguments(task *model.CallHTTP, state *utils.State) (*model.HTTPArguments, error) {
 	// First, we need to convert it to map[string]any
 	b, err := json.Marshal(task.With)
 	if err != nil {
@@ -230,7 +230,7 @@ func (c *CallActivities) parseHTTPArguments(task *model.CallHTTP, state *utils.S
 	return &result, nil
 }
 
-func (c *CallActivities) parseOutput(outputType string, httpResp HTTPResponse, raw []byte) any {
+func (c *CallHTTPActivities) parseOutput(outputType string, httpResp HTTPResponse, raw []byte) any {
 	var output any
 	switch outputType {
 	case "raw":
