@@ -17,11 +17,8 @@
 package tasks
 
 import (
-	"fmt"
-
 	"github.com/mrsimonemms/zigflow/pkg/utils"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
-	"go.temporal.io/sdk/temporal"
 	"go.temporal.io/sdk/worker"
 	"go.temporal.io/sdk/workflow"
 )
@@ -63,25 +60,6 @@ type CallHTTPTaskBuilder struct {
 
 func (t *CallHTTPTaskBuilder) Build() (TemporalWorkflowFunc, error) {
 	return func(ctx workflow.Context, input any, state *utils.State) (any, error) {
-		logger := workflow.GetLogger(ctx)
-		logger.Debug("Calling HTTP endpoint", "name", t.name)
-
-		var res any
-		if err := workflow.ExecuteActivity(ctx, (*CallActivities).CallHTTPActivity, t.task, input, state).Get(ctx, &res); err != nil {
-			if temporal.IsCanceledError(err) {
-				return nil, nil
-			}
-
-			logger.Error("Error calling HTTP task", "name", t.name, "error", err)
-			return nil, fmt.Errorf("error calling http task: %w", err)
-		}
-
-		// Add the result to the state's data
-		logger.Debug("Setting data to the state", "key", t.name)
-		state.AddData(map[string]any{
-			t.name: res,
-		})
-
-		return res, nil
+		return t.executeActivity(ctx, (*CallHTTPActivities).CallHTTPActivity, input, state)
 	}, nil
 }
