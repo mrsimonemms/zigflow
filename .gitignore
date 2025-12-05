@@ -13,3 +13,5 @@ go.work.sum
 values.example.yaml
 
 wiki
+
+*.pb.go
