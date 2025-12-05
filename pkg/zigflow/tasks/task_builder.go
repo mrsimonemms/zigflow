@@ -108,6 +108,8 @@ func (d *builder[T]) ShouldRun(state *utils.State) (bool, error) {
 // Factory to create a TaskBuilder instance, or die trying
 func NewTaskBuilder(taskName string, task model.Task, temporalWorker worker.Worker, doc *model.Workflow) (TaskBuilder, error) {
 	switch t := task.(type) {
+	case *model.CallGRPC:
+		return NewCallGRPCTaskBuilder(temporalWorker, t, taskName, doc)
 	case *model.CallHTTP:
 		return NewCallHTTPTaskBuilder(temporalWorker, t, taskName, doc)
 	case *model.DoTask:
@@ -137,6 +139,7 @@ func NewTaskBuilder(taskName string, task model.Task, temporalWorker worker.Work
 
 // Ensure the tasks meets the TaskBuilder type
 var (
+	_ TaskBuilder = &CallGRPCTaskBuilder{}
 	_ TaskBuilder = &CallHTTPTaskBuilder{}
 	_ TaskBuilder = &DoTaskBuilder{}
 	_ TaskBuilder = &ForTaskBuilder{}
