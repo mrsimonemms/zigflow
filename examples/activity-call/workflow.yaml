@@ -1,14 +1,12 @@
 # Temporal activity call example workflow
 # Run alongside the DSL worker to execute custom activities
-
 document:
   dsl: 1.0.0
   namespace: temporal-dsl
   name: activity-call
   version: 0.0.1
   title: Activity Call Workflow
-  summary: Demonstrates invoking Temporal activities from the DSL
-
+  summary: Invoke a Temporal activity from Zigflow
 input:
   schema:
     format: json
@@ -20,11 +18,9 @@ input:
         userId:
           type: string
           description: External user identifier
-
 timeout:
   after:
     minutes: 1
-
 do:
   - activity-call:
       do:

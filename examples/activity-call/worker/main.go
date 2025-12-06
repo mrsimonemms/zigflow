@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 	"math/rand/v2"
-	"os"
 	"time"
 
 	"github.com/mrsimonemms/golang-helpers/temporal"
@@ -67,6 +66,7 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("Unable to create Temporal client")
 	}
+	defer c.Close()
 
 	w := worker.New(c, activityTaskQueue, worker.Options{})
 
@@ -75,10 +75,7 @@ func main() {
 
 	log.Info().Str("taskQueue", activityTaskQueue).Msg("Activity worker started - Waiting for commands")
 	if err := w.Run(worker.InterruptCh()); err != nil {
-		log.Error().Err(err).Msg("Worker exited with error")
-		c.Close()
-		os.Exit(1)
+		//nolint:gocritic
+		log.Fatal().Err(err).Msg("Worker exited with error")
 	}
-
-	c.Close()
 }

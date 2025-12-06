@@ -18,4 +18,6 @@ package tasks
 
 import "time"
 
+const customCallFunctionActivity = "activity"
+
 const defaultWorkflowTimeout = time.Minute * 5

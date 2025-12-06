@@ -39,7 +39,7 @@ func NewCallActivityTaskBuilder(
 	taskName string,
 	doc *model.Workflow,
 ) (*CallActivityTaskBuilder, error) {
-	if task.Call != "activity" {
+	if task.Call != customCallFunctionActivity {
 		return nil, fmt.Errorf("unsupported call task '%s' for activity builder", task.Call)
 	}
 

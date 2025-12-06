@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package tasks_test
+package tasks
 
 import (
 	"context"
@@ -22,9 +22,8 @@ import (
 	"time"
 
 	"github.com/mrsimonemms/zigflow/pkg/utils"
-	"github.com/mrsimonemms/zigflow/pkg/zigflow/tasks"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/assert"
 	"go.temporal.io/sdk/activity"
 	"go.temporal.io/sdk/testsuite"
 	"go.temporal.io/sdk/workflow"
@@ -40,7 +39,7 @@ func TestCallActivityTaskBuilderExecute(t *testing.T) {
 	}, activity.RegisterOptions{Name: activityName})
 
 	task := &model.CallFunction{
-		Call: "activity",
+		Call: customCallFunctionActivity,
 		With: map[string]any{
 			"name":      activityName,
 			"arguments": []any{"${ .input.message }"},
@@ -50,11 +49,11 @@ func TestCallActivityTaskBuilderExecute(t *testing.T) {
 		},
 	}
 
-	b, err := tasks.NewCallActivityTaskBuilder(nil, task, "callActivity", nil)
-	require.NoError(t, err)
+	b, err := NewCallActivityTaskBuilder(nil, task, "callActivity", nil)
+	assert.NoError(t, err)
 
 	fn, err := b.Build()
-	require.NoError(t, err)
+	assert.NoError(t, err)
 
 	workflowFunc := func(ctx workflow.Context) (string, error) {
 		state := utils.NewState().AddWorkflowInfo(ctx)
@@ -73,9 +72,9 @@ func TestCallActivityTaskBuilderExecute(t *testing.T) {
 	env.ExecuteWorkflow(workflowFunc)
 
 	var got string
-	require.NoError(t, env.GetWorkflowError())
-	require.NoError(t, env.GetWorkflowResult(&got))
-	require.Equal(t, "ping-processed", got)
+	assert.NoError(t, env.GetWorkflowError())
+	assert.NoError(t, env.GetWorkflowResult(&got))
+	assert.Equal(t, "ping-processed", got)
 }
 
 func TestCallActivityTaskBuilderExecuteLocal(t *testing.T) {
@@ -88,7 +87,7 @@ func TestCallActivityTaskBuilderExecuteLocal(t *testing.T) {
 	}, activity.RegisterOptions{Name: activityName})
 
 	task := &model.CallFunction{
-		Call: "activity",
+		Call: customCallFunctionActivity,
 		With: map[string]any{
 			"name":      activityName,
 			"local":     true,
@@ -99,11 +98,11 @@ func TestCallActivityTaskBuilderExecuteLocal(t *testing.T) {
 		},
 	}
 
-	b, err := tasks.NewCallActivityTaskBuilder(nil, task, "callLocalActivity", nil)
-	require.NoError(t, err)
+	b, err := NewCallActivityTaskBuilder(nil, task, "callLocalActivity", nil)
+	assert.NoError(t, err)
 
 	fn, err := b.Build()
-	require.NoError(t, err)
+	assert.NoError(t, err)
 
 	workflowFunc := func(ctx workflow.Context) (string, error) {
 		state := utils.NewState().AddWorkflowInfo(ctx)
@@ -121,7 +120,50 @@ func TestCallActivityTaskBuilderExecuteLocal(t *testing.T) {
 	env.ExecuteWorkflow(workflowFunc)
 
 	var got string
-	require.NoError(t, env.GetWorkflowError())
-	require.NoError(t, env.GetWorkflowResult(&got))
-	require.Equal(t, "value-local", got)
+	assert.NoError(t, env.GetWorkflowError())
+	assert.NoError(t, env.GetWorkflowResult(&got))
+	assert.Equal(t, "value-local", got)
+}
+
+func TestDurationToTime(t *testing.T) {
+	t.Run("inline", func(t *testing.T) {
+		d := &model.Duration{Value: model.DurationInline{Seconds: 5}}
+		got, err := durationToTime(d)
+		assert.NoError(t, err)
+		assert.Equal(t, 5*time.Second, got)
+	})
+
+	t.Run("expression", func(t *testing.T) {
+		d := &model.Duration{Value: model.DurationExpression{Expression: "PT1H30M"}}
+		got, err := durationToTime(d)
+		assert.NoError(t, err)
+		assert.Equal(t, time.Hour+30*time.Minute, got)
+	})
+
+	t.Run("unsupported", func(t *testing.T) {
+		d := &model.Duration{Value: model.DurationExpression{Expression: "P1Y"}}
+		_, err := durationToTime(d)
+		assert.Error(t, err)
+	})
+}
+
+func TestConvertRetryPolicy(t *testing.T) {
+	maxAttempts := int32(3)
+	retry, err := convertRetryPolicy(&ActivityRetryPolicy{
+		InitialInterval: &model.Duration{Value: model.DurationInline{Seconds: 1}},
+		BackoffCoefficient: func() *float64 {
+			v := 2.0
+			return &v
+		}(),
+		MaximumAttempts: &maxAttempts,
+	})
+	assert.NoError(t, err)
+	assert.NotNil(t, retry)
+	assert.Equal(t, 3, int(retry.MaximumAttempts))
+	assert.Equal(t, 2.0, retry.BackoffCoefficient)
+	assert.Equal(t, time.Second, retry.InitialInterval)
+
+	retry, err = convertRetryPolicy(&ActivityRetryPolicy{})
+	assert.NoError(t, err)
+	assert.Nil(t, retry)
 }
