@@ -44,6 +44,7 @@ func TestCallActivityTaskBuilderExecute(t *testing.T) {
 			"name":      activityName,
 			"arguments": []any{"${ .input.message }"},
 			"options": map[string]any{
+				"taskQueue":           "some-task-queue",
 				"startToCloseTimeout": map[string]any{"seconds": 5},
 			},
 		},
@@ -75,59 +76,4 @@ func TestCallActivityTaskBuilderExecute(t *testing.T) {
 	assert.NoError(t, env.GetWorkflowError())
 	assert.NoError(t, env.GetWorkflowResult(&got))
 	assert.Equal(t, "ping-processed", got)
-}
-
-func TestCallActivityTaskBuilderExecuteLocal(t *testing.T) {
-	var s testsuite.WorkflowTestSuite
-	env := s.NewTestWorkflowEnvironment()
-
-	const activityName = "dslLocalActivity"
-	env.RegisterActivityWithOptions(func(value string) (string, error) {
-		return value + "-local", nil
-	}, activity.RegisterOptions{Name: activityName})
-
-	task := &model.CallFunction{
-		Call: customCallFunctionActivity,
-		With: map[string]any{
-			"name":      activityName,
-			"local":     true,
-			"arguments": []any{"value"},
-			"localOptions": map[string]any{
-				"startToCloseTimeout": map[string]any{"seconds": 2},
-			},
-		},
-	}
-
-	b, err := NewCallActivityTaskBuilder(nil, task, "callLocalActivity", nil)
-	assert.NoError(t, err)
-
-	fn, err := b.Build()
-	assert.NoError(t, err)
-
-	workflowFunc := func(ctx workflow.Context) (string, error) {
-		state := utils.NewState().AddWorkflowInfo(ctx)
-		ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{StartToCloseTimeout: time.Minute})
-		result, err := fn(ctx, nil, state)
-		if err != nil {
-			return "", err
-		}
-		if result == nil {
-			return "", nil
-		}
-		return result.(string), nil
-	}
-
-	env.ExecuteWorkflow(workflowFunc)
-
-	var got string
-	assert.NoError(t, env.GetWorkflowError())
-	assert.NoError(t, env.GetWorkflowResult(&got))
-	assert.Equal(t, "value-local", got)
-}
-
-func TestDurationToTime(t *testing.T) {
-	t.Run("inline", func(t *testing.T) {
-		d := &model.Duration{Value: model.DurationInline{Seconds: 5}}
-		assert.Equal(t, 5*time.Second, utils.ToDuration(d))
-	})
 }

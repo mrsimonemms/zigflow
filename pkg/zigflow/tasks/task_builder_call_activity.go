@@ -74,18 +74,11 @@ func (t *CallActivityTaskBuilder) Build() (TemporalWorkflowFunc, error) {
 
 		logger.Info("Executing Temporal activity", "activity", t.activity.Name, "task", t.GetTaskName())
 
-		if t.activity.IsLocal && t.activity.LocalOptions != nil {
-			ctx = workflow.WithLocalActivityOptions(ctx, t.activity.LocalOptions.ToTemporal(ctx))
-		} else if t.activity.Options != nil {
+		if t.activity.Options != nil {
 			ctx = workflow.WithActivityOptions(ctx, t.activity.Options.ToTemporal(ctx))
 		}
 
-		var future workflow.Future
-		if t.activity.IsLocal {
-			future = workflow.ExecuteLocalActivity(ctx, t.activity.Name, t.activity.Arguments...)
-		} else {
-			future = workflow.ExecuteActivity(ctx, t.activity.Name, t.activity.Arguments...)
-		}
+		future := workflow.ExecuteActivity(ctx, t.activity.Name, t.activity.Arguments...)
 
 		var res any
 		if err := future.Get(ctx, &res); err != nil {

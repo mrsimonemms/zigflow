@@ -24,11 +24,9 @@ import (
 )
 
 type ActivityCallWith struct {
-	Name         string                        `json:"name"`
-	IsLocal      bool                          `json:"local"`
-	Arguments    []any                         `json:"arguments"`
-	Options      *ActivityCallWithOptions      `json:"options,omitempty"`
-	LocalOptions *ActivityCallWithLocalOptions `json:"localOptions,omitempty"`
+	Name      string                   `json:"name"`
+	Arguments []any                    `json:"arguments"`
+	Options   *ActivityCallWithOptions `json:"options,omitempty"`
 }
 
 type ActivityCallWithOptions struct {
@@ -90,32 +88,6 @@ func (a *ActivityCallWithOptions) ToTemporal(ctx workflow.Context) workflow.Acti
 
 	if a.Priority != nil {
 		opts.Priority = a.Priority.ToTemporal()
-	}
-
-	return opts
-}
-
-type ActivityCallWithLocalOptions struct {
-	ScheduleToCloseTimeout *model.Duration `json:"scheduleToCloseTimeout"`
-	StartToCloseTimeout    *model.Duration `json:"startToCloseTimeout"`
-	RetryPolicy            *RetryPolicy    `json:"retryPolicy"`
-	Summary                string          `json:"summary"`
-}
-
-func (a *ActivityCallWithLocalOptions) ToTemporal(ctx workflow.Context) workflow.LocalActivityOptions {
-	opts := workflow.GetLocalActivityOptions(ctx)
-
-	if a.ScheduleToCloseTimeout != nil {
-		opts.ScheduleToCloseTimeout = utils.ToDuration(a.ScheduleToCloseTimeout)
-	}
-	if a.StartToCloseTimeout != nil {
-		opts.StartToCloseTimeout = utils.ToDuration(a.StartToCloseTimeout)
-	}
-	if a.RetryPolicy != nil {
-		opts.RetryPolicy = a.RetryPolicy.ToTemporal()
-	}
-	if a.Summary != "" {
-		opts.Summary = a.Summary
 	}
 
 	return opts
