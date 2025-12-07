@@ -23,15 +23,18 @@ import (
 )
 
 // Convert the Serverless Workflow duration into a time Duration
-func ToDuration(v *model.Duration) time.Duration {
-	inline := v.AsInline()
+func ToDuration(v *model.Duration) (duration time.Duration) {
+	if v != nil {
+		inline := v.AsInline()
 
-	var duration time.Duration
-	duration += time.Millisecond * time.Duration(inline.Milliseconds)
-	duration += time.Second * time.Duration(inline.Seconds)
-	duration += time.Minute * time.Duration(inline.Minutes)
-	duration += time.Hour * time.Duration(inline.Hours)
-	duration += (time.Hour * 24) * time.Duration(inline.Days)
+		if inline != nil {
+			duration += time.Millisecond * time.Duration(inline.Milliseconds)
+			duration += time.Second * time.Duration(inline.Seconds)
+			duration += time.Minute * time.Duration(inline.Minutes)
+			duration += time.Hour * time.Duration(inline.Hours)
+			duration += (time.Hour * 24) * time.Duration(inline.Days)
+		}
+	}
 
 	return duration
 }

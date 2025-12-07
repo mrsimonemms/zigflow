@@ -128,42 +128,6 @@ func TestCallActivityTaskBuilderExecuteLocal(t *testing.T) {
 func TestDurationToTime(t *testing.T) {
 	t.Run("inline", func(t *testing.T) {
 		d := &model.Duration{Value: model.DurationInline{Seconds: 5}}
-		got, err := durationToTime(d)
-		assert.NoError(t, err)
-		assert.Equal(t, 5*time.Second, got)
+		assert.Equal(t, 5*time.Second, utils.ToDuration(d))
 	})
-
-	t.Run("expression", func(t *testing.T) {
-		d := &model.Duration{Value: model.DurationExpression{Expression: "PT1H30M"}}
-		got, err := durationToTime(d)
-		assert.NoError(t, err)
-		assert.Equal(t, time.Hour+30*time.Minute, got)
-	})
-
-	t.Run("unsupported", func(t *testing.T) {
-		d := &model.Duration{Value: model.DurationExpression{Expression: "P1Y"}}
-		_, err := durationToTime(d)
-		assert.Error(t, err)
-	})
-}
-
-func TestConvertRetryPolicy(t *testing.T) {
-	maxAttempts := int32(3)
-	retry, err := convertRetryPolicy(&ActivityRetryPolicy{
-		InitialInterval: &model.Duration{Value: model.DurationInline{Seconds: 1}},
-		BackoffCoefficient: func() *float64 {
-			v := 2.0
-			return &v
-		}(),
-		MaximumAttempts: &maxAttempts,
-	})
-	assert.NoError(t, err)
-	assert.NotNil(t, retry)
-	assert.Equal(t, 3, int(retry.MaximumAttempts))
-	assert.Equal(t, 2.0, retry.BackoffCoefficient)
-	assert.Equal(t, time.Second, retry.InitialInterval)
-
-	retry, err = convertRetryPolicy(&ActivityRetryPolicy{})
-	assert.NoError(t, err)
-	assert.Nil(t, retry)
 }

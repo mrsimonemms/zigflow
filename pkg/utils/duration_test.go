@@ -32,6 +32,10 @@ func TestToDuration(t *testing.T) {
 		Expected time.Duration
 	}{
 		{
+			Name:     "nil",
+			Expected: 0,
+		},
+		{
 			Name: "10 second",
 			Duration: model.DurationInline{
 				Seconds: 10,

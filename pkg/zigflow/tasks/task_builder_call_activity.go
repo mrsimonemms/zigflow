@@ -18,14 +18,11 @@ package tasks
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
-	"math"
-	"regexp"
-	"strconv"
-	"time"
 
 	"github.com/mrsimonemms/zigflow/pkg/utils"
+	"github.com/mrsimonemms/zigflow/pkg/zigflow/models"
+	"github.com/rs/zerolog/log"
 	swUtil "github.com/serverlessworkflow/sdk-go/v3/impl/utils"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
 	"go.temporal.io/sdk/temporal"
@@ -55,53 +52,49 @@ func NewCallActivityTaskBuilder(
 
 type CallActivityTaskBuilder struct {
 	builder[*model.CallFunction]
+
+	// Store the parsed activity data
+	activity *models.ActivityCallWith
 }
 
 func (t *CallActivityTaskBuilder) Build() (TemporalWorkflowFunc, error) {
+	log.Debug().Str("task", t.GetTaskName()).Msg("Converting call activity data")
+	if err := t.convertToType(); err != nil {
+		log.Error().Err(err).Msg("Error building call activity data")
+		return nil, err
+	}
+
 	return func(ctx workflow.Context, input any, state *utils.State) (any, error) {
 		logger := workflow.GetLogger(ctx)
 
-		args, err := parseActivityCallArguments(t.task, state)
-		if err != nil {
+		if err := t.parseArgs(state); err != nil {
+			logger.Error("Error parsing call activity arguments", "error", err)
 			return nil, err
 		}
 
-		if args.Name == "" {
-			return nil, errors.New("call activity requires a name")
-		}
+		logger.Info("Executing Temporal activity", "activity", t.activity.Name, "task", t.GetTaskName())
 
-		logger.Info("Executing Temporal activity", "activity", args.Name, "task", t.GetTaskName())
-
-		var execCtx workflow.Context
-		if args.Local {
-			laOpts := workflow.GetLocalActivityOptions(ctx)
-			if err := applyLocalActivityOverrides(&laOpts, args.LocalOptions); err != nil {
-				return nil, err
-			}
-			execCtx = workflow.WithLocalActivityOptions(ctx, laOpts)
-		} else {
-			aOpts := workflow.GetActivityOptions(ctx)
-			if err := applyActivityOverrides(&aOpts, args.Options); err != nil {
-				return nil, err
-			}
-			execCtx = workflow.WithActivityOptions(ctx, aOpts)
+		if t.activity.IsLocal && t.activity.LocalOptions != nil {
+			ctx = workflow.WithLocalActivityOptions(ctx, t.activity.LocalOptions.ToTemporal(ctx))
+		} else if t.activity.Options != nil {
+			ctx = workflow.WithActivityOptions(ctx, t.activity.Options.ToTemporal(ctx))
 		}
 
 		var future workflow.Future
-		if args.Local {
-			future = workflow.ExecuteLocalActivity(execCtx, args.Name, args.Arguments...)
+		if t.activity.IsLocal {
+			future = workflow.ExecuteLocalActivity(ctx, t.activity.Name, t.activity.Arguments...)
 		} else {
-			future = workflow.ExecuteActivity(execCtx, args.Name, args.Arguments...)
+			future = workflow.ExecuteActivity(ctx, t.activity.Name, t.activity.Arguments...)
 		}
 
 		var res any
 		if err := future.Get(ctx, &res); err != nil {
 			if temporal.IsCanceledError(err) {
-				logger.Debug("Activity cancelled", "activity", args.Name)
+				logger.Debug("Activity cancelled", "activity", t.activity.Name)
 				return nil, nil
 			}
-			logger.Error("Error executing activity", "activity", args.Name, "error", err)
-			return nil, fmt.Errorf("error executing activity %s: %w", args.Name, err)
+			logger.Error("Error executing activity", "activity", t.activity.Name, "error", err)
+			return nil, fmt.Errorf("error executing activity %s: %w", t.activity.Name, err)
 		}
 
 		state.AddData(map[string]any{
@@ -112,295 +105,40 @@ func (t *CallActivityTaskBuilder) Build() (TemporalWorkflowFunc, error) {
 	}, nil
 }
 
-type ActivityCallArguments struct {
-	Name         string                    `json:"name"`
-	Local        bool                      `json:"local,omitempty"`
-	Arguments    []any                     `json:"arguments,omitempty"`
-	Options      *ActivityCallOptions      `json:"options,omitempty"`
-	LocalOptions *LocalActivityCallOptions `json:"localOptions,omitempty"`
-}
-
-type ActivityCallOptions struct {
-	TaskQueue              string               `json:"taskQueue,omitempty"`
-	ScheduleToCloseTimeout *model.Duration      `json:"scheduleToCloseTimeout,omitempty"`
-	ScheduleToStartTimeout *model.Duration      `json:"scheduleToStartTimeout,omitempty"`
-	StartToCloseTimeout    *model.Duration      `json:"startToCloseTimeout,omitempty"`
-	HeartbeatTimeout       *model.Duration      `json:"heartbeatTimeout,omitempty"`
-	WaitForCancellation    *bool                `json:"waitForCancellation,omitempty"`
-	ActivityID             string               `json:"activityId,omitempty"`
-	RetryPolicy            *ActivityRetryPolicy `json:"retryPolicy,omitempty"`
-	DisableEagerExecution  *bool                `json:"disableEagerExecution,omitempty"`
-	Summary                string               `json:"summary,omitempty"`
-	Priority               *ActivityPriority    `json:"priority,omitempty"`
-}
-
-type LocalActivityCallOptions struct {
-	ScheduleToCloseTimeout *model.Duration      `json:"scheduleToCloseTimeout,omitempty"`
-	StartToCloseTimeout    *model.Duration      `json:"startToCloseTimeout,omitempty"`
-	RetryPolicy            *ActivityRetryPolicy `json:"retryPolicy,omitempty"`
-	Summary                string               `json:"summary,omitempty"`
-}
-
-type ActivityRetryPolicy struct {
-	InitialInterval        *model.Duration `json:"initialInterval,omitempty"`
-	BackoffCoefficient     *float64        `json:"backoffCoefficient,omitempty"`
-	MaximumInterval        *model.Duration `json:"maximumInterval,omitempty"`
-	MaximumAttempts        *int32          `json:"maximumAttempts,omitempty"`
-	NonRetryableErrorTypes []string        `json:"nonRetryableErrorTypes,omitempty"`
-}
-
-type ActivityPriority struct {
-	PriorityKey    *int     `json:"priorityKey,omitempty"`
-	FairnessKey    string   `json:"fairnessKey,omitempty"`
-	FairnessWeight *float32 `json:"fairnessWeight,omitempty"`
-}
-
-func parseActivityCallArguments(task *model.CallFunction, state *utils.State) (*ActivityCallArguments, error) {
-	var clone map[string]any
-	if task.With != nil {
-		clone = swUtil.DeepClone(task.With)
-	} else {
-		clone = map[string]any{}
-	}
-	interpolated, err := utils.TraverseAndEvaluateObj(model.NewObjectOrRuntimeExpr(clone), state)
+func (t *CallActivityTaskBuilder) convertToType() error {
+	payload, err := json.Marshal(t.task.With)
 	if err != nil {
-		return nil, fmt.Errorf("error interpolating activity call arguments: %w", err)
+		return fmt.Errorf("error marshalling activity call arguments: %w", err)
 	}
 
-	payload, err := json.Marshal(interpolated)
-	if err != nil {
-		return nil, fmt.Errorf("error marshalling activity call arguments: %w", err)
+	var result models.ActivityCallWith
+	if err := json.Unmarshal(payload, &result); err != nil {
+		return fmt.Errorf("error unmarshalling activity call arguments: %w", err)
 	}
 
-	var args ActivityCallArguments
-	if err := json.Unmarshal(payload, &args); err != nil {
-		return nil, fmt.Errorf("error unmarshalling activity call arguments: %w", err)
+	if result.Name == "" {
+		return fmt.Errorf("call activity requires a name: %s", t.GetTaskName())
 	}
 
-	if args.Arguments == nil {
-		args.Arguments = []any{}
+	if result.Options != nil && result.Options.TaskQueue == "" {
+		return fmt.Errorf("activity task queue must be set: %s", t.GetTaskName())
 	}
 
-	return &args, nil
+	t.activity = &result
+
+	return nil
 }
 
-func applyActivityOverrides(base *workflow.ActivityOptions, cfg *ActivityCallOptions) error {
-	if cfg == nil {
-		return nil
-	}
-
-	if cfg.TaskQueue != "" {
-		base.TaskQueue = cfg.TaskQueue
-	}
-	if err := setActivityDurations(base, cfg); err != nil {
+func (t *CallActivityTaskBuilder) parseArgs(state *utils.State) error {
+	parsedArgs, err := utils.TraverseAndEvaluateObj(model.NewObjectOrRuntimeExpr(map[string]any{
+		"args": swUtil.DeepCloneValue(t.activity.Arguments),
+	}), state)
+	if err != nil {
 		return err
 	}
-	if cfg.WaitForCancellation != nil {
-		base.WaitForCancellation = *cfg.WaitForCancellation
-	}
-	if cfg.ActivityID != "" {
-		base.ActivityID = cfg.ActivityID
-	}
-	if cfg.RetryPolicy != nil {
-		rp, err := convertRetryPolicy(cfg.RetryPolicy)
-		if err != nil {
-			return err
-		}
-		base.RetryPolicy = rp
-	}
-	if cfg.DisableEagerExecution != nil {
-		base.DisableEagerExecution = *cfg.DisableEagerExecution
-	}
-	if cfg.Summary != "" {
-		base.Summary = cfg.Summary
-	}
-	if cfg.Priority != nil {
-		base.Priority = convertPriority(cfg.Priority)
-	}
+
+	// Replace the arguments with the parsed values
+	t.activity.Arguments = parsedArgs["args"].([]any)
 
 	return nil
-}
-
-func setActivityDurations(opts *workflow.ActivityOptions, cfg *ActivityCallOptions) error {
-	var err error
-	if cfg.ScheduleToCloseTimeout != nil {
-		if opts.ScheduleToCloseTimeout, err = durationToTime(cfg.ScheduleToCloseTimeout); err != nil {
-			return fmt.Errorf("invalid scheduleToCloseTimeout: %w", err)
-		}
-	}
-	if cfg.ScheduleToStartTimeout != nil {
-		if opts.ScheduleToStartTimeout, err = durationToTime(cfg.ScheduleToStartTimeout); err != nil {
-			return fmt.Errorf("invalid scheduleToStartTimeout: %w", err)
-		}
-	}
-	if cfg.StartToCloseTimeout != nil {
-		if opts.StartToCloseTimeout, err = durationToTime(cfg.StartToCloseTimeout); err != nil {
-			return fmt.Errorf("invalid startToCloseTimeout: %w", err)
-		}
-	}
-	if cfg.HeartbeatTimeout != nil {
-		if opts.HeartbeatTimeout, err = durationToTime(cfg.HeartbeatTimeout); err != nil {
-			return fmt.Errorf("invalid heartbeatTimeout: %w", err)
-		}
-	}
-
-	return nil
-}
-
-func applyLocalActivityOverrides(base *workflow.LocalActivityOptions, cfg *LocalActivityCallOptions) error {
-	if cfg == nil {
-		return nil
-	}
-
-	var err error
-	if cfg.ScheduleToCloseTimeout != nil {
-		if base.ScheduleToCloseTimeout, err = durationToTime(cfg.ScheduleToCloseTimeout); err != nil {
-			return fmt.Errorf("invalid local scheduleToCloseTimeout: %w", err)
-		}
-	}
-	if cfg.StartToCloseTimeout != nil {
-		if base.StartToCloseTimeout, err = durationToTime(cfg.StartToCloseTimeout); err != nil {
-			return fmt.Errorf("invalid local startToCloseTimeout: %w", err)
-		}
-	}
-	if cfg.RetryPolicy != nil {
-		rp, err := convertRetryPolicy(cfg.RetryPolicy)
-		if err != nil {
-			return err
-		}
-		base.RetryPolicy = rp
-	}
-	if cfg.Summary != "" {
-		base.Summary = cfg.Summary
-	}
-
-	return nil
-}
-
-func convertRetryPolicy(cfg *ActivityRetryPolicy) (*temporal.RetryPolicy, error) {
-	if cfg == nil {
-		return nil, nil
-	}
-
-	retry := &temporal.RetryPolicy{}
-	var hasValue bool
-	if cfg.InitialInterval != nil {
-		d, err := durationToTime(cfg.InitialInterval)
-		if err != nil {
-			return nil, fmt.Errorf("invalid retry initial interval: %w", err)
-		}
-		retry.InitialInterval = d
-		hasValue = true
-	}
-	if cfg.BackoffCoefficient != nil {
-		retry.BackoffCoefficient = *cfg.BackoffCoefficient
-		hasValue = true
-	}
-	if cfg.MaximumInterval != nil {
-		d, err := durationToTime(cfg.MaximumInterval)
-		if err != nil {
-			return nil, fmt.Errorf("invalid retry maximum interval: %w", err)
-		}
-		retry.MaximumInterval = d
-		hasValue = true
-	}
-	if cfg.MaximumAttempts != nil {
-		retry.MaximumAttempts = *cfg.MaximumAttempts
-		hasValue = true
-	}
-	if len(cfg.NonRetryableErrorTypes) > 0 {
-		retry.NonRetryableErrorTypes = cfg.NonRetryableErrorTypes
-		hasValue = true
-	}
-
-	if !hasValue {
-		return nil, nil
-	}
-
-	return retry, nil
-}
-
-func convertPriority(cfg *ActivityPriority) temporal.Priority {
-	priority := temporal.Priority{}
-	if cfg.PriorityKey != nil {
-		priority.PriorityKey = *cfg.PriorityKey
-	}
-	if cfg.FairnessKey != "" {
-		priority.FairnessKey = cfg.FairnessKey
-	}
-	if cfg.FairnessWeight != nil {
-		priority.FairnessWeight = *cfg.FairnessWeight
-	}
-	return priority
-}
-
-func durationToTime(d *model.Duration) (time.Duration, error) {
-	if d == nil {
-		return 0, nil
-	}
-
-	if inline := d.AsInline(); inline != nil {
-		return utils.ToDuration(d), nil
-	}
-
-	expr := d.AsExpression()
-	if expr == "" {
-		return 0, nil
-	}
-
-	return parseISODuration(expr)
-}
-
-var iso8601DurationRe = regexp.MustCompile(`^P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?$`)
-
-func parseISODuration(expr string) (time.Duration, error) {
-	matches := iso8601DurationRe.FindStringSubmatch(expr)
-	if len(matches) == 0 {
-		return 0, fmt.Errorf("invalid ISO8601 duration: %s", expr)
-	}
-
-	if matches[1] != "" || matches[2] != "" {
-		return 0, fmt.Errorf("ISO8601 years/months not supported: %s", expr)
-	}
-
-	days, err := toDurationComponent(matches[3], 24*time.Hour)
-	if err != nil {
-		return 0, err
-	}
-	hours, err := toDurationComponent(matches[4], time.Hour)
-	if err != nil {
-		return 0, err
-	}
-	minutes, err := toDurationComponent(matches[5], time.Minute)
-	if err != nil {
-		return 0, err
-	}
-	seconds, err := parseSeconds(matches[6])
-	if err != nil {
-		return 0, err
-	}
-
-	return days + hours + minutes + seconds, nil
-}
-
-func toDurationComponent(value string, unit time.Duration) (time.Duration, error) {
-	if value == "" {
-		return 0, nil
-	}
-	v, err := strconv.Atoi(value)
-	if err != nil {
-		return 0, fmt.Errorf("invalid ISO8601 duration component '%s': %w", value, err)
-	}
-	return time.Duration(v) * unit, nil
-}
-
-func parseSeconds(value string) (time.Duration, error) {
-	if value == "" {
-		return 0, nil
-	}
-	f, err := strconv.ParseFloat(value, 64)
-	if err != nil {
-		return 0, fmt.Errorf("invalid ISO8601 seconds '%s': %w", value, err)
-	}
-	return time.Duration(math.Round(f * float64(time.Second))), nil
 }

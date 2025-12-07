@@ -36,7 +36,7 @@ func exec() error {
 	}
 	defer c.Close()
 
-	workflowOptions := client.StartWorkflowOptions{TaskQueue: "temporal-dsl"}
+	workflowOptions := client.StartWorkflowOptions{TaskQueue: "zigflow"}
 
 	input := map[string]any{
 		"userId": "dsl-user-42",

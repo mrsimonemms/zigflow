@@ -22,6 +22,7 @@ import (
 	"math/rand/v2"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/mrsimonemms/golang-helpers/temporal"
 	"github.com/rs/zerolog/log"
 	"go.temporal.io/sdk/activity"
@@ -44,6 +45,10 @@ func fetchProfile(ctx context.Context, userID, requestID string) (map[string]any
 			"lastLogin": time.Now().UTC().Format(time.RFC3339),
 		},
 	}, nil
+}
+
+func generateRandom(_ context.Context) (uuid.UUID, error) {
+	return uuid.NewRandom()
 }
 
 func generateWelcome(_ context.Context, profile map[string]any) (map[string]string, error) {
@@ -72,6 +77,7 @@ func main() {
 
 	w.RegisterActivityWithOptions(fetchProfile, activity.RegisterOptions{Name: "activitycall.FetchProfile"})
 	w.RegisterActivityWithOptions(generateWelcome, activity.RegisterOptions{Name: "activitycall.GenerateWelcome"})
+	w.RegisterActivityWithOptions(generateRandom, activity.RegisterOptions{Name: "activitycall.GenerateRandom"})
 
 	log.Info().Str("taskQueue", activityTaskQueue).Msg("Activity worker started - Waiting for commands")
 	if err := w.Run(worker.InterruptCh()); err != nil {
