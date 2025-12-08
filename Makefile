@@ -16,6 +16,11 @@ EXAMPLES = ./examples
 TMP_IMG ?= ttl.sh/zigflow
 TMP_IMG_TAG ?= 24h
 
+commitlint:
+	@npx commitlint --version
+	@npx commitlint --to HEAD
+.PHONY: commitlint
+
 cruft-update:
 ifeq (,$(wildcard .cruft.json))
 	@echo "Cruft not configured"
