@@ -37,7 +37,7 @@ import (
 )
 
 func init() {
-	activities = append(activities, callScriptActivity)
+	activities = append(activities, callScriptActivity, callShellActivity)
 }
 
 func NewRunTaskBuilder(
@@ -74,7 +74,12 @@ func (t *RunTaskBuilder) Build() (TemporalWorkflowFunc, error) {
 		if !*t.task.Run.Await {
 			return nil, fmt.Errorf("run scripts must be run with await: %s", t.GetTaskName())
 		}
+		if s.InlineCode == nil || *s.InlineCode == "" {
+			return nil, fmt.Errorf("run script has no code defined: %s", t.GetTaskName())
+		}
 		factory = t.runScript
+	} else if t.task.Run.Shell != nil {
+		factory = t.runShell
 	} else if t.task.Run.Workflow != nil {
 		factory = t.runWorkflow
 	} else {
@@ -85,31 +90,44 @@ func (t *RunTaskBuilder) Build() (TemporalWorkflowFunc, error) {
 		logger := workflow.GetLogger(ctx)
 		logger.Debug("Run await status", "await", *t.task.Run.Await, "task", t.GetTaskName())
 
-		return factory(ctx, input, state)
+		res, err := factory(ctx, input, state)
+		if err != nil {
+			return nil, err
+		}
+
+		// Add the result to the state's data
+		logger.Debug("Setting data to the state", "key", t.name)
+		state.AddData(map[string]any{
+			t.name: res,
+		})
+
+		return res, nil
 	}, nil
 }
 
-func (t *RunTaskBuilder) runScript(ctx workflow.Context, input any, state *utils.State) (any, error) {
+func (t *RunTaskBuilder) executeCommand(ctx workflow.Context, activityFn, input any, state *utils.State) (any, error) {
 	logger := workflow.GetLogger(ctx)
-	logger.Debug("Running a script", "task", t.GetTaskName())
+	logger.Debug("Executing a command", "task", t.GetTaskName())
 
 	var res any
-	if err := workflow.ExecuteActivity(ctx, callScriptActivity, t.task, input, state).Get(ctx, &res); err != nil {
+	if err := workflow.ExecuteActivity(ctx, activityFn, t.task, input, state).Get(ctx, &res); err != nil {
 		if temporal.IsCanceledError(err) {
 			return nil, nil
 		}
 
-		logger.Error("Error calling run script task", "name", t.name, "error", err)
-		return nil, fmt.Errorf("error calling run script task: %w", err)
+		logger.Error("Error calling executing command task", "name", t.name, "error", err)
+		return nil, fmt.Errorf("error calling executing command task: %w", err)
 	}
 
-	// Add the result to the state's data
-	logger.Debug("Setting data to the state", "key", t.name)
-	state.AddData(map[string]any{
-		t.name: res,
-	})
-
 	return res, nil
+}
+
+func (t *RunTaskBuilder) runScript(ctx workflow.Context, input any, state *utils.State) (any, error) {
+	return t.executeCommand(ctx, callScriptActivity, input, state)
+}
+
+func (t *RunTaskBuilder) runShell(ctx workflow.Context, input any, state *utils.State) (any, error) {
+	return t.executeCommand(ctx, callShellActivity, input, state)
 }
 
 func (t *RunTaskBuilder) runWorkflow(ctx workflow.Context, input any, state *utils.State) (any, error) {
@@ -142,12 +160,20 @@ func (t *RunTaskBuilder) runWorkflow(ctx workflow.Context, input any, state *uti
 	return res, nil
 }
 
+/**
+ **************
+ * Activities *
+ **************
+ */
+
 func callScriptActivity(ctx context.Context, task *model.RunTask, input any, state *utils.State) (any, error) {
+	command := make([]string, 0)
+	var file string
+
 	logger := activity.GetLogger(ctx)
 	logger.Debug("Running call script activity")
 
-	state = state.AddActivityInfo(ctx)
-
+	logger.Debug("Creating temporary directory")
 	dir, err := os.MkdirTemp("", "script")
 	if err != nil {
 		logger.Error("Error making temp dir", "error", err)
@@ -159,11 +185,9 @@ func callScriptActivity(ctx context.Context, task *model.RunTask, input any, sta
 		}
 	}()
 
-	command := make([]string, 0)
-	var file string
-
-	l := task.Run.Script.Language
-	switch l {
+	lang := task.Run.Script.Language
+	logger.Debug("Detecting script language", "language", lang)
+	switch lang {
 	case "js":
 		command = append(command, "node")
 		file = "script.js"
@@ -171,8 +195,8 @@ func callScriptActivity(ctx context.Context, task *model.RunTask, input any, sta
 		command = append(command, "python")
 		file = "script.py"
 	default:
-		logger.Error("Unknown script language", "language", l)
-		return nil, fmt.Errorf("unknown script language: %s", l)
+		logger.Error("Unknown script language", "language", lang)
+		return nil, fmt.Errorf("unknown script language: %s", lang)
 	}
 
 	fname := filepath.Join(dir, file)
@@ -183,9 +207,54 @@ func callScriptActivity(ctx context.Context, task *model.RunTask, input any, sta
 		return nil, fmt.Errorf("error writing code to script: %w", err)
 	}
 
+	return runExecCommand(
+		ctx,
+		command,
+		task.Run.Script.Arguments,
+		task.Run.Script.Environment,
+		state,
+		dir,
+	)
+}
+
+func callShellActivity(ctx context.Context, task *model.RunTask, input any, state *utils.State) (any, error) {
+	logger := activity.GetLogger(ctx)
+	logger.Debug("Running call script activity")
+
+	return runExecCommand(
+		ctx,
+		[]string{task.Run.Shell.Command},
+		task.Run.Shell.Arguments,
+		task.Run.Shell.Environment,
+		state,
+		"",
+	)
+}
+
+// runExecCommand a general purpose function to build and execute a command in an activity
+func runExecCommand(
+	ctx context.Context,
+	command []string,
+	args *model.RunArguments,
+	env map[string]string,
+	state *utils.State,
+	dir string,
+) (any, error) {
+	logger := activity.GetLogger(ctx)
+
+	if args == nil {
+		args = &model.RunArguments{}
+	}
+	if env == nil {
+		env = map[string]string{}
+	}
+
+	state = state.Clone().AddActivityInfo(ctx)
+
+	logger.Debug("Interpolating command arguments and envvars")
 	data, err := utils.TraverseAndEvaluateObj(model.NewObjectOrRuntimeExpr(map[string]any{
-		"args": swUtil.DeepCloneValue(task.Run.Script.Arguments.AsSlice()),
-		"env":  swUtil.DeepCloneValue(task.Run.Script.Environment),
+		"args": swUtil.DeepCloneValue(args.AsSlice()),
+		"env":  swUtil.DeepCloneValue(env),
 	}), state)
 	if err != nil {
 		return nil, fmt.Errorf("error traversing task parameters: %w", err)
@@ -202,16 +271,20 @@ func callScriptActivity(ctx context.Context, task *model.RunTask, input any, sta
 	var stdout bytes.Buffer
 	//nolint:gosec // Allow dynamic commands
 	cmd := exec.CommandContext(ctx, command[0], command[1:]...)
-	cmd.Dir = dir
 	cmd.Env = envvars
 	cmd.Stderr = &stderr
 	cmd.Stdout = &stdout
 
+	if dir != "" {
+		cmd.Dir = dir
+	}
+
+	logger.Info("Running command on worker", "command", command)
 	if err := cmd.Run(); err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok {
 			// The command received an exit code above 0 - return as-is
-			logger.Error("Script error", "error", err)
-			return nil, temporal.NewApplicationErrorWithCause("Error calling script", "script", exitErr, stderr.String())
+			logger.Error("Shell error", "error", err)
+			return nil, temporal.NewApplicationErrorWithCause("Error calling command", "command", exitErr, stderr.String())
 		}
 		logger.Error("Error running command", "error", err)
 		return nil, fmt.Errorf("error running command: %w", err)

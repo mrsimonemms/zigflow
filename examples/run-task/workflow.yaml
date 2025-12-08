@@ -22,7 +22,7 @@ do:
 
             console.log(`${process.argv[2]} from ${process.env.NAME}`);
 
-            console.log(http.STATUS_CODES[404]);
+            console.log(http.STATUS_CODES);
           arguments:
             - Hello
           environment:
@@ -50,3 +50,11 @@ do:
             - Hello
           environment:
             NAME: python
+  - shell:
+      export:
+        as: shell
+      run:
+        shell:
+          command: ls
+          arguments:
+            - -la

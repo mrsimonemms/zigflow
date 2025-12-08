@@ -18,10 +18,12 @@ package tasks
 
 import (
 	"testing"
+	"time"
 
 	"github.com/mrsimonemms/zigflow/pkg/utils"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"go.temporal.io/sdk/testsuite"
 	"go.temporal.io/sdk/workflow"
 )
@@ -107,8 +109,10 @@ func TestRunTaskBuilderRunWorkflow(t *testing.T) {
 				}, nil
 			}, workflow.RegisterOptions{Name: task.Run.Workflow.Name})
 
+			state := utils.NewState()
+
 			env.RegisterWorkflowWithOptions(func(ctx workflow.Context) (any, error) {
-				return fn(ctx, map[string]any{"request": "data"}, utils.NewState())
+				return fn(ctx, map[string]any{"request": "data"}, state)
 			}, workflow.RegisterOptions{Name: "run-" + tc.name})
 
 			env.ExecuteWorkflow("run-" + tc.name)
@@ -124,6 +128,147 @@ func TestRunTaskBuilderRunWorkflow(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, map[string]any{"child": "done"}, result)
 			}
+
+			val, ok := state.Data["run-task"]
+			assert.True(t, ok)
+			if tc.expectNilResp {
+				assert.Nil(t, val)
+			} else {
+				assert.Equal(t, map[string]any{"child": "done"}, val)
+			}
 		})
 	}
+}
+
+func TestRunTaskBuilderRunScriptValidation(t *testing.T) {
+	t.Parallel()
+
+	inline := "print('noop')"
+	tests := []struct {
+		name      string
+		task      *model.RunTask
+		assertErr string
+	}{
+		{
+			name: "invalid language",
+			task: &model.RunTask{
+				Run: model.RunTaskConfiguration{
+					Script: &model.Script{
+						Language:   "golang",
+						InlineCode: utils.Ptr(inline),
+					},
+				},
+			},
+			assertErr: "unknown script language 'golang' for task: script-task",
+		},
+		{
+			name: "missing inline code",
+			task: &model.RunTask{
+				Run: model.RunTaskConfiguration{
+					Script: &model.Script{
+						Language: "python",
+					},
+				},
+			},
+			assertErr: "run script has no code defined: script-task",
+		},
+		{
+			name: "await disabled",
+			task: &model.RunTask{
+				Run: model.RunTaskConfiguration{
+					Await: utils.Ptr(false),
+					Script: &model.Script{
+						Language:   "python",
+						InlineCode: utils.Ptr(inline),
+					},
+				},
+			},
+			assertErr: "run scripts must be run with await: script-task",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			builder, err := NewRunTaskBuilder(nil, tc.task, "script-task", nil)
+			assert.NoError(t, err)
+
+			_, err = builder.Build()
+			assert.EqualError(t, err, tc.assertErr)
+		})
+	}
+}
+
+func TestRunTaskBuilderRunScriptExecutesActivity(t *testing.T) {
+	var s testsuite.WorkflowTestSuite
+	env := s.NewTestWorkflowEnvironment()
+
+	task := &model.RunTask{
+		Run: model.RunTaskConfiguration{
+			Script: &model.Script{
+				Language:   "python",
+				InlineCode: utils.Ptr("print('hello')"),
+			},
+		},
+	}
+
+	builder, err := NewRunTaskBuilder(nil, task, "script-task", nil)
+	assert.NoError(t, err)
+
+	fn, err := builder.Build()
+	assert.NoError(t, err)
+
+	state := utils.NewState()
+	env.OnActivity(callScriptActivity, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return("script-success", nil).Once()
+
+	env.RegisterWorkflowWithOptions(func(ctx workflow.Context) (any, error) {
+		ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{StartToCloseTimeout: time.Minute})
+		return fn(ctx, map[string]any{"request": "data"}, state)
+	}, workflow.RegisterOptions{Name: "script-run"})
+
+	env.ExecuteWorkflow("script-run")
+	assert.NoError(t, env.GetWorkflowError())
+
+	var result string
+	assert.NoError(t, env.GetWorkflowResult(&result))
+	assert.Equal(t, "script-success", result)
+
+	assert.Equal(t, "script-success", state.Data["script-task"])
+}
+
+func TestRunTaskBuilderRunShellExecutesActivity(t *testing.T) {
+	var s testsuite.WorkflowTestSuite
+	env := s.NewTestWorkflowEnvironment()
+
+	task := &model.RunTask{
+		Run: model.RunTaskConfiguration{
+			Shell: &model.Shell{
+				Command: "echo",
+			},
+		},
+	}
+
+	builder, err := NewRunTaskBuilder(nil, task, "shell-task", nil)
+	assert.NoError(t, err)
+
+	fn, err := builder.Build()
+	assert.NoError(t, err)
+
+	state := utils.NewState()
+	env.OnActivity(callShellActivity, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return("shell-success", nil).Once()
+
+	env.RegisterWorkflowWithOptions(func(ctx workflow.Context) (any, error) {
+		ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{StartToCloseTimeout: time.Minute})
+		return fn(ctx, map[string]any{"request": "data"}, state)
+	}, workflow.RegisterOptions{Name: "shell-run"})
+
+	env.ExecuteWorkflow("shell-run")
+	assert.NoError(t, env.GetWorkflowError())
+
+	var result string
+	assert.NoError(t, env.GetWorkflowResult(&result))
+	assert.Equal(t, "shell-success", result)
+
+	assert.Equal(t, "shell-success", state.Data["shell-task"])
 }
