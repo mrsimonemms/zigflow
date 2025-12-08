@@ -21,6 +21,13 @@ ENV CGO_ENABLED=0
 ENV GOOS=linux
 ENV GOCACHE=/go/.cache
 ENV PROJECT_NAME="${PROJECT_NAME}"
+ENV WORKFLOW_FILE=/go/app/workflow.example.yaml
+RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - \
+  && apt update \
+  && apt install -y nodejs python3 \
+  && ln -s /usr/bin/python3 /usr/bin/python \
+  && node --version \
+  && python --version
 USER 1000
 WORKDIR /go/app
 COPY --chown=1000:1000 . .
@@ -31,7 +38,7 @@ RUN go build \
 COPY --from=cosmtrek/air /go/bin/air /go/bin/air
 ENTRYPOINT [ "air" ]
 
-FROM scratch
+FROM node:lts-alpine
 ARG GIT_COMMIT
 ARG VERSION
 ENV DISABLE_TELEMETRY=false
@@ -39,6 +46,10 @@ ENV GIT_COMMIT="${GIT_COMMIT}"
 ENV VERSION="${VERSION}"
 ENV WORKFLOW_FILE=/workflow.yaml
 WORKDIR /app
+RUN apk add --no-cache python3 \
+  && node --version \
+  && python --version
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=builder /go/bin/app /app
+USER node
 ENTRYPOINT [ "/app/app" ]
