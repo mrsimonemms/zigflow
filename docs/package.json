@@ -10,7 +10,7 @@
     "format": "prettier --write \"**/*.js\"",
     "lint": "eslint \"**/*.js\" ",
     "serve": "docusaurus serve",
-    "start": "docusaurus start --host 0.0.0.0 --no-open",
+    "start": "docusaurus start --host 0.0.0.0 --no-open --port 9999",
     "swizzle": "docusaurus swizzle",
     "write-heading-ids": "docusaurus write-heading-ids",
     "write-translations": "docusaurus write-translations"
