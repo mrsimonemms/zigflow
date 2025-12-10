@@ -16,6 +16,14 @@
 
 package metadata
 
+import (
+	"time"
+
+	"go.temporal.io/sdk/temporal"
+)
+
+const MetadataActvitiyOptions string = "activityOptions"
+
 const MetadataSearchAttribute string = "searchAttributes"
 
 const (
@@ -25,3 +33,12 @@ const (
 )
 
 const MaxHistoryLengthAttribute string = "canMaxHistoryLength"
+
+const defaultWorkflowTimeout = time.Minute * 5
+
+var defaultRetryPolicy = &temporal.RetryPolicy{
+	InitialInterval:    time.Second,
+	BackoffCoefficient: 2.0,
+	MaximumInterval:    time.Minute,
+	MaximumAttempts:    5,
+}

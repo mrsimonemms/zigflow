@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"maps"
 	"slices"
-	"time"
 
 	"github.com/mrsimonemms/zigflow/pkg/utils"
 	"github.com/rs/zerolog/log"
@@ -147,10 +146,6 @@ func (t *ForkTaskBuilder) exec(forkedTasks []*forkedTask) (TemporalWorkflowFunc,
 
 		logger := workflow.GetLogger(ctx)
 		logger.Debug("Forking a task", "isCompeting", isCompeting)
-
-		ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
-			StartToCloseTimeout: time.Minute,
-		})
 
 		futures := &utils.CancellableFutures{}
 

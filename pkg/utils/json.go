@@ -14,6 +14,25 @@
  * limitations under the License.
  */
 
-package tasks
+package utils
 
-const customCallFunctionActivity = "activity"
+import (
+	"encoding/json"
+	"fmt"
+)
+
+// ToType this works in a similar way to mapstructure.Decode, but with JSON. This
+// is because many of the Serverless Workflow types have custom marshal/unmarshal
+// JSON functions.
+func ToType[T any](m any, result T) error {
+	payload, err := json.Marshal(m)
+	if err != nil {
+		return fmt.Errorf("error marshalling data to json: %w", err)
+	}
+
+	if err := json.Unmarshal(payload, &result); err != nil {
+		return fmt.Errorf("error unmarshalling json to type: %w", err)
+	}
+
+	return nil
+}

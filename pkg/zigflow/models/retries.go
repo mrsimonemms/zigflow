@@ -15,39 +15,3 @@
  */
 
 package models
-
-import (
-	"github.com/mrsimonemms/zigflow/pkg/utils"
-	"github.com/serverlessworkflow/sdk-go/v3/model"
-	"go.temporal.io/sdk/temporal"
-)
-
-type RetryPolicy struct {
-	InitialInterval        *model.Duration `json:"initialInterval"`
-	BackoffCoefficient     *float64        `json:"backoffCoefficient"`
-	MaximumInterval        *model.Duration `json:"maximumInterval"`
-	MaximumAttempts        *int32          `json:"maximumAttempts"`
-	NonRetryableErrorTypes []string        `json:"nonRetryableErrorTypes"`
-}
-
-func (r *RetryPolicy) ToTemporal() *temporal.RetryPolicy {
-	retry := &temporal.RetryPolicy{}
-
-	if r.InitialInterval != nil {
-		retry.InitialInterval = utils.ToDuration(r.InitialInterval)
-	}
-	if r.BackoffCoefficient != nil {
-		retry.BackoffCoefficient = *r.BackoffCoefficient
-	}
-	if r.MaximumInterval != nil {
-		retry.MaximumInterval = utils.ToDuration(r.MaximumInterval)
-	}
-	if r.MaximumAttempts != nil {
-		retry.MaximumAttempts = *r.MaximumAttempts
-	}
-	if len(r.NonRetryableErrorTypes) > 0 {
-		retry.NonRetryableErrorTypes = r.NonRetryableErrorTypes
-	}
-
-	return retry
-}

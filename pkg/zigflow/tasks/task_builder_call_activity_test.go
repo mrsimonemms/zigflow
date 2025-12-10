@@ -43,10 +43,7 @@ func TestCallActivityTaskBuilderExecute(t *testing.T) {
 		With: map[string]any{
 			"name":      activityName,
 			"arguments": []any{"${ .input.message }"},
-			"options": map[string]any{
-				"taskQueue":           "some-task-queue",
-				"startToCloseTimeout": map[string]any{"seconds": 5},
-			},
+			"taskQueue": "some-task-queue",
 		},
 	}
 

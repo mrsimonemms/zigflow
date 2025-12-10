@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"github.com/mrsimonemms/zigflow/pkg/utils"
+	"github.com/mrsimonemms/zigflow/pkg/zigflow/metadata"
 	"github.com/rs/zerolog/log"
 	swUtil "github.com/serverlessworkflow/sdk-go/v3/impl/utils"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
@@ -185,15 +186,6 @@ func (t *DoTaskBuilder) workflowExecutor(tasks []workflowFunc) TemporalWorkflowF
 			}
 		}
 
-		timeout := defaultWorkflowTimeout
-		if t.doc.Timeout != nil && t.doc.Timeout.Timeout != nil && t.doc.Timeout.Timeout.After != nil {
-			timeout = utils.ToDuration(t.doc.Timeout.Timeout.After)
-		}
-		logger.Debug("Setting activity options", "startToCloseTimeout", timeout)
-		ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
-			StartToCloseTimeout: timeout,
-		})
-
 		// Iterate through the tasks to create the workflow
 		if err := t.iterateTasks(ctx, tasks, input, state); err != nil {
 			return nil, err
@@ -281,10 +273,11 @@ func (t *DoTaskBuilder) iterateTasks(
 			return err
 		}
 
-		logger.Debug("Adding summary to activity context", "name", task.Name)
-		ao := workflow.GetActivityOptions(ctx)
-		ao.Summary = task.Name
-		ctx = workflow.WithActivityOptions(ctx, ao)
+		if wCtx, err := metadata.SetActivityOptions(ctx, t.doc, taskBase, task.Name); err != nil {
+			return err
+		} else {
+			ctx = wCtx
+		}
 
 		if err := t.runTask(ctx, task, input, state); err != nil {
 			return err

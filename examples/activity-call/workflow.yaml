@@ -35,10 +35,7 @@ do:
           arguments:
             - ${ .data.requestedUserId }
             - ${ .data.requestId }
-          options:
-            taskQueue: activity-call-worker
-            startToCloseTimeout:
-              seconds: 5
+          taskQueue: activity-call-worker
   - generateWelcome:
       call: activity
       export:
@@ -47,10 +44,7 @@ do:
         name: activitycall.GenerateWelcome
         arguments:
           - ${ .output.profile }
-        options:
-          taskQueue: activity-call-worker
-          startToCloseTimeout:
-            seconds: 5
+        taskQueue: activity-call-worker
   - finalize:
       set:
         workflowId: ${ .data.captureInput.requestId }

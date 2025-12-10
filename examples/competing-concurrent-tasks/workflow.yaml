@@ -19,9 +19,9 @@ do:
         seconds: 1
   # Fan out and the first to finish wins
   - race:
+      export:
+        as: winner
       fork:
-        export:
-          as: winner
         compete: true # This is important - if false, they all run to completion in parallel
         branches:
           # Winning task
@@ -50,7 +50,7 @@ do:
                       endpoint: https://jsonplaceholder.typicode.com/users/1
                 - wait:
                     wait:
-                      seconds: 5
+                      seconds: 50
                 - set:
                     export:
                       as: task
@@ -58,10 +58,9 @@ do:
                       winner: task2
   - wait:
       wait:
-        seconds: 5
+        seconds: 1
   - set:
       export:
         as: data
       set:
         id: ${ .data.id }
-        winner: ${ .data.task.winner }

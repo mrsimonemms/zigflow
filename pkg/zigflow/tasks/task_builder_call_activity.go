@@ -72,11 +72,12 @@ func (t *CallActivityTaskBuilder) Build() (TemporalWorkflowFunc, error) {
 			return nil, err
 		}
 
-		logger.Info("Executing Temporal activity", "activity", t.activity.Name, "task", t.GetTaskName())
+		// Set the task queue
+		opts := workflow.GetActivityOptions(ctx)
+		opts.TaskQueue = t.activity.TaskQueue
+		ctx = workflow.WithActivityOptions(ctx, opts)
 
-		if t.activity.Options != nil {
-			ctx = workflow.WithActivityOptions(ctx, t.activity.Options.ToTemporal(ctx))
-		}
+		logger.Info("Executing Temporal activity", "activity", t.activity.Name, "task", t.GetTaskName())
 
 		future := workflow.ExecuteActivity(ctx, t.activity.Name, t.activity.Arguments...)
 
@@ -113,7 +114,7 @@ func (t *CallActivityTaskBuilder) convertToType() error {
 		return fmt.Errorf("call activity requires a name: %s", t.GetTaskName())
 	}
 
-	if result.Options != nil && result.Options.TaskQueue == "" {
+	if result.TaskQueue == "" {
 		return fmt.Errorf("activity task queue must be set: %s", t.GetTaskName())
 	}
 

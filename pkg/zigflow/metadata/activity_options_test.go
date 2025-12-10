@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package models_test
+package metadata_test
 
 import (
 	"testing"
 	"time"
 
 	"github.com/mrsimonemms/zigflow/pkg/utils"
-	"github.com/mrsimonemms/zigflow/pkg/zigflow/models"
+	"github.com/mrsimonemms/zigflow/pkg/zigflow/metadata"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
 	"github.com/stretchr/testify/assert"
 	"go.temporal.io/sdk/temporal"
@@ -30,17 +30,18 @@ import (
 func TestConvertRetryPolicy(t *testing.T) {
 	tests := []struct {
 		Name        string
-		RetryPolicy *models.RetryPolicy
+		RetryPolicy *metadata.RetryPolicy
+		Starting    *temporal.RetryPolicy
 		Expected    *temporal.RetryPolicy
 	}{
 		{
 			Name:        "Empty",
-			RetryPolicy: &models.RetryPolicy{},
+			RetryPolicy: &metadata.RetryPolicy{},
 			Expected:    &temporal.RetryPolicy{},
 		},
 		{
 			Name: "Full",
-			RetryPolicy: &models.RetryPolicy{
+			RetryPolicy: &metadata.RetryPolicy{
 				InitialInterval:        &model.Duration{Value: model.DurationInline{Seconds: 1}},
 				BackoffCoefficient:     utils.Ptr(2.0),
 				MaximumAttempts:        utils.Ptr[int32](3),
@@ -59,7 +60,7 @@ func TestConvertRetryPolicy(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			assert.Equal(t, test.Expected, test.RetryPolicy.ToTemporal())
+			assert.Equal(t, test.Expected, test.RetryPolicy.ToTemporal(test.Starting))
 		})
 	}
 }

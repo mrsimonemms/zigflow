@@ -11,6 +11,10 @@ document:
     # Acts as override to test out continue-as-new
     # @link https://docs.temporal.io/develop/go/continue-as-new
     canMaxHistoryLength: 14
+    # Configure global activity options
+    activityOptions:
+      retryPolicy:
+        maximumAttempts: 3
 # Optionally validate the input received
 input:
   schema:
@@ -47,6 +51,11 @@ do:
       call: http
       export:
         as: getUser
+      metadata:
+        # Configure activity options for this task only
+        activityOptions:
+          retryPolicy:
+            maximumAttempts: 5
       with:
         method: get
         endpoint: ${ "https://jsonplaceholder.typicode.com/users/" + (.input.userId | tostring) }
