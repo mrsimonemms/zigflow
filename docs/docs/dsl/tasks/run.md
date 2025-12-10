@@ -1,6 +1,3 @@
----
-sidebar_position: 8
----
 # Run
 
 Provides the capability to run execute external commands

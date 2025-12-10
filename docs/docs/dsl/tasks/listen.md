@@ -1,6 +1,3 @@
----
-sidebar_position: 6
----
 # Listen
 
 Provides a mechanism for workflows to await and react to external events, enabling

@@ -1,6 +1,3 @@
----
-sidebar_position: 3
----
 # Do
 
 The Do task is specified in every single workflow as it represents the basic

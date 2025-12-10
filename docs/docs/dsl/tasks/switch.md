@@ -1,6 +1,3 @@
----
-sidebar_position: 10
----
 # Switch
 
 Enables conditional branching within workflows, allowing them to dynamically

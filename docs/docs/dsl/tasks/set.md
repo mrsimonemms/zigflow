@@ -1,6 +1,3 @@
----
-sidebar_position: 9
----
 # Set
 
 A task used to set data to the workflow's state.

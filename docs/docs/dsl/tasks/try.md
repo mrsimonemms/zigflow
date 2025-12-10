@@ -1,6 +1,3 @@
----
-sidebar_position: 11
----
 # Try
 
 Serves as a mechanism within workflows to handle errors gracefully, potentially

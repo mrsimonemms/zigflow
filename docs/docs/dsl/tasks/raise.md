@@ -1,6 +1,3 @@
----
-sidebar_position: 7
----
 # Raise
 
 Intentionally triggers and propagates errors. By employing the "Raise" task,

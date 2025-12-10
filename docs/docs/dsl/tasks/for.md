@@ -1,6 +1,3 @@
----
-sidebar_position: 4
----
 # For
 
 Allows workflows to iterate over a collection of items, executing a defined set

@@ -1,6 +1,3 @@
----
-sidebar_position: 12
----
 # Wait
 
 Allows workflows to pause or delay their execution for a specified period of time.
