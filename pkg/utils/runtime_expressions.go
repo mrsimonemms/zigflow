@@ -109,20 +109,35 @@ func traverseAndEvaluate(node any, state *State, evaluationWrapper ExpressionWra
 		return v, nil
 	case []any:
 		// Traverse an array
-		for i, value := range v {
-			evaluatedValue, err := traverseAndEvaluate(value, state, evaluationWrapper)
-			if err != nil {
-				return nil, err
-			}
-			v[i] = evaluatedValue
-		}
-		return v, nil
+		return traverseSlice(v, state, evaluationWrapper)
+	case []string:
+		// Traverse an array
+		return traverseSlice(toAnySlice(v), state, evaluationWrapper)
 	case string:
 		return EvaluateString(v, state, evaluationWrapper)
 	default:
 		// Return as-is
 		return v, nil
 	}
+}
+
+func traverseSlice(v []any, state *State, evaluationWrapper ExpressionWrapperFunc) ([]any, error) {
+	for i, value := range v {
+		evaluatedValue, err := traverseAndEvaluate(value, state, evaluationWrapper)
+		if err != nil {
+			return nil, err
+		}
+		v[i] = evaluatedValue
+	}
+	return v, nil
+}
+
+func toAnySlice[T any](in []T) []any {
+	out := make([]any, len(in))
+	for i, v := range in {
+		out[i] = v
+	}
+	return out
 }
 
 func evaluateJQExpression(expression string, state *State) (any, error) {

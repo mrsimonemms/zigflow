@@ -260,7 +260,10 @@ func runExecCommand(
 		return nil, fmt.Errorf("error traversing task parameters: %w", err)
 	}
 
-	command = append(command, data["args"].([]string)...)
+	// Cast the arg to a string
+	for _, v := range data["args"].([]any) {
+		command = append(command, fmt.Sprintf("%v", v))
+	}
 
 	envvars := make([]string, 0)
 	for k, v := range data["env"].(map[string]string) {
