@@ -70,6 +70,9 @@ const config = {
           // Remove this to remove the "edit this page" links.
           editUrl: `https://github.com/${githubDomain}/tree/main/docs/`,
         },
+        theme: {
+          customCss: require.resolve('./src/css/custom.css'),
+        },
       }),
     ],
   ],
@@ -82,7 +85,6 @@ const config = {
         respectPrefersColorScheme: true,
       },
       navbar: {
-        title: 'Zigflow',
         logo: {
           alt: 'Zigflow',
           src: 'img/logo.png',
@@ -158,8 +160,6 @@ const config = {
           },
         ],
         copyright: `Licenced under <a href="https://github.com/mrsimonemms/zigflow/blob/main/LICENSE" target="_blank">Apache-2.0</a>
-        <br />
-        Ziggy mascot &copy; <a href="https://temporal.io" target="_blank">Temporal Technologies</a>
         <br />
         Copyright &copy; ${new Date().getFullYear()} <a href="https://github.com/mrsimonemms/zigflow/graphs/contributors" target="_blank">Zigflow authors</a>.
         Built with Docusaurus.`,
