@@ -7,9 +7,10 @@
     "https://json.schemastore.org/github-workflow.json": [
       ".github/workflows/*.{yml,yaml}"
     ],
-    "https://serverlessworkflow.io/schemas/1.0.0/workflow.json": [
+    "https://zigflow.dev/schema.yaml": [
       "workflow.example.yaml",
-      "workflow.yaml"
+      "workflow.yaml",
+      "zigflow.yaml"
     ]
   },
   "go.lintTool": "golangci-lint",
