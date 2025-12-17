@@ -28,10 +28,10 @@ import (
 	"go.temporal.io/sdk/workflow"
 )
 
-var activities []any = make([]any, 0)
+var activitiesRegistry []any = make([]any, 0)
 
 func ActivitiesList() []any {
-	return activities
+	return activitiesRegistry
 }
 
 type TaskBuilder interface {

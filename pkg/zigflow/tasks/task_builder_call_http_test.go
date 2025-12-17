@@ -44,7 +44,7 @@ func TestParseHTTPArguments(t *testing.T) {
 		},
 	}
 
-	got, err := parseHTTPArguments(task, state)
+	got, err := (&CallActivities{}).parseHTTPArguments(task, state)
 	assert.NoError(t, err)
 	assert.Equal(t, "GET", got.Method)
 	assert.Equal(t, "https://example.com", got.Endpoint.String())
@@ -85,7 +85,7 @@ func TestParseOutput(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got := parseOutput(tc.outputType, httpResp, raw)
+			got := (&CallActivities{}).parseOutput(tc.outputType, httpResp, raw)
 			assert.Equal(t, tc.expect, got)
 		})
 	}

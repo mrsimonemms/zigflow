@@ -17,28 +17,16 @@
 package tasks
 
 import (
-	"bytes"
-	"context"
 	"fmt"
-	"os"
-	"os/exec"
-	"path/filepath"
 	"slices"
-	"strings"
 
 	"github.com/mrsimonemms/zigflow/pkg/utils"
-	swUtil "github.com/serverlessworkflow/sdk-go/v3/impl/utils"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
 	"go.temporal.io/api/enums/v1"
-	"go.temporal.io/sdk/activity"
 	"go.temporal.io/sdk/temporal"
 	"go.temporal.io/sdk/worker"
 	"go.temporal.io/sdk/workflow"
 )
-
-func init() {
-	activities = append(activities, callScriptActivity, callShellActivity)
-}
 
 func NewRunTaskBuilder(
 	temporalWorker worker.Worker,
@@ -123,11 +111,11 @@ func (t *RunTaskBuilder) executeCommand(ctx workflow.Context, activityFn, input 
 }
 
 func (t *RunTaskBuilder) runScript(ctx workflow.Context, input any, state *utils.State) (any, error) {
-	return t.executeCommand(ctx, callScriptActivity, input, state)
+	return t.executeCommand(ctx, (*RunActivities).CallScriptActivity, input, state)
 }
 
 func (t *RunTaskBuilder) runShell(ctx workflow.Context, input any, state *utils.State) (any, error) {
-	return t.executeCommand(ctx, callShellActivity, input, state)
+	return t.executeCommand(ctx, (*RunActivities).CallShellActivity, input, state)
 }
 
 func (t *RunTaskBuilder) runWorkflow(ctx workflow.Context, input any, state *utils.State) (any, error) {
@@ -158,140 +146,4 @@ func (t *RunTaskBuilder) runWorkflow(ctx workflow.Context, input any, state *uti
 	logger.Debug("Child workflow completed", "task", t.GetTaskName())
 
 	return res, nil
-}
-
-/**
- **************
- * Activities *
- **************
- */
-
-func callScriptActivity(ctx context.Context, task *model.RunTask, input any, state *utils.State) (any, error) {
-	command := make([]string, 0)
-	var file string
-
-	logger := activity.GetLogger(ctx)
-	logger.Debug("Running call script activity")
-
-	logger.Debug("Creating temporary directory")
-	dir, err := os.MkdirTemp("", "script")
-	if err != nil {
-		logger.Error("Error making temp dir", "error", err)
-		return nil, fmt.Errorf("error making temp dir: %w", err)
-	}
-	defer func() {
-		if err := os.RemoveAll(dir); err != nil {
-			logger.Warn("Generated script not deleted", "dir", dir, "error", err)
-		}
-	}()
-
-	lang := task.Run.Script.Language
-	logger.Debug("Detecting script language", "language", lang)
-	switch lang {
-	case "js":
-		command = append(command, "node")
-		file = "script.js"
-	case "python":
-		command = append(command, "python")
-		file = "script.py"
-	default:
-		logger.Error("Unknown script language", "language", lang)
-		return nil, fmt.Errorf("unknown script language: %s", lang)
-	}
-
-	fname := filepath.Join(dir, file)
-	logger.Debug("Writing script to disk", "file", fname)
-	command = append(command, fname)
-	if err := os.WriteFile(fname, []byte(*task.Run.Script.InlineCode), 0o600); err != nil {
-		logger.Error("Error writing script to disk", "file", fname, "error", err)
-		return nil, fmt.Errorf("error writing code to script: %w", err)
-	}
-
-	return runExecCommand(
-		ctx,
-		command,
-		task.Run.Script.Arguments,
-		task.Run.Script.Environment,
-		state,
-		dir,
-	)
-}
-
-func callShellActivity(ctx context.Context, task *model.RunTask, input any, state *utils.State) (any, error) {
-	logger := activity.GetLogger(ctx)
-	logger.Debug("Running call script activity")
-
-	return runExecCommand(
-		ctx,
-		[]string{task.Run.Shell.Command},
-		task.Run.Shell.Arguments,
-		task.Run.Shell.Environment,
-		state,
-		"",
-	)
-}
-
-// runExecCommand a general purpose function to build and execute a command in an activity
-func runExecCommand(
-	ctx context.Context,
-	command []string,
-	args *model.RunArguments,
-	env map[string]string,
-	state *utils.State,
-	dir string,
-) (any, error) {
-	logger := activity.GetLogger(ctx)
-
-	if args == nil {
-		args = &model.RunArguments{}
-	}
-	if env == nil {
-		env = map[string]string{}
-	}
-
-	state = state.Clone().AddActivityInfo(ctx)
-
-	logger.Debug("Interpolating command arguments and envvars")
-	data, err := utils.TraverseAndEvaluateObj(model.NewObjectOrRuntimeExpr(map[string]any{
-		"args": swUtil.DeepCloneValue(args.AsSlice()),
-		"env":  swUtil.DeepCloneValue(env),
-	}), state)
-	if err != nil {
-		return nil, fmt.Errorf("error traversing task parameters: %w", err)
-	}
-
-	// Cast the arg to a string
-	for _, v := range data["args"].([]any) {
-		command = append(command, fmt.Sprintf("%v", v))
-	}
-
-	envvars := make([]string, 0)
-	for k, v := range data["env"].(map[string]string) {
-		envvars = append(envvars, fmt.Sprintf("%s=%v", k, v))
-	}
-
-	var stderr bytes.Buffer
-	var stdout bytes.Buffer
-	//nolint:gosec // Allow dynamic commands
-	cmd := exec.CommandContext(ctx, command[0], command[1:]...)
-	cmd.Env = envvars
-	cmd.Stderr = &stderr
-	cmd.Stdout = &stdout
-
-	if dir != "" {
-		cmd.Dir = dir
-	}
-
-	logger.Info("Running command on worker", "command", command)
-	if err := cmd.Run(); err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok {
-			// The command received an exit code above 0 - return as-is
-			logger.Error("Shell error", "error", err)
-			return nil, temporal.NewApplicationErrorWithCause("Error calling command", "command", exitErr, stderr.String())
-		}
-		logger.Error("Error running command", "error", err)
-		return nil, fmt.Errorf("error running command: %w", err)
-	}
-
-	return strings.TrimSpace(stdout.String()), nil
 }

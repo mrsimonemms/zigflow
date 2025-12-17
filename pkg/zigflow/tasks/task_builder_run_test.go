@@ -203,6 +203,7 @@ func TestRunTaskBuilderRunScriptValidation(t *testing.T) {
 func TestRunTaskBuilderRunScriptExecutesActivity(t *testing.T) {
 	var s testsuite.WorkflowTestSuite
 	env := s.NewTestWorkflowEnvironment()
+	runActivities := &RunActivities{}
 
 	task := &model.RunTask{
 		Run: model.RunTaskConfiguration{
@@ -220,7 +221,13 @@ func TestRunTaskBuilderRunScriptExecutesActivity(t *testing.T) {
 	assert.NoError(t, err)
 
 	state := utils.NewState()
-	env.OnActivity(callScriptActivity, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return("script-success", nil).Once()
+	env.OnActivity(
+		runActivities.CallScriptActivity,
+		mock.Anything,
+		mock.Anything,
+		mock.Anything,
+		mock.Anything,
+	).Return("script-success", nil).Once()
 
 	env.RegisterWorkflowWithOptions(func(ctx workflow.Context) (any, error) {
 		ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{StartToCloseTimeout: time.Minute})
@@ -240,6 +247,7 @@ func TestRunTaskBuilderRunScriptExecutesActivity(t *testing.T) {
 func TestRunTaskBuilderRunShellExecutesActivity(t *testing.T) {
 	var s testsuite.WorkflowTestSuite
 	env := s.NewTestWorkflowEnvironment()
+	runActivities := &RunActivities{}
 
 	task := &model.RunTask{
 		Run: model.RunTaskConfiguration{
@@ -256,7 +264,13 @@ func TestRunTaskBuilderRunShellExecutesActivity(t *testing.T) {
 	assert.NoError(t, err)
 
 	state := utils.NewState()
-	env.OnActivity(callShellActivity, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return("shell-success", nil).Once()
+	env.OnActivity(
+		runActivities.CallShellActivity,
+		mock.Anything,
+		mock.Anything,
+		mock.Anything,
+		mock.Anything,
+	).Return("shell-success", nil).Once()
 
 	env.RegisterWorkflowWithOptions(func(ctx workflow.Context) (any, error) {
 		ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{StartToCloseTimeout: time.Minute})
