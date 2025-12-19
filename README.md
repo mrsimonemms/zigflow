@@ -1,5 +1,7 @@
 # Zigflow: Declarative workflows for Temporal
 
+![Zigflow](./designs/zigflow.png "Zigflow")
+
 [![Contributions Welcome](https://img.shields.io/badge/Contributions-Welcome-green.svg?style=flat)](https://github.com/mrsimonemms/zigflow/issues)
 [![Licence](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/mrsimonemms/zigflow/blob/master/LICENSE)
 [![GitHub Release](https://img.shields.io/github/v/release/mrsimonemms/zigflow?label=Release)](https://github.com/mrsimonemms/zigflow/releases/latest)
