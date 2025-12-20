@@ -53,7 +53,7 @@ Define a workflow declaratively in YAML:
 document:
   dsl: 1.0.0
   namespace: MoneyTransfer # Mapped to the task queue
-  name: AccountTransferWorkflow # Workflow name
+  name: AccountTransferWorkflow # Workflow type
   version: 0.0.1
   title: Money Transfer Demo
   summary: Temporal's world-famous Money Transfer Demo, in DSL form
@@ -150,9 +150,9 @@ boilerplate required.
 
 You can now run it with any [Temporal SDK](https://docs.temporal.io/encyclopedia/temporal-sdks).
 
-* [**Task Queue**](https://docs.temporal.io/task-queue): `zigflow`
+* [**Task Queue**](https://docs.temporal.io/task-queue): `MoneyTransfer`
 * [**Workflow Type**](https://docs.temporal.io/workflows#intro-to-workflows):
-  `example`
+  `AccountTransferWorkflow`
 
 ---
 
