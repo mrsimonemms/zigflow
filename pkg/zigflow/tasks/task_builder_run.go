@@ -55,7 +55,19 @@ func (t *RunTaskBuilder) Build() (TemporalWorkflowFunc, error) {
 	}
 
 	var factory TemporalWorkflowFunc
-	if s := t.task.Run.Script; s != nil {
+	if t.task.Run.Container != nil {
+		if t.task.Run.Container.Lifetime == nil {
+			t.task.Run.Container.Lifetime = &model.ContainerLifetime{
+				Cleanup: "always",
+			}
+		}
+
+		if len(t.task.Run.Container.Ports) > 0 {
+			return nil, fmt.Errorf("ports are not allowed on containers")
+		}
+
+		factory = t.runContainer
+	} else if s := t.task.Run.Script; s != nil {
 		if !slices.Contains([]string{"js", "python"}, s.Language) {
 			return nil, fmt.Errorf("unknown script language '%s' for task: %s", s.Language, t.GetTaskName())
 		}
@@ -108,6 +120,10 @@ func (t *RunTaskBuilder) executeCommand(ctx workflow.Context, activityFn, input 
 	}
 
 	return res, nil
+}
+
+func (t *RunTaskBuilder) runContainer(ctx workflow.Context, input any, state *utils.State) (any, error) {
+	return t.executeCommand(ctx, (*RunActivities).CallContainerActivity, input, state)
 }
 
 func (t *RunTaskBuilder) runScript(ctx workflow.Context, input any, state *utils.State) (any, error) {
