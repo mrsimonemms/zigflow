@@ -20,7 +20,8 @@
       "extensions": [
         "esbenp.prettier-vscode",
         "unifiedjs.vscode-mdx",
-        "DrBlury.protobuf-vsc"
+        "DrBlury.protobuf-vsc",
+        "svelte.svelte-vscode"
       ],
       "settings": {}
     }
@@ -32,11 +33,13 @@
     "CONVERTER_KEY_PATH": "/workspaces/zigflow/keys.example.yaml",
     "GIT_REPO": "github.com/mrsimonemms/zigflow",
     "LOG_LEVEL": "trace",
+    "PUBLIC_DATA_DIR": "/workspaces/zigflow/ui/data",
     "ZIGGY_EXAMPLE_ENVVAR": "some-example-envvar",
     "WORKFLOW_FILE": "./workflow.example.yaml"
   },
   "forwardPorts": [
     3000,
+    5173,
     7070,
     7233,
     8080,

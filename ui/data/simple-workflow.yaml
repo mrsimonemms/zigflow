@@ -1,0 +1,11 @@
+document:
+  dsl: 1.0.0
+  namespace: zigflow
+  name: simple-workflow
+  version: 1.0.0
+do:
+  - set:
+      export:
+        as: data
+      set:
+        message: Hello from Ziggy
