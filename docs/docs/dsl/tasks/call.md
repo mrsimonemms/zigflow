@@ -5,8 +5,8 @@ The Call task allows you to make calls to external services.
 ## Properties
 
 | Name | Type | Required | Description |
-|:--|:---:|:---:|:---|
-| call | `string` | `yes` | The name of the function to call. One of `activity` or `http`.|
+| --- | :---: | :---: | --- |
+| call | `string` | `yes` | The name of the function to call. One of `activity` or `http`. |
 | with | `map` | `no` | A name/value mapping of the parameters to call the function with |
 
 ## Activity
@@ -20,7 +20,7 @@ To use this, the `call` property must equal `activity`.
 ### Properties {#activity-properties}
 
 | Name | Type | Required | Description |
-|:--|:---:|:---:|:---|
+| --- | :---: | :---: | --- |
 | name | `string` | `yes` | The activity name to call. |
 | arguments | `string` | `any[]` | The arguments to pass to the activity. These are interpolated through the state. |
 | taskQueue | `string` | `yes` | The task queue where the activity is running. |
@@ -60,8 +60,8 @@ Call an external resource via gRPC. To use this, the `call` property must equal
 
 ### Properties {#grpc-properties}
 
-| Name | Type | Required | Description|
-|:--|:---:|:---:|:---|
+| Name | Type | Required | Description |
+| --- | :---: | :---: | --- |
 | proto.endpoint | `string` | `yes` | The proto resource that describes the gRPC service to call.. |
 | service.name | `string` | `yes` | The name of the gRPC service to call. |
 | service.host | `string` | `yes` | The hostname of the gRPC service to call. |
@@ -100,7 +100,7 @@ Call an external resource via HTTP. To use this, the `call` property must equal
 ### Properties {#http-properties}
 
 | Name | Type | Required | Description |
-|:--|:---:|:---:|:---|
+| --- | :---: | :---: | --- |
 | method | `string` | `yes` | The HTTP request method. |
 | endpoint | `string`\|[`endpoint`](https://github.com/serverlessworkflow/specification/blob/main/dsl-reference.md#endpoint) | `yes` | An URI or an object that describes the HTTP endpoint to call. |
 | headers | `map` | `no` | A name/value mapping of the HTTP headers to use, if any. |

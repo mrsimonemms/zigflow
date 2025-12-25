@@ -5,7 +5,7 @@ Provides the capability to run execute external commands
 ## Properties
 
 | Name | Type | Required | Description |
-|:--|:---:|:---:|:---|
+| --- | :---: | :---: | --- |
 | run.script | [`script`](#script-process) | `no` | The definition of the script to run.<br />*Required if `shell` and `workflow` have not been set.* |
 | run.shell | [`shell`](#shell-process) | `no` | The definition of the shell command to run.<br />*Required if `script` and `workflow` have not been set.* |
 | run.workflow | [`workflow`](#workflow-process) | `no` | The definition of the workflow to run.<br />*Required if `script` and `shell` have not been set.* |
@@ -20,7 +20,7 @@ executing user-defined scripts written in various programming languages.
 ### Properties {#script-properties}
 
 | Name | Type | Required | Description |
-|:--|:---:|:---:|:---|
+| --- | :---: | :---: | --- |
 | language | `string` | `yes` | The language of the script to run.<br />*Supported values are: [`js` and `python`](#supported-languages).* |
 | code | `string` | `yes` | The script's code. |
 | arguments | `string[]` | `no` | A list of the arguments, if any, to the script as argv |
@@ -29,16 +29,16 @@ executing user-defined scripts written in various programming languages.
 #### Supported languages
 
 :::warning
-The [Docker image](https://github.com/mrsimonemms/zigflow/blob/main/Dockerfile) is
-built on the [`node:lts-alpine` image](https://hub.docker.com/_/node/) and installs
-the [`python3` Alpine package](https://pkgs.alpinelinux.org/package/edge/main/x86/python3).
+The [Docker image](https://github.com/mrsimonemms/zigflow/blob/main/Dockerfile)
+is built on the [`node:lts-alpine` image](https://hub.docker.com/_/node/) and
+installs the [`python3` Alpine package](https://pkgs.alpinelinux.org/package/edge/main/x86/python3).
 For specific versions of these languages, build your own image.
 :::
 
 This is a list of available languages and the command that is called.
 
 | Language | Binary Target |
-|:-----------|:---------|
+| :--- | :--- |
 | `js` | `node` |
 | `python` | `python` |
 
@@ -102,7 +102,7 @@ tasks.
 ### Properties {#shell-properties}
 
 | Name | Type | Required | Description |
-|:--|:---:|:---:|:---|
+| --- | :---: | :---: | --- |
 | command | `string` | `yes` | The shell command to run |
 | arguments | `string[]` | `no` | A list of the arguments, if any, to the shell command as argv |
 | environment | `map` | `no` | A key/value mapping of the environment variables, if any, to use when running the configured process |
@@ -135,7 +135,7 @@ workflow units.
 ### Properties {#workflow-properties}
 
 | Name | Type | Required | Description |
-|:--|:---:|:---:|:---|
+| --- | :---: | :---: | --- |
 | name | `string` | `yes` | The name of the workflow to run |
 | namespace | `string` | `yes` | This is not used and only exists to maintain compatability with the Serverless Workflow schema |
 | version | `string` | `yes` | This is not used and only exists to maintain compatability with the Serverless Workflow schema |

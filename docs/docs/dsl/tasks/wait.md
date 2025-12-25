@@ -6,7 +6,7 @@ This converts to a Temporal [Durable Timer](https://docs.temporal.io/workflow-ex
 ## Properties
 
 | Name | Type | Required | Description |
-|:--|:---:|:---:|:---|
+| --- | :---: | :---: | --- |
 | wait | [`duration`](../intro#duration) | `yes` | The amount of time to wait. |
 
 ## Example

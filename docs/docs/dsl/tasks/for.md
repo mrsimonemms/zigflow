@@ -8,7 +8,7 @@ operations across datasets.
 ## Properties
 
 | Name | Type | Required | Description |
-|:--|:---:|:---:|:---|
+| --- | :---: | :---: | --- |
 | for.each | `string` | `no` | The name of the variable used to store the current item being enumerated.<br />Defaults to `item`. |
 | for.in | `string` | `yes` | A [runtime expression](intro#runtime-expressions) used to get the collection to enumerate. |
 | for.at | `string` | `no` | The name of the variable used to store the index of the current item being enumerated.<br />Defaults to `index`. |

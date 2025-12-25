@@ -12,7 +12,7 @@ that can be used:
 ## Properties {#listen-properties}
 
 | Name | Type | Required | Description |
-|:--|:---:|:---:|:---|
+| --- | :---: | :---: | --- |
 | listen.to | [`eventConsumptionStrategy`](#event-consumption-strategy) | `yes` | Configures the [event(s)](https://cloudevents.io/) the workflow must listen to. |
 
 ### Event Consumption Strategy
@@ -22,7 +22,7 @@ Represents the configuration of an event consumption strategy.
 #### Properties {#event-consumption-strategy-properties}
 
 | Property | Type | Required | Description |
-|----------|:----:|:--------:|-------------|
+| --- | :---: | :---: | --- |
 | all | [`eventFilter[]`](#event-filter) | `no` | Configures the workflow to wait for all defined events before resuming execution.<br />*Required if `any` and `one` have not been set.* |
 | any | [`eventFilter[]`](#event-filter) | `no` | Configures the workflow to wait for any of the defined events before resuming execution.<br />*Required if `all` and `one` have not been set.*<br />*If empty, listens to all incoming events* |
 | one | [`eventFilter`](#event-filter) | `no` | Configures the workflow to wait for the defined event before resuming execution.<br />*Required if `all` and `any` have not been set.* |
@@ -35,7 +35,7 @@ on predefined criteria, such as event type, source, or specific attributes.
 #### Properties {#event-filter-properties}
 
 | Property | Type | Required | Description |
-|----------|:----:|:--------:|-------------|
+| --- | :---: | :---: | --- |
 | with | [`eventProperties`](#event-properties) | `yes` | A name/value mapping of the attributes filtered events must define. Supports both regular expressions and runtime expressions. |
 
 ### Event Properties
@@ -49,7 +49,7 @@ An event object typically includes details such as the event type, source, times
 #### Properties {#event-properties-properties}
 
 | Property | Type | Required | Description |
-|----------|:----:|:--------:|-------------|
+| --- | :---: | :---: | --- |
 | id | `string` | `yes` | This is the name of the Temporal event |
 | type | `string` | `yes` | Describes the type of event related to the originating occurrence - either `query`, `signal` or `update`.<br />*Required when emitting an event using `emit.event.with`.* |
 | data | `any` | `no` | The event payload. Ignored for `query`. |

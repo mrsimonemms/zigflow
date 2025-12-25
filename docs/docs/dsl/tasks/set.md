@@ -44,7 +44,7 @@ in such a way that it's saved to the Temporal state and is safe to replay.
 ## Properties
 
 | Name | Type | Required | Description |
-|:-------|:------:|:----------:|:-------------|
+| :--- | :---: | :---: | :--- |
 | set | `map` | `yes` | The data to set. |
 
 ## Example

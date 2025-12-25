@@ -6,7 +6,7 @@ retrying failed tasks before proceeding with alternate ones.
 ## Properties {#try-properties}
 
 | Name | Type | Required | Description |
-|:--|:---:|:---:|:---|
+| --- | :---: | :---: | --- |
 | try | [`map[string, task]`](./intro) | `yes` | The task(s) to perform. This will be run as a [child workflow](https://docs.temporal.io/child-workflows). |
 | catch | [`catch`](#catch) | `yes` | Configures the errors to catch and how to handle them. |
 
@@ -61,5 +61,5 @@ errors.
 #### Properties {#catch-properties}
 
 | Name | Type | Required | Description |
-|:--|:---:|:---:|:---|
+| --- | :---: | :---: | --- |
 | do | [`map[string, task]`](./intro) | `yes` | The definition of the task(s) to run when catching an error. This will be run as a [child workflow](https://docs.temporal.io/child-workflows). |

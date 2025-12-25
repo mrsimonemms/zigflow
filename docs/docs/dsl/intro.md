@@ -26,7 +26,7 @@ optimise efficiency within an organisation.
 ### Properties {#workflow-properties}
 
 | Name | Type | Required | Description |
-|:--|:---:|:---:|:---|
+| --- | :---: | :---: | --- |
 | document | [`document`](#document) | `yes` | Documents the defined workflow. |
 | do | [`map[string, task]`](./tasks/intro) | `yes` | The [task(s)](./tasks/intro) that must be performed by the [workflow](#workflow). |
 | input | [`input`](#input) | `no` | Configures the workflow's input. |
@@ -38,7 +38,7 @@ optimise efficiency within an organisation.
 Documents the workflow definition.
 
 | Name | Type | Required | Description |
-|:--|:---:|:---:|:---|
+| --- | :---: | :---: | --- |
 | dsl | `string` | `yes` | The version of the DSL used to define the workflow. |
 | namespace | `string` | `yes` | The Temporal [Task Queue](https://docs.temporal.io/task-queue).<br /><br />**IMPORTANT**: this does **not** map to the [Temporal namespace](https://docs.temporal.io/namespaces), which is part of the connection information set at runtime. |
 | name | `string` | `yes` | The Temporal workflow's name. This will be ignored if multiple [`do`](./tasks/do) are set and the workflow names will be taken from the step name |
@@ -63,7 +63,7 @@ applying transformations, unless defined otherwise.
 ### Properties {#input-properties}
 
 | Property | Type | Required | Description |
-|----------|:----:|:--------:|-------------|
+| --- | :---: | :---: | --- |
 | schema | `schema` | `no` | The [JSON schema](https://json-schema.org/) used to describe and validate raw input data.<br /><br />*Even though the schema is not required, it is strongly encouraged to document it, whenever feasible. The input will be validated against this schema, returning an error if the given input does not match.* |
 
 ### Examples {#input-examples}
@@ -95,8 +95,8 @@ Defines a workflow or task timeout.
 ### Properties {#timeout-properties}
 
 | Property | Type | Required | Description |
-|----------|:----:|:--------:|-------------|
-| after | [`duration`](#duration) | `yes` | The duration after which the workflow or task times out.  |
+| --- | :---: | :---: | --- |
+| after | [`duration`](#duration) | `yes` | The duration after which the workflow or task times out. |
 
 ### Examples {#timeout-examples}
 
@@ -123,12 +123,12 @@ string or with a runtime expression that is evaluated to an ISO 8601 string
 ### Properties {#duration-properties}
 
 | Property | Type | Required | Description |
-|----------|:----:|:--------:|-------------|
+| --- | :---: | :---: | --- |
 | Days | `integer` | `no` | Number of days, if any. |
 | Hours | `integer` | `no` | Number of hours, if any. |
-| Minutes | `integer` | `no`| Number of minutes, if any. |
-| Seconds | `integer` | `no`| Number of seconds, if any. |
-| Milliseconds | `integer` | `no`| Number of milliseconds, if any. |
+| Minutes | `integer` | `no` | Number of minutes, if any. |
+| Seconds | `integer` | `no` | Number of seconds, if any. |
+| Milliseconds | `integer` | `no` | Number of milliseconds, if any. |
 
 ### Examples {#duration-examples}
 
@@ -145,7 +145,7 @@ seconds: 30
 Configures the schedule of a workflow.
 
 | Name | Type | Required | Description |
-|:--|:---:|:---:|:---|
+| --- | :---: | :---: | --- |
 | every | [`duration`](#duration) | `no` | Specifies the duration of the interval at which the workflow should be executed. Unlike `after`, this option will run the workflow regardless of whether the previous run is still in progress.<br />*Required when no other property has been set.* |
 | cron | `string` | `no` | Specifies the schedule using a CRON expression, e.g., `0 0 * * *` for daily at midnight.<br />*Required when no other property has been set.* |
 
@@ -155,7 +155,7 @@ Additional options can be configured by setting `metadata` in the [Document](#do
 This configures a [Temporal schedule](https://docs.temporal.io/schedule).
 
 | Name | Type | Required | Description |
-|:--|:---:|:---:|:---|
+| --- | :---: | :---: | --- |
 | scheduleWorkflowName | `string` | `yes` | Set the workflow name to trigger - this will either be the document.name or the Do task |
 | scheduleId | `string` | `no` | Set the schedule ID. If not set, this will to `zigflow_<workflow.document.name>` |
 | scheduleInput | `any[]` | `no` | Set the input |

@@ -26,7 +26,7 @@ In Temporal, a task may add logic to:
 ## Available Tasks
 
 | Name | Description |
-|:--|:---|
+| :--- | :--- |
 | [Call](./call) | Enables the execution of a specified function within a workflow, allowing seamless integration with custom business logic or external services. |
 | [Do](./do) | Serves as a fundamental building block within workflows, enabling the sequential execution of multiple subtasks. By defining a series of subtasks to perform in sequence, the Do task facilitates the efficient execution of complex operations, ensuring that each subtask is completed before the next one begins. |
 | [For](./for) | Allows workflows to iterate over a collection of items, executing a defined set of subtasks for each item in the collection. This task type is instrumental in handling scenarios such as batch processing, data transformation, and repetitive operations across datasets. |
@@ -54,7 +54,7 @@ transform data, and make decisions during the execution of workflows.
 Variables
 
 | Name | Description | Example |
-|:--|:---|:---|
+| :--- | :--- | :--- |
 | `data` | Data set to the workflow's state - see [data](#data) | `${ .data.someData }` |
 | `env` | Any environment variable prefixed with `ZIGFLOW_`. The prefix is _NOT_ used in this object | `${ .env.EXAMPLE_ENVVAR }` |
 | `input` | Any input received when the workflow was triggered | `${ .input.val1 }` |

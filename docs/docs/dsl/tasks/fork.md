@@ -9,7 +9,7 @@ simultaneously.
 ## Properties
 
 | Name | Type | Required | Description |
-|:--|:---:|:---:|:---|
+| --- | :---: | :---: | --- |
 | fork.branches | [`map[string, task]`](./intro) | `no` | The tasks to perform concurrently. These will be run as [child workflows](https://docs.temporal.io/child-workflows). |
 | fork.compete | `boolean` | `no` | Indicates whether or not the concurrent [`tasks`](./intro) are racing against each other, with a single possible winner, which sets the composite task's output.<br />*If set to `false`, the task returns an array that includes the outputs from each branch, preserving the order in which the branches are declared.*<br />*If to `true`, the task returns only the output of the winning branch.*<br />*Defaults to `false`.* |
 

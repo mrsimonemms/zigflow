@@ -15,7 +15,7 @@ These will be discussed in detail in those tasks.
 ## Properties
 
 | Name | Type | Required | Description |
-|:--|:---:|:---:|:---|
+| --- | :---: | :---: | --- |
 | do | [`map[string, task]`](./intro) | `no` | The tasks to perform sequentially. |
 
 ## Examples
