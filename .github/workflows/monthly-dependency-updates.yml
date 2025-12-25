@@ -14,8 +14,17 @@ jobs:
         with:
           fetch-depth: 0
 
+      - uses: actions/setup-python@v6
+        with:
+          python-version: 3.x
+
+      - name: Update Pre-Commit dependencies
+        run: |
+          pip install pre-commit
+          pre-commit autoupdate
+
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
           cache: true
@@ -26,7 +35,7 @@ jobs:
           go mod tidy
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: lts/*
           cache: npm
@@ -46,6 +55,7 @@ jobs:
           body: |
             Automated monthly dependency refresh.
 
+            - Pre-commit dependencies update via `pre-commit autoupdate`
             - Go dependencies updated via `go get -u ./...` and `go mod tidy`
             - Docs npm dependencies updated via `npm update` in `docs`
           branch: chore/monthly-deps
