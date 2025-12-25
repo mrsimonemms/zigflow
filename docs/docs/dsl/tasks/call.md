@@ -53,6 +53,45 @@ do:
               seconds: 5
 ```
 
+## gRPC
+
+Call an external resource via gRPC. To use this, the `call` property must equal
+`grpc`.
+
+### Properties {#grpc-properties}
+
+| Name | Type | Required | Description|
+|:--|:---:|:---:|:---|
+| proto.endpoint | `string` | `yes` | The proto resource that describes the gRPC service to call.. |
+| service.name | `string` | `yes` | The name of the gRPC service to call. |
+| service.host | `string` | `yes` | The hostname of the gRPC service to call. |
+| service.port | `integer` | `no` | The port number of the gRPC service to call. |
+| method | `string` | `yes` | The name of the gRPC service method to call. |
+| arguments | `map` | `no` | A name/value mapping of the method call's arguments, if any. |
+
+### Example {#grpc-example}
+
+```yaml
+document:
+  dsl: 1.0.0
+  namespace: zigflow
+  name: external-activity-call
+  version: 0.0.1
+do:
+  - greet:
+      call: grpc
+      with:
+        proto:
+          endpoint: file:///go/app/examples/external-calls/grpc/basic/proto/basic/v1/basic.proto
+        service:
+          name: providers.v1.BasicService
+          host: grpc
+          port: 3000
+        method: Command1
+        arguments:
+          input: hello world
+```
+
 ## HTTP
 
 Call an external resource via HTTP. To use this, the `call` property must equal
