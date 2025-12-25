@@ -11,50 +11,60 @@ timeout:
   after:
     minutes: 1
 do:
-  - nodejs:
+  - container:
       export:
-        as: nodejs
+        as: container
       run:
-        script:
-          language: js
-          code: |
-            const http = require('http');
-
-            console.log(`${process.argv[2]} from ${process.env.NAME}`);
-
-            console.log(http.STATUS_CODES);
+        container:
+          image: alpine
           arguments:
-            - Hello
+            - env
           environment:
-            NAME: js
-  - python:
-      export:
-        as: python
-      run:
-        script:
-          language: python
-          code: |
-            import os
-            import sys
+            hello: world
+  # - nodejs:
+  #     export:
+  #       as: nodejs
+  #     run:
+  #       script:
+  #         language: js
+  #         code: |
+  #           const http = require('http');
 
-            def main():
-                arg = sys.argv[1] if len(sys.argv) > 1 else ""
+  #           console.log(`${process.argv[2]} from ${process.env.NAME}`);
 
-                name = os.getenv("NAME", "")
+  #           console.log(http.STATUS_CODES);
+  #         arguments:
+  #           - Hello
+  #         environment:
+  #           NAME: js
+  # - python:
+  #     export:
+  #       as: python
+  #     run:
+  #       script:
+  #         language: python
+  #         code: |
+  #           import os
+  #           import sys
 
-                print(f"{arg} from {name}")
+  #           def main():
+  #               arg = sys.argv[1] if len(sys.argv) > 1 else ""
 
-            if __name__ == "__main__":
-                main()
-          arguments:
-            - Hello
-          environment:
-            NAME: python
-  - shell:
-      export:
-        as: shell
-      run:
-        shell:
-          command: ls
-          arguments:
-            - -la
+  #               name = os.getenv("NAME", "")
+
+  #               print(f"{arg} from {name}")
+
+  #           if __name__ == "__main__":
+  #               main()
+  #         arguments:
+  #           - Hello
+  #         environment:
+  #           NAME: python
+  # - shell:
+  #     export:
+  #       as: shell
+  #     run:
+  #       shell:
+  #         command: ls
+  #         arguments:
+  #           - -la
