@@ -31,9 +31,9 @@ func LoadEnvvars(prefix string) map[string]any {
 		key := pair[0]
 		value := pair[1]
 
-		if strings.HasPrefix(key, prefix) {
+		if after, ok := strings.CutPrefix(key, prefix); ok {
 			// Remove the prefix from the key
-			vars[strings.TrimLeft(key, prefix)] = value
+			vars[after] = value
 		}
 	}
 
