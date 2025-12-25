@@ -1,6 +1,6 @@
 # Zigflow: Declarative workflows for Temporal
 
-![Zigflow](./designs/zigflow.png "Zigflow")
+[![Zigflow](./designs/zigflow.png "Zigflow")](https://zigflow.dev)
 
 [![Contributions Welcome](https://img.shields.io/badge/Contributions-Welcome-green.svg?style=flat)](https://github.com/mrsimonemms/zigflow/issues)
 [![Licence](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/mrsimonemms/zigflow/blob/master/LICENSE)
