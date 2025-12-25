@@ -5,7 +5,7 @@
   "context": {
     "cookiecutter": {
       "project_name": "zigflow",
-      "description": "Turn your declarative YAML into production-ready Temporal workflows",
+      "description": "A DSL for turning declarative YAML into production-ready Temporal workflows",
       "author": "Zigflow authors <https://github.com/mrsimonemms/zigflow/graphs/contributors>",
       "repo": "github.com/mrsimonemms/zigflow",
       "use_viper": false,

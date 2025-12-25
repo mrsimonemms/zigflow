@@ -8,7 +8,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/mrsimonemms/zigflow)](https://goreportcard.com/report/github.com/mrsimonemms/zigflow)
 
 Zigflow provides a **simple and declarative way** to define and manage
-[Temporal](https://temporal.io) workflows using the
+[Temporal](https://temporal.io) workflows using a DSL built upon the
 [CNCF Serverless Workflow](https://serverlessworkflow.io) specification. It
 enables **low-code** and **no-code** workflow creation that's
 **easy to visualise, share, and maintain**, without sacrificing the power and

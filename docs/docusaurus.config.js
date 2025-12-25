@@ -30,7 +30,7 @@ const githubDomain = `${organizationName}/${projectName}`;
 const config = {
   title: 'Zigflow',
   tagline:
-    'Turn your declarative YAML into production-ready Temporal workflows',
+    'A DSL for turning declarative YAML into production-ready Temporal workflows',
   favicon: 'img/favicon.ico',
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
@@ -90,6 +90,13 @@ const config = {
       colorMode: {
         respectPrefersColorScheme: true,
       },
+      metadata: [
+        {
+          name: 'keywords',
+          content:
+            'Temporal, DSL, YAML, workflows, workflow management system, serverless workflow, durable execution',
+        },
+      ],
       navbar: {
         logo: {
           alt: 'Zigflow',

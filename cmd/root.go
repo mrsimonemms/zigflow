@@ -59,7 +59,7 @@ var rootOpts struct {
 var rootCmd = &cobra.Command{
 	Use:           "zigflow",
 	Version:       Version,
-	Short:         "Turn your declarative YAML into production-ready Temporal workflows",
+	Short:         "A DSL for turning declarative YAML into production-ready Temporal workflows",
 	SilenceUsage:  true,
 	SilenceErrors: true,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {

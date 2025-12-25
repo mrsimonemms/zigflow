@@ -53,13 +53,10 @@ function HomepageHeader() {
 }
 
 export default function Home() {
+  const { siteConfig } = useDocusaurusContext();
+
   return (
-    <Layout
-      title={
-        'Turn your declarative YAML into production-ready Temporal workflows'
-      }
-      description="Turn your declarative YAML into production-ready Temporal workflows"
-    >
+    <Layout title={siteConfig.tagline} description={siteConfig.tagline}>
       <HomepageHeader />
       <main>
         <HomepageFeatures />
