@@ -40,8 +40,11 @@ func (c *CancellableFutures) Add(key string, future CancellableFuture) {
 }
 
 func (c *CancellableFutures) CancelOthers(passedContext workflow.Context) {
+	passedID := workflow.GetChildWorkflowOptions(passedContext).WorkflowID
 	for _, f := range c.m {
-		if f.Context != passedContext {
+		currentID := workflow.GetChildWorkflowOptions(f.Context).WorkflowID
+
+		if currentID != passedID {
 			log.Debug().
 				Str("childWorkflowID", workflow.GetChildWorkflowOptions(f.Context).WorkflowID).
 				Msg("Cancelling losing child workflow")

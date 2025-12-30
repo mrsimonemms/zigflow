@@ -30,7 +30,7 @@ func TestSetTaskBuilderBuild(t *testing.T) {
 	task := &model.SetTask{
 		Set: map[string]any{
 			"result": map[string]any{
-				"value": "${ .env.VALUE }",
+				"value": "${ $env.VALUE }",
 			},
 		},
 	}

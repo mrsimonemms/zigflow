@@ -42,7 +42,7 @@ func TestCallActivityTaskBuilderExecute(t *testing.T) {
 		Call: customCallFunctionActivity,
 		With: map[string]any{
 			"name":      activityName,
-			"arguments": []any{"${ .input.message }"},
+			"arguments": []any{"${ $input.message }"},
 			"taskQueue": "some-task-queue",
 		},
 	}

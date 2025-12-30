@@ -126,13 +126,13 @@ func (t *CallActivityTaskBuilder) convertToType() error {
 func (t *CallActivityTaskBuilder) parseArgs(state *utils.State) error {
 	parsedArgs, err := utils.TraverseAndEvaluateObj(model.NewObjectOrRuntimeExpr(map[string]any{
 		"args": swUtil.DeepCloneValue(t.activity.Arguments),
-	}), state)
+	}), nil, state)
 	if err != nil {
 		return err
 	}
 
 	// Replace the arguments with the parsed values
-	t.activity.Arguments = parsedArgs["args"].([]any)
+	t.activity.Arguments = parsedArgs.(map[string]any)["args"].([]any)
 
 	return nil
 }

@@ -24,9 +24,12 @@ input:
 do:
   # Set some data to the state
   - step1:
+      export:
+        as:
+          data: ${ . }
       set:
         # Set a variable from an envvar
-        envvar: ${ .env.EXAMPLE_ENVVAR }
+        envvar: ${ $env.EXAMPLE_ENVVAR }
         # Generate a UUID at a workflow level
         uuid: ${ uuid }
   # Pause the workflow
@@ -37,8 +40,8 @@ do:
   - getUser:
       call: http
       # Expose the response to the output
-      export:
-        as: user
+      output:
+        as: '${ $context + { user: . }}'
       with:
         method: get
-        endpoint: ${ "https://jsonplaceholder.typicode.com/users/" + (.input.userId | tostring) }
+        endpoint: ${ "https://jsonplaceholder.typicode.com/users/" + ($input.userId | tostring) }

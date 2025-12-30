@@ -143,7 +143,7 @@ func TestListenTaskBuilderProcessReply(t *testing.T) {
 			Type: string(ListenTaskTypeSignal),
 			Additional: map[string]any{
 				"data": map[string]any{
-					"result": "${ .data.message }",
+					"result": "${ $data.message }",
 				},
 			},
 		},

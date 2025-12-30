@@ -320,6 +320,49 @@ func (t *DoTaskBuilder) handleFlowDirective(
 	return
 }
 
+func (t *DoTaskBuilder) processTaskExport(task workflowFunc, taskOutput any, state *utils.State) error {
+	taskBase := task.GetTask().GetBase()
+
+	if taskBase.Export == nil {
+		return nil
+	}
+
+	export, err := utils.TraverseAndEvaluateObj(taskBase.Export.As, taskOutput, state)
+	if err != nil {
+		return err
+	}
+
+	if err := swUtil.ValidateSchema(export, taskBase.Export.Schema, task.Name); err != nil {
+		return err
+	}
+
+	state.Context = export
+
+	return nil
+}
+
+func (t *DoTaskBuilder) processTaskOutput(task workflowFunc, taskOutput any, state *utils.State) error {
+	taskBase := task.GetTask().GetBase()
+
+	if taskBase.Output == nil {
+		state.Output = taskOutput
+		return nil
+	}
+
+	output, err := utils.TraverseAndEvaluateObj(taskBase.Output.As, taskOutput, state)
+	if err != nil {
+		return err
+	}
+
+	if err := swUtil.ValidateSchema(output, taskBase.Output.Schema, task.Name); err != nil {
+		return err
+	}
+
+	state.Output = output
+
+	return nil
+}
+
 func (t *DoTaskBuilder) runTask(ctx workflow.Context, task workflowFunc, input any, state *utils.State) error {
 	logger := workflow.GetLogger(ctx)
 
@@ -335,8 +378,15 @@ func (t *DoTaskBuilder) runTask(ctx workflow.Context, task workflowFunc, input a
 		return err
 	}
 
-	// Set the output - this is only set if there's an export.as on the task
-	state.AddOutput(task.GetTask(), output)
+	// Set the output
+	if err := t.processTaskOutput(task, output, state); err != nil {
+		return fmt.Errorf("error processing task output: %w", err)
+	}
+
+	// Set the export
+	if err := t.processTaskExport(task, output, state); err != nil {
+		return fmt.Errorf("error processing task export: %w", err)
+	}
 
 	return nil
 }

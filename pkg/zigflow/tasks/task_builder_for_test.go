@@ -40,7 +40,7 @@ func TestForTaskBuilderCheckWhile(t *testing.T) {
 		},
 		{
 			name:  "boolean true expression",
-			while: "${ .data.flag }",
+			while: "${ $data.flag }",
 			stateData: map[string]any{
 				"flag": true,
 			},
@@ -48,7 +48,7 @@ func TestForTaskBuilderCheckWhile(t *testing.T) {
 		},
 		{
 			name:  "boolean false expression",
-			while: "${ .data.flag }",
+			while: "${ $data.flag }",
 			stateData: map[string]any{
 				"flag": false,
 			},
@@ -56,7 +56,7 @@ func TestForTaskBuilderCheckWhile(t *testing.T) {
 		},
 		{
 			name:  "non boolean resolves to false",
-			while: "${ .data.text }",
+			while: "${ $data.text }",
 			stateData: map[string]any{
 				"text": "not-bool",
 			},
@@ -64,7 +64,7 @@ func TestForTaskBuilderCheckWhile(t *testing.T) {
 		},
 		{
 			name:        "invalid expression returns error",
-			while:       "${ .data. }",
+			while:       "${ $data. }",
 			expectError: true,
 		},
 	}

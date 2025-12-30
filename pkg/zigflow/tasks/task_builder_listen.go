@@ -271,19 +271,20 @@ func (t *ListenTaskBuilder) getAcceptIf(event *model.EventFilter, state *utils.S
 	if tpl, ok := additional["acceptIf"]; ok {
 		templateKey := "template"
 
-		var obj map[string]any
-		obj, err = utils.TraverseAndEvaluateObj(
+		var ob any
+		ob, err = utils.TraverseAndEvaluateObj(
 			model.NewObjectOrRuntimeExpr(map[string]any{
 				// Put in a map as the template could be anything
 				templateKey: tpl,
 			}),
+			nil,
 			state,
 		)
 		if err != nil {
 			return
 		}
 
-		if v, isBool := obj[templateKey].(bool); isBool {
+		if v, isBool := ob.(map[string]any)[templateKey].(bool); isBool {
 			isComplete = v
 		}
 	} else {
@@ -345,6 +346,7 @@ func (t *ListenTaskBuilder) processReply(ctx workflow.Context, event *model.Even
 				// Put in a map as the template could be anything
 				templateKey: tpl,
 			}),
+			nil,
 			state,
 		)
 		if err != nil {
@@ -355,7 +357,7 @@ func (t *ListenTaskBuilder) processReply(ctx workflow.Context, event *model.Even
 		// Return the data
 		logger.Debug("Replied from event", "event", event.With.ID)
 
-		return obj[templateKey], nil
+		return obj.(map[string]any)[templateKey], nil
 	}
 	return nil, nil
 }
