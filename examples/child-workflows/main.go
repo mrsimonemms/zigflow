@@ -18,6 +18,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/mrsimonemms/golang-helpers/temporal"
@@ -48,14 +49,18 @@ func main() {
 
 	log.Info().Str("workflowId", we.GetID()).Str("runId", we.GetRunID()).Msg("Started workflow")
 
-	var result map[string]any
+	var result any
 	if err := we.Get(ctx, &result); err != nil {
 		log.Fatal().Err(err).Msg("Error getting response")
 	}
 
 	log.Info().Interface("result", result).Msg("Workflow completed")
 
+	f, err := json.MarshalIndent(result, "", "  ")
+	if err != nil {
+		panic(err)
+	}
 	fmt.Println("===")
-	fmt.Printf("%+v\n", result)
+	fmt.Println(string(f))
 	fmt.Println("===")
 }

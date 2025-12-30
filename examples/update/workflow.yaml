@@ -18,11 +18,15 @@ do:
                 id: temperature
                 # Temporal update - used to make read/write request
                 type: update
-                acceptIf: ${ .data.temperature > 38 }
+                acceptIf: ${ $data.temperature > 38 }
             - with:
                 id: bpm
                 type: update
-                acceptIf: ${ .data.bpm < 60 or .data.bpm > 100 }
+                acceptIf: ${ $data.bpm < 60 or $data.bpm > 100 }
   - wait:
+      output:
+        as:
+          temperature: ${ $data.temperature }
+          bpm: ${ $data.bpm }
       wait:
         seconds: 10

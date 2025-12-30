@@ -24,29 +24,25 @@ timeout:
 do:
   - captureInput:
       set:
-        requestedUserId: ${ .input.userId }
+        requestedUserId: ${ $input.userId }
         requestId: ${ uuid }
   - fetchProfile:
       call: activity
-      export:
-        as: profile
       with:
           name: activitycall.FetchProfile
           arguments:
-            - ${ .data.requestedUserId }
-            - ${ .data.requestId }
+            - ${ $data.requestedUserId }
+            - ${ $data.requestId }
           taskQueue: activity-call-worker
   - generateWelcome:
       call: activity
-      export:
-        as: welcome
       with:
         name: activitycall.GenerateWelcome
         arguments:
-          - ${ .output.profile }
+          - ${ $data.fetchProfile }
         taskQueue: activity-call-worker
   - finalize:
       set:
-        workflowId: ${ .data.captureInput.requestId }
-        profile: ${ .output.profile }
-        message: ${ .output.welcome.message }
+        workflowId: ${ $data.requestId }
+        profile: ${ $data.fetchProfile }
+        message: ${ $data.generateWelcome.message }

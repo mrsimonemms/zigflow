@@ -18,6 +18,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -64,7 +65,7 @@ func exec() error {
 
 		log.Info().Str("workflowId", we.GetID()).Str("runId", we.GetRunID()).Str("workflow", w).Msg("Started workflow")
 
-		var result map[string]any
+		var result any
 		if err := we.Get(ctx, &result); err != nil {
 			return gh.FatalError{
 				Cause: err,
@@ -74,9 +75,13 @@ func exec() error {
 
 		log.Info().Interface("result", result).Msg("Workflow completed")
 
-		fmt.Printf("=== %s ===\n", w)
-		fmt.Printf("%+v\n", result)
-		fmt.Println("======")
+		f, err := json.MarshalIndent(result, "", "  ")
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("===")
+		fmt.Println(string(f))
+		fmt.Println("===")
 	}
 	return nil
 }

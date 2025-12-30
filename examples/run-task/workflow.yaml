@@ -13,7 +13,7 @@ timeout:
 do:
   - nodejs:
       export:
-        as: nodejs
+        as: '${ $context + { nodejs: . } }'
       run:
         script:
           language: js
@@ -29,7 +29,7 @@ do:
             NAME: js
   - python:
       export:
-        as: python
+        as: '${ $context + { python: . } }'
       run:
         script:
           language: python
@@ -51,8 +51,8 @@ do:
           environment:
             NAME: python
   - shell:
-      export:
-        as: shell
+      output:
+        as: '${ $context + { shell: . } }'
       run:
         shell:
           command: ls

@@ -12,10 +12,18 @@
         content-type: application/json
       # Send some JSON over
       body:
-          amount: ${ .input.amount }
-          attempt: ${ .data.activity.attempt }
-          idempotencyKey: ${ .data.idempotencyKey }
-          name: ${ .data.workflow.workflow_type_name }
+          amount: ${ $input.amount }
+          attempt: ${ $data.activity.attempt }
+          idempotencyKey: ${ $data.idempotencyKey }
+          name: ${ $data.workflow.workflow_type_name }
+
+  output: &output
+    as:
+      idempotencyKey: ${ $data.idempotencyKey }
+      stateApprovalTime: ${ $data.stateApprovalTime }
+      stateChargeId: ${ $data.stateChargeId }
+      stateProgressPercentage: ${ $data.stateProgressPercentage }
+      stateTransferState: ${ $data.stateTransferState }
 
   queryState: &queryState
     listen:
@@ -30,12 +38,12 @@
             datacontenttype: application/json
             # The data returned from the query - for application/json, this must be a string so Go interpolation works correctly
             data:
-              approvalTime: ${ .data.stateApprovalTime }
+              approvalTime: ${ $data.stateApprovalTime }
               chargeResult:
-                chargeId: ${ .data.stateChargeId }
-              progressPercentage: ${ .data.stateProgressPercentage }
-              transferState: ${ .data.stateTransferState }
-              workflowStatus: ${ .data.stateWorkflowStatus }
+                chargeId: ${ $data.stateChargeId }
+              progressPercentage: ${ $data.stateProgressPercentage }
+              transferState: ${ $data.stateTransferState }
+              workflowStatus: ${ $data.stateWorkflowStatus }
 
   sendNotification: &sendNotification
     call: http
@@ -46,9 +54,9 @@
         content-type: application/json
       # Send some JSON over
       body:
-        amount: ${ .input.amount }
-        fromAccount: ${ .input.fromAccount }
-        toAccount: ${ .input.toAccount }
+        amount: ${ $input.amount }
+        fromAccount: ${ $input.fromAccount }
+        toAccount: ${ $input.toAccount }
 
   setup: &setup
     set:
@@ -74,10 +82,10 @@
         content-type: application/json
       # Send some JSON over
       body:
-        amount: ${ .input.amount }
-        attempt: ${ .data.activity.attempt }
-        idempotencyKey: ${ .data.idempotencyKey }
-        name: ${ .data.workflow.workflow_type_name }
+        amount: ${ $input.amount }
+        attempt: ${ $data.activity.attempt }
+        idempotencyKey: ${ $data.idempotencyKey }
+        name: ${ $data.workflow.workflow_type_name }
 
   workflowScenarios: &workflowScenarios
     do:
@@ -85,7 +93,7 @@
       - setup: *setup
       # The setter isn't used, but used as a safe way of setting a value in order to have an if statement
       - advancedVisibility:
-          if: '${ .data.workflow.workflow_type_name == "AccountTransferWorkflowAdvancedVisibility" }'
+          if: '${ $data.workflow.workflow_type_name == "AccountTransferWorkflowAdvancedVisibility" }'
           metadata:
             searchAttributes:
               Step:
@@ -99,12 +107,12 @@
             stateProgressPercentage: 25
             stateTransferState: running
       - requireApprovalStatus:
-          if: '${ .data.workflow.workflow_type_name == "AccountTransferWorkflowHumanInLoop" }'
+          if: '${ $data.workflow.workflow_type_name == "AccountTransferWorkflowHumanInLoop" }'
           set:
             stateProgressPercentage: 30
             stateTransferState: waiting
       - requireApprovalListener:
-          if: '${ .data.workflow.workflow_type_name == "AccountTransferWorkflowHumanInLoop" }'
+          if: '${ $data.workflow.workflow_type_name == "AccountTransferWorkflowHumanInLoop" }'
           metadata:
             timeout: 30s
           listen:
@@ -117,7 +125,7 @@
                   type: signal
       # The setter isn't used, but used as a safe way of setting a value in order to have an if statement
       - advancedVisibility:
-          if: '${ .data.workflow.workflow_type_name == "AccountTransferWorkflowAdvancedVisibility" }'
+          if: '${ $data.workflow.workflow_type_name == "AccountTransferWorkflowAdvancedVisibility" }'
           metadata:
             searchAttributes:
               Step:
@@ -127,7 +135,7 @@
             step: withdraw
       - withdraw: *withdraw
       - bug:
-          if: '${ .data.workflow.workflow_type_name == "AccountTransferWorkflowRecoverableFailure" }'
+          if: '${ $data.workflow.workflow_type_name == "AccountTransferWorkflowRecoverableFailure" }'
           raise:
             error:
               type: https://go.dev/panic
@@ -140,7 +148,7 @@
             stateTransferState: running
       # The setter isn't used, but used as a safe way of setting a value in order to have an if statement
       - advancedVisibility:
-          if: '${ .data.workflow.workflow_type_name == "AccountTransferWorkflowAdvancedVisibility" }'
+          if: '${ $data.workflow.workflow_type_name == "AccountTransferWorkflowAdvancedVisibility" }'
           metadata:
             searchAttributes:
               Step:
@@ -154,7 +162,7 @@
             stateProgressPercentage: 75
       # The setter isn't used, but used as a safe way of setting a value in order to have an if statement
       - advancedVisibility:
-          if: '${ .data.workflow.workflow_type_name == "AccountTransferWorkflowAdvancedVisibility" }'
+          if: '${ $data.workflow.workflow_type_name == "AccountTransferWorkflowAdvancedVisibility" }'
           metadata:
             searchAttributes:
               Step:
@@ -168,6 +176,8 @@
             stateProgressPercentage: 100
             stateTransferState: finished
       - sleep:
+          output:
+            <<: *output
           wait:
             seconds: 1
 
@@ -216,6 +226,8 @@ do:
               stateProgressPercentage: 100
               stateTransferState: finished
         - sleep:
+            output:
+              <<: *output
             wait:
               seconds: 1
   # Scenarios

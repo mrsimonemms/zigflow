@@ -32,15 +32,16 @@ timeout:
 do:
   - baseData:
       export:
-        as: data
+        as:
+          baseData: ${ . }
       set:
         # Set a variable from an envvar
-        envvar: ${ .env.EXAMPLE_ENVVAR }
+        envvar: ${ $env.EXAMPLE_ENVVAR }
         uuid: ${ uuid }
         object:
           hello: world
           uuid: ${ uuid }
-        inputUserId: ${ .input.userId }
+        inputUserId: ${ $input.userId }
         array:
           - ${ uuid }
           - hello: world
@@ -50,7 +51,7 @@ do:
   - getUser:
       call: http
       export:
-        as: getUser
+        as: '${ $context + { getUser: . } }'
       metadata:
         # Configure activity options for this task only
         activityOptions:
@@ -58,11 +59,11 @@ do:
             maximumAttempts: 5
       with:
         method: get
-        endpoint: ${ "https://jsonplaceholder.typicode.com/users/" + (.input.userId | tostring) }
+        endpoint: ${ "https://jsonplaceholder.typicode.com/users/" + ($input.userId | tostring) }
   - raiseAlarm:
       # A fork is a series of child workflows running in parallel
-      export:
-        as: raiseAlarm
+      output:
+        as: '${ $context + del(.multiStep) }'
       fork:
         # If not competing, all tasks will run to the finish - this is the default behaviour
         compete: false
@@ -70,8 +71,6 @@ do:
           # A single step is passed in by the Serverless Workflow task
           - callNurse:
               call: http
-              export:
-                as: callNurse
               with:
                 method: get
                 endpoint: https://jsonplaceholder.typicode.com/users/2
@@ -87,8 +86,6 @@ do:
           # Another single step child workflow
           - callDoctor:
               call: http
-              export:
-                as: callDoctor
               with:
                 method: get
-                endpoint: ${ "https://jsonplaceholder.typicode.com/users/" + (.input.userId | tostring) }
+                endpoint: ${ "https://jsonplaceholder.typicode.com/users/" + ($input.userId | tostring) }
