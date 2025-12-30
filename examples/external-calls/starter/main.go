@@ -18,6 +18,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -65,8 +66,12 @@ func exec() error {
 
 	log.Info().Interface("result", result).Msg("Workflow completed")
 
+	f, err := json.MarshalIndent(result, "", "  ")
+	if err != nil {
+		panic(err)
+	}
 	fmt.Println("===")
-	fmt.Printf("%+v\n", result)
+	fmt.Println(string(f))
 	fmt.Println("===")
 
 	return nil

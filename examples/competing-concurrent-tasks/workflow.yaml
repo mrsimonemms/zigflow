@@ -12,6 +12,9 @@ timeout:
     minutes: 1
 do:
   - state:
+      export:
+        as:
+          data: ${ . }
       set:
         id: ${ uuid }
   - wait:
@@ -20,7 +23,7 @@ do:
   # Fan out and the first to finish wins
   - race:
       export:
-        as: winner
+        as: ${ . }
       fork:
         compete: true # This is important - if false, they all run to completion in parallel
         branches:
@@ -29,6 +32,9 @@ do:
               do:
                 - getUser:
                     call: http
+                    export:
+                      as:
+                        data: ${ . }
                     with:
                       method: get
                       endpoint: https://jsonplaceholder.typicode.com/users/2
@@ -36,8 +42,8 @@ do:
                     wait:
                       seconds: 2
                 - set:
-                    export:
-                      as: task
+                    output:
+                      as: '${ $context + . }'
                     set:
                       winner: task1
           # Losing task
@@ -45,6 +51,9 @@ do:
               do:
                 - getUser:
                     call: http
+                    export:
+                      as:
+                        data: ${ . }
                     with:
                       method: get
                       endpoint: https://jsonplaceholder.typicode.com/users/1
@@ -52,15 +61,15 @@ do:
                     wait:
                       seconds: 50
                 - set:
-                    export:
-                      as: task
+                    output:
+                      as: '${ $context + . }'
                     set:
                       winner: task2
   - wait:
       wait:
         seconds: 1
   - set:
-      export:
-        as: data
+      output:
+        as: '${ $context + . }'
       set:
-        id: ${ .data.id }
+        id: ${ $data.id }

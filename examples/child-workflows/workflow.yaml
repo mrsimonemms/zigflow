@@ -23,7 +23,7 @@ do:
                 name: child-workflow1
                 namespace: default
                 version: 0.0.0
-        # Do a fan-out child workflow - this will be asynchronously
+        # Do a fan-out child workflow - this will be run asynchronously
         - fanOut:
             fork:
               compete: false
@@ -41,6 +41,9 @@ do:
                         namespace: default
                         version: 0.0.0
         - wait:
+            output:
+              as:
+                completed: true
             wait:
               seconds: 5
   - child-workflow1:

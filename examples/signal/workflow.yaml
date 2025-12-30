@@ -17,13 +17,15 @@ do:
               id: approve
               # Temporal signal - used to make write request
               type: signal
-              acceptIf: ${ .data.approveListener }
+              acceptIf: ${ $data.approveListener }
   - outputSignal:
       export:
-        as: response
+        as: '${ $context + { response: . } }'
       set:
         # Get the data from the approveListener signal
-        signal: ${ .data.approveListener }
+        signal: ${ $data.approveListener }
   - wait:
+      output:
+        as: ${ $context }
       wait:
         seconds: 5

@@ -7,15 +7,11 @@ document:
   summary: An example of how to use Serverless Workflow to make external calls
 do:
   - fork:
-      export:
-        as: tasks
       fork:
         compete: false
         branches:
           - grpc:
               call: grpc
-              export:
-                as: grpc
               with:
                 proto:
                   endpoint: file:///go/app/examples/external-calls/grpc/basic/proto/basic/v1/basic.proto
@@ -25,11 +21,9 @@ do:
                   port: 3000
                 method: Command1
                 arguments:
-                  input: ${ .env.GRPC_INPUT }
+                  input: ${ $env.GRPC_INPUT }
           - http:
               call: http
-              export:
-                as: http
               with:
                   method: get
                   endpoint: https://jsonplaceholder.typicode.com/users/3
