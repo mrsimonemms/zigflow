@@ -80,19 +80,3 @@ func TestForkTaskBuilderAwaitCondition(t *testing.T) {
 		})
 	}
 }
-
-func TestForkTaskBuilderResolveOutput(t *testing.T) {
-	builder := &ForkTaskBuilder{}
-
-	data := map[string]any{
-		"a": map[string]any{
-			"value": "first",
-		},
-	}
-
-	assert.Equal(t, data, builder.resolveOutput(false, data))
-	assert.Equal(t, map[string]any{
-		"value": "first",
-	}, builder.resolveOutput(true, data))
-	assert.Nil(t, builder.resolveOutput(true, map[string]any{}))
-}

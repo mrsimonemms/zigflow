@@ -75,12 +75,7 @@ func TestDoTaskBuilderWorkflowExecutor(t *testing.T) {
 			var capturedState *utils.State
 			runOrder := make([]string, 0, 2)
 			expectedOutput := map[string]any{
-				"first": map[string]any{
-					"value": "one",
-				},
-				"second": map[string]any{
-					"value": "two",
-				},
+				"value": "two",
 			}
 
 			tasks := newOutputWorkflowFuncs(&runOrder, &capturedState)

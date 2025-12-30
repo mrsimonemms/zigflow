@@ -124,13 +124,14 @@ func (r *RunActivities) runExecCommand(
 	state = state.Clone().AddActivityInfo(ctx)
 
 	logger.Debug("Interpolating command arguments and envvars")
-	data, err := utils.TraverseAndEvaluateObj(model.NewObjectOrRuntimeExpr(map[string]any{
+	d, err := utils.TraverseAndEvaluateObj(model.NewObjectOrRuntimeExpr(map[string]any{
 		"args": swUtil.DeepCloneValue(args.AsSlice()),
 		"env":  swUtil.DeepCloneValue(env),
-	}), state)
+	}), nil, state)
 	if err != nil {
 		return nil, fmt.Errorf("error traversing task parameters: %w", err)
 	}
+	data := d.(map[string]any)
 
 	// Cast the arg to a string
 	for _, v := range data["args"].([]any) {

@@ -36,10 +36,10 @@ func TestParseHTTPArguments(t *testing.T) {
 			Method:   "GET",
 			Endpoint: model.NewEndpoint("https://example.com"),
 			Headers: map[string]string{
-				"X-Token": "${ .env.token }",
+				"X-Token": "${ $env.token }",
 			},
 			Query: map[string]any{
-				"debug": "${ .data.flag }",
+				"debug": "${ $data.flag }",
 			},
 		},
 	}

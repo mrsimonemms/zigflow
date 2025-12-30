@@ -44,15 +44,17 @@ func (c *CallGRPCActivities) CallGRPCActivity(
 ) (any, error) {
 	logger := activity.GetLogger(ctx)
 
-	obj, err := utils.TraverseAndEvaluateObj(model.NewObjectOrRuntimeExpr(map[string]any{
+	ob, err := utils.TraverseAndEvaluateObj(model.NewObjectOrRuntimeExpr(map[string]any{
 		"service": task.With.Service,
 		"args":    task.With.Arguments,
 		"method":  task.With.Method,
 		"proto":   task.With.Proto,
-	}), state)
+	}), nil, state)
 	if err != nil {
 		return nil, temporal.NewNonRetryableApplicationError("error traversing grpc data object", "CallGRPC error", err)
 	}
+
+	obj := ob.(map[string]any)
 
 	service := obj["service"].(model.GRPCService)
 	args := obj["args"].(map[string]any)

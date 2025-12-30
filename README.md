@@ -52,91 +52,16 @@ Define a workflow declaratively in YAML:
 ```yaml
 document:
   dsl: 1.0.0
-  namespace: MoneyTransfer # Mapped to the task queue
-  name: AccountTransferWorkflow # Workflow type
-  version: 0.0.1
-  title: Money Transfer Demo
-  summary: Temporal's world-famous Money Transfer Demo, in DSL form
+  namespace: zigflow # Mapped to the task queue
+  name: simple-workflow # Workflow type
+  version: 1.0.0
 do:
-  - queryState:
-      listen:
-        to:
-          one:
-            with:
-              # ID maps to the query name in Temporal
-              id: transferStatus
-              # Temporal query - used to make read requests
-              type: query
-              # The data returned from the query - for application/json, this must be a string so Go interpolation works correctly
-              data:
-                approvalTime: ${ .data.stateApprovalTime }
-                chargeResult:
-                  chargeId: ${ .data.stateChargeId }
-                progressPercentage: ${ .data.stateProgressPercentage }
-                transferState: ${ .data.stateTransferState }
-                workflowStatus: ${ .data.stateWorkflowStatus }
-  - setup:
+  - set:
+      output:
+        as:
+          data: ${ . }
       set:
-        idempotencyKey: ${ uuid }
-        stateApprovalTime: 30
-        stateChargeId: ${ uuid }
-        stateProgressPercentage: 0
-        stateTransferState: starting
-        stateWorkflowStatus: ""
-  - validate:
-      call: http
-      with:
-        method: post
-        endpoint: http://server:3000/validate
-  - updateState:
-      set:
-        stateProgressPercentage: 25
-        stateTransferState: running
-  - withdraw:
-      call: http
-      with:
-        method: post
-        endpoint: http://server:3000/withdraw
-        headers:
-          content-type: application/json
-        body:
-          amount: ${ .input.amount }
-          attempt: ${ .data.activity.attempt }
-          idempotencyKey: ${ .data.idempotencyKey }
-          name: ${ .data.workflow.workflow_type_name }
-  - updateState:
-      set:
-        stateProgressPercentage: 50
-  - deposit:
-      call: http
-      with:
-        method: post
-        endpoint: http://server:3000/deposit
-        headers:
-          content-type: application/json
-        body:
-            amount: ${ .input.amount }
-            attempt: ${ .data.activity.attempt }
-            idempotencyKey: ${ .data.idempotencyKey }
-            name: ${ .data.workflow.workflow_type_name }
-  - updateState:
-      set:
-        stateProgressPercentage: 75
-  - sendNotification:
-      call: http
-      with:
-        method: post
-        endpoint: http://server:3000/notify
-        headers:
-          content-type: application/json
-        body:
-          amount: ${ .input.amount }
-          fromAccount: ${ .input.fromAccount }
-          toAccount: ${ .input.toAccount }
-  - updateState:
-      set:
-        stateProgressPercentage: 100
-        stateTransferState: finished
+        message: Hello from Ziggy
 ```
 
 Run it through Zigflow:
@@ -148,11 +73,13 @@ zigflow -f ./path/to/workflow.yaml
 This builds your Temporal workflow and runs the workers — no additional Go
 boilerplate required.
 
-You can now run it with any [Temporal SDK](https://docs.temporal.io/encyclopedia/temporal-sdks).
+You can now run it with any [Temporal SDK](https://docs.temporal.io/encyclopedia/temporal-sdks),
+in the [Temporal UI](https://docs.temporal.io/web-ui#workflow-actions) or from
+the [Temporal CLI](https://docs.temporal.io/cli/workflow#start).
 
-* [**Task Queue**](https://docs.temporal.io/task-queue): `MoneyTransfer`
+* [**Task Queue**](https://docs.temporal.io/task-queue): `zigflow`
 * [**Workflow Type**](https://docs.temporal.io/workflows#intro-to-workflows):
-  `AccountTransferWorkflow`
+  `simple-workflow`
 
 ---
 

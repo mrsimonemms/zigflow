@@ -58,7 +58,7 @@ func TestSwitchTaskBuilderExecutesMatchingCase(t *testing.T) {
 		Switch: []model.SwitchItem{
 			{
 				"match": {
-					When: model.NewRuntimeExpression("${ .data.run }"),
+					When: model.NewRuntimeExpression("${ $data.run }"),
 					Then: &model.FlowDirective{Value: childWorkflow},
 				},
 			},
