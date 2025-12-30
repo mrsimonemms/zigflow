@@ -1,7 +1,7 @@
 [project]
 name = "zigflow-python-example"
 version = "0.0.1"
-description = "The basic Temporal DSL example, but in Python."
+description = "The basic Zigflow example, but in Python."
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
