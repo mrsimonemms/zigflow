@@ -24,22 +24,27 @@ do:
               id: state
               type: query
               data:
-                progress: ${ .data.progress }
+                progress: ${ $data.progress }
   - state:
       export:
-        as: state
+        as: ${ . }
       set:
-        envvar: ${ .env.EXAMPLE_ENVVAR }
+        envvar: ${ $env.EXAMPLE_ENVVAR }
         uuid: ${ uuid }
         input:
-          userId: ${ .input.userId }
+          userId: ${ $input.userId }
         progress: 0
   - wait:
       wait:
         seconds: 1
   - updateState:
+      export:
+        as: '${ $context + { progress: .progress } }'
       set:
         progress: 100
   - wait:
+      output:
+        as:
+          state: '${ $context + . }'
       wait:
         seconds: 5
