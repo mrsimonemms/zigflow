@@ -53,7 +53,7 @@ func RunToCompletion[T any](t *testing.T, test TestCase) {
 	we, err := c.ExecuteWorkflow(wCtx, workflowOptions, test.Workflow.Document.Name, test.Input)
 	assert.NoError(t, err)
 
-	var result map[string]any
+	var result T
 	assert.NoError(t, we.Get(wCtx, &result))
 	assert.Equal(t, test.ExpectedOutput, result)
 }

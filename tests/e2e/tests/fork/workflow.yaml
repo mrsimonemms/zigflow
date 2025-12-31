@@ -4,22 +4,16 @@ document:
   name: workflow
   version: 0.0.1
 do:
-  - fork2:
-      export:
-        as: fork
+  - fork:
       fork:
         branches:
-          - callHTTP:
+          - callHTTP1:
               call: http
-              export:
-                as: callHTTP1
               with:
                 method: get
                 endpoint: http://localhost:8888/posts/1
           - callHTTP2:
               call: http
-              export:
-                as: callHTTP2
               with:
                 method: get
                 endpoint: http://localhost:8888/posts/2

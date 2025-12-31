@@ -5,15 +5,14 @@ document:
   version: 0.0.1
 do:
   - fork-compete:
-      export:
-        as: fork
+      output:
+        as:
+          fork: ${ . }
       fork:
         compete: true
         branches:
           - callHTTP:
               call: http
-              export:
-                as: callHTTP1
               with:
                 method: get
                 endpoint: http://localhost:8888/posts/1

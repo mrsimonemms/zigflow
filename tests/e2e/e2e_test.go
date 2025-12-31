@@ -19,13 +19,13 @@
 package e2e
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net"
 	"os"
 	"os/exec"
 	"path"
+	"syscall"
 	"testing"
 
 	"github.com/mrsimonemms/zigflow/pkg/zigflow"
@@ -36,8 +36,7 @@ import (
 )
 
 type harness struct {
-	Binary string
-	Cases  []utils.TestCase
+	Cases []utils.TestCase
 }
 
 var h *harness
@@ -75,20 +74,8 @@ func setup() (*harness, error) {
 		cases = append(cases, c)
 	}
 
-	// Build the binary
-	binaryFile, err := os.MkdirTemp("", "zigflow")
-	if err != nil {
-		return nil, fmt.Errorf("error creating temp file: %w", err)
-	}
-
-	cmd := exec.CommandContext(context.Background(), "go", "build", "-o", binaryFile, "../../")
-	if _, err := cmd.Output(); err != nil {
-		return nil, fmt.Errorf("error building binary: %w", err)
-	}
-
 	return &harness{
-		Binary: path.Join(binaryFile, "zigflow"),
-		Cases:  cases,
+		Cases: cases,
 	}, nil
 }
 
@@ -110,13 +97,14 @@ func TestE2E(t *testing.T) {
 		t.Fatal("harness is nil - setup not run")
 	}
 
-	cancellableCtx := t.Context()
-	defer cancellableCtx.Done()
+	cwd, err := os.Getwd()
+	assert.NoError(t, err, "working directory")
+
+	ctx := t.Context()
+	defer ctx.Done()
 
 	for _, test := range h.Cases {
 		t.Run(test.Name, func(t *testing.T) {
-			t.Parallel()
-
 			healthPort, err := getFreePort()
 			assert.NoError(t, err, "health port")
 
@@ -124,6 +112,8 @@ func TestE2E(t *testing.T) {
 			assert.NoError(t, err, "metrics port")
 
 			args := []string{
+				"run",
+				".",
 				"--file", test.WorkflowPath,
 				"--health-listen-address", fmt.Sprintf("localhost:%d", healthPort),
 				"--metrics-listen-address", fmt.Sprintf("localhost:%d", metricsPort),
@@ -132,8 +122,16 @@ func TestE2E(t *testing.T) {
 			// Start the Zigflow binary with the loaded workflow
 			go (func() {
 				//nolint
-				cmd := exec.CommandContext(cancellableCtx, h.Binary, args...)
-				assert.NoError(t, cmd.Run())
+				cmd := exec.CommandContext(ctx, "go", args...)
+				cmd.Dir = path.Join(cwd, "..", "..")
+				cmd.SysProcAttr = &syscall.SysProcAttr{
+					Setpgid: true,
+				}
+				assert.NoError(t, cmd.Start())
+
+				t.Cleanup(func() {
+					syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
+				})
 			})()
 
 			test.Test(t, test)
