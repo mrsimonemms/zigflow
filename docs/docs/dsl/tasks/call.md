@@ -36,21 +36,16 @@ document:
 do:
   - captureInput:
       set:
-        requestedUserId: ${ .input.userId }
+        requestedUserId: ${ $input.userId }
         requestId: ${ uuid }
   - fetchProfile:
       call: activity
-      export:
-        as: profile
       with:
           name: activitycall.FetchProfile
           arguments:
-            - ${ .data.requestedUserId }
-            - ${ .data.requestId }
-          options:
-            taskQueue: activity-call-worker
-            startToCloseTimeout:
-              seconds: 5
+            - ${ $data.requestedUserId }
+            - ${ $data.requestId }
+          taskQueue: activity-call-worker
 ```
 
 ## gRPC

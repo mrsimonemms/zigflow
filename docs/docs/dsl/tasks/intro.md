@@ -51,22 +51,23 @@ transform data, and make decisions during the execution of workflows.
 
 ### Variables
 
-Variables
+Variables able to be referenced within runtime expressions.
 
 | Name | Description | Example |
 | :--- | :--- | :--- |
-| `data` | Data set to the workflow's state - see [data](#data) | `${ .data.someData }` |
-| `env` | Any environment variable prefixed with `ZIGFLOW_`. The prefix is _NOT_ used in this object | `${ .env.EXAMPLE_ENVVAR }` |
-| `input` | Any input received when the workflow was triggered | `${ .input.val1 }` |
-| `output` | Any output exported from a task - see [output](#output) | `${ .output.output }` |
+| `$context` | Anything set to the output in previous steps. Typically used within [output](../intro#output) and [export](../intro#export) | `${ $context }` |
+| `$data` | Data set to the workflow's state - see [data](#data) | `${ $data.someData }` |
+| `$env` | Any environment variable prefixed with `ZIGFLOW_`. The prefix is _NOT_ used in this object | `${ $env.EXAMPLE_ENVVAR }` |
+| `$input` | Any input received when the workflow was triggered | `${ $input.val1 }` |
+| `$output` | Any output exported from a task - see [output](../intro#output) | `${ $output }` |
 
 ### Data
 
-The `data` object also receives the workflow and activity info.
+The `$data` object also receives the workflow and activity info.
 
 #### Workflow
 
-This can be accessed from `${ .data.workflow }`.
+This can be accessed from `${ $data.workflow }`.
 
 * attempt
 * binary_checksum
@@ -86,7 +87,7 @@ This can be accessed from `${ .data.workflow }`.
 
 #### Activity
 
-This can be accessed from `${ .data.activity }`. Ideally, this should be avoided
+This can be accessed from `${ $data.activity }`. Ideally, this should be avoided
 as Zigflow does not allow specific targeting of an activity.
 
 * activity_id
@@ -105,21 +106,6 @@ as Zigflow does not allow specific targeting of an activity.
 * workflow_namespace
 * workflow_execution_id
 * workflow_execution_run_id
-
-### Output
-
-The `${ .output }` object receives any data that is output. Output is only set
-if you set the `export.as` property. For example:
-
-```yaml
-- setData:
-    export:
-      as: data
-    set:
-      hello: world
-```
-
-This will set `${ .output.data }` to `{ "hello": "world" }`.
 
 ## Flow Directive
 

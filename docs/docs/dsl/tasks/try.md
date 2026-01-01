@@ -20,21 +20,22 @@ document:
   version: 0.0.1
 do:
   - user:
-      export:
-        as: user
       try:
         - getUser:
             call: http
-            export:
-              as: user
+            output:
+              as:
+                user: ${ . }
             with:
               method: get
+              # This URL returns a 404
               endpoint: https://jsonplaceholder.typicode.com/users/2000
       catch:
         do:
           - setError:
-              export:
-                as: error
+              output:
+                as:
+                  error: ${ . }
               set:
                 message: some error
 ```

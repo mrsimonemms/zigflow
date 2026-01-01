@@ -27,52 +27,58 @@ do:
   # Iterate over the map object
   - forTaskMap:
       export:
-        as: forMap
+        as: '${ $context + { forTaskMap: . } }'
       for:
-        in: ${ .input.map }
+        in: ${ $input.map }
       do:
         - setData:
             export:
-              as: response
+              as: ${ . }
             set:
-              key: "${ \"hello: \" + .data.index }"
-              value: ${ .data.item }
+              key: "${ \"hello: \" + $data.index }"
+              value: ${ $data.item }
         - wait:
+            output:
+              as: ${ $context }
             wait:
               seconds: 2
   # Iterate over the data array
   - forTaskArray:
       export:
-        as: forArray
+        as: '${ $context + { forTaskArray: . } }'
       for:
         each: item
-        in: ${ .input.data }
+        in: ${ $input.data }
         at: index
-      while: ${ .data.item.userId != 4 } # If this returns false, it will cut the iteration
+      # while: ${ $data.item.userId != 4 } # If this returns false, it will cut the iteration
       do:
         # Each iteration will run these tasks in order
         - setData:
             export:
-              as: response
+              as: ${ . }
             set:
-              userId: ${ .data.item.userId } # Get the userId for this iteration
-              id: ${ .data.index } # Get the key
+              userId: ${ $data.item.userId } # Get the userId for this iteration
+              id: ${ $data.index } # Get the key
               processed: true
         - wait:
+            output:
+              as: ${ $context }
             wait:
               seconds: 1
   - forTaskNumber:
-      export:
-        as: forNumber
+      output:
+        as: '${ $context + { forTaskNumber: . } }'
       for:
-        in: ${ 5 } # This will iterate 5 times
+        in: ${ 5 }
       do:
         - setData:
             export:
-              as: response
+              as: ${ . }
             set:
-              number: ${ .data.item }
+              number: ${ $data.item }
         - wait:
+            output:
+              as: ${ $context }
             wait:
               seconds: 1
 ```

@@ -14,28 +14,42 @@ if it was replayed:
 # Bad ❌
 - updateUser:
     call: http
+    output:
+      as: '${ { response: . } }'
     with:
       method: put
+      headers:
+        content-type: application/json
       endpoint: https://echo.free.beeceptor.com
       body:
         id: ${ uuid } # This value is different every time this task is run
+        hello: world
+
 ```
 
 However, as this one generates the UUID in a Set task, [this is wrapped](https://docs.temporal.io/develop/go/side-effects)
 in such a way that it's saved to the Temporal state and is safe to replay.
 
 ```yaml
-# Good ✅
 - set:
+    export:
+      as:
+        data: ${ . }
     set:
       id: ${ uuid }
 - updateUser:
     call: http
+    output:
+      as: '${ $context + { response: . } }'
     with:
       method: put
+      headers:
+        content-type: application/json
       endpoint: https://echo.free.beeceptor.com
       body:
-        id: ${ .data.id }
+        id: ${ $data.id }
+        hello: world
+
 ```
 
 **With great power comes great responsibility**
@@ -50,7 +64,7 @@ in such a way that it's saved to the Temporal state and is safe to replay.
 ## Example
 
 The data is saved to a `state` object and can be retrieved in a later task by
-calling `${ .data.<key> }`. Once set, it remains in the state and can be overidden
+calling `${ $data.<key> }`. Once set, it remains in the state and can be overidden
 by a later Set task.
 
 ```yaml
@@ -61,15 +75,18 @@ document:
   version: 0.0.1
 do:
   - baseData:
+      # Set the output to the context
+      export:
+        as: ${ . }
       set:
         # This value will be overidden later
         progress: 0
         # Set a variable from an envvar
-        envvar: ${ .env.EXAMPLE_ENVVAR }
+        envvar: ${ $env.EXAMPLE_ENVVAR }
         # Generate a UUID
         uuid: ${ uuid }
         # Insert something from the input
-        inputUserId: ${ .input.userId }
+        inputUserId: ${ $input.userId }
         # Maps can be used
         object:
           hello: world
@@ -79,6 +96,9 @@ do:
           - ${ uuid }
           - hello: world
   - updateProgress:
+      # Merge this set with the context and output everything together
+      output:
+        as: ${ $context + . }
       set:
         # Overidden from above. Everything else remains the same
         progress: 100

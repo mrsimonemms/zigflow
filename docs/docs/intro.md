@@ -45,8 +45,9 @@ document:
   version: 1.0.0
 do:
   - set:
-      export:
-        as: data
+      output:
+        as:
+          data: ${ . }
       set:
         message: Hello from Ziggy
 ```

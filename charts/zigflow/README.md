@@ -368,8 +368,10 @@ true
   "do": [
     {
       "set": {
-        "export": {
-          "as": "data"
+        "output": {
+          "as": {
+            "data": "${ . }"
+          }
         },
         "set": {
           "message": "Hello from Ziggy"

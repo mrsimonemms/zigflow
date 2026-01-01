@@ -79,12 +79,13 @@ do:
               type: query
               # This data will be returned as-is
               data:
-                id: ${ .data.id }
-                progressPercentage: ${ .data.progressPercentage }
-                status: ${ .data.status }
+                id: ${ $data.id }
+                progress: ${ $data.progressPercentage }
+                status: ${ $data.status }
   - createState:
       output:
-        as: data
+        as:
+          data: ${ . }
       set:
         id: ${ uuid }
         status: not started
@@ -133,11 +134,15 @@ do:
               type: signal
   - outputSignal:
       export:
-        as: response
+        as: '${ $context + { response: . } }'
       set:
         # Get the data from the approveListener signal
-        signal: ${ .data.approveListener }
+        signal: ${ $data.approveListener }
   - wait:
+      # The wait returns nothing by default, so we have to
+      # tell it to output the context
+      output:
+        as: ${ $context }
       wait:
         seconds: 5
 ```
@@ -173,12 +178,16 @@ do:
                 id: temperature
                 # Temporal update - used to make read/write request
                 type: update
-                data: ${ .data.temperature > 38 }
+                acceptIf: ${ $data.temperature > 38 }
             - with:
                 id: bpm
                 type: update
-                data: ${ .data.bpm < 60 or .data.bpm > 100 }
+                acceptIf: ${ $data.bpm < 60 or $data.bpm > 100 }
   - wait:
+      output:
+        as:
+          temperature: ${ $data.temperature }
+          bpm: ${ $data.bpm }
       wait:
         seconds: 10
 ```

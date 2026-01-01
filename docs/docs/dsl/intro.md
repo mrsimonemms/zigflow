@@ -64,7 +64,7 @@ applying transformations, unless defined otherwise.
 
 | Property | Type | Required | Description |
 | --- | :---: | :---: | --- |
-| schema | `schema` | `no` | The [JSON schema](https://json-schema.org/) used to describe and validate raw input data.<br /><br />*Even though the schema is not required, it is strongly encouraged to document it, whenever feasible. The input will be validated against this schema, returning an error if the given input does not match.* |
+| schema | [`schema`](#schema) | `no` | The [`schema`](#schema) used to describe and validate raw input data.<br />*Even though the schema is not required, it is strongly encouraged to document it, whenever feasible. The input will be validated against this schema, returning an error if the given input does not match.* |
 
 ### Examples {#input-examples}
 
@@ -88,6 +88,122 @@ schema:
                 type: string
 ```
 
+## Output
+
+Documents the structure - and optionally configures the transformations of -
+workflow/task output data.
+
+It's crucial for authors to document the schema of output data whenever feasible.
+This documentation empowers consuming applications to provide contextual auto-suggestions
+when handling runtime expressions.
+
+When set, runtimes must validate output data against the defined schema after
+applying transformations, unless defined otherwise.
+
+### Properties {#output-properties}
+
+| Property | Type | Required | Description |
+| --- | :---: | :---: | --- |
+| schema | [`schema`](#schema) | `no` | The [`schema`](#schema) used to describe and validate raw input data.<br />*Even though the schema is not required, it is strongly encouraged to document it, whenever feasible.* |
+| as | `string`<br />`object` | `no` | A [runtime expression](./tasks/intro#runtime-expressions), if any, used to filter and/or mutate the workflow/task output. |
+
+### Examples {#output-examples}
+
+```yaml
+output:
+  schema:
+    format: json
+    document:
+      type: object
+      properties:
+        petId:
+          type: string
+      required:
+        - petId
+  as:
+    petId: ${ .pet.id }
+```
+
+## Export
+
+Certain task needs to set the workflow context to save the task output for later
+usage. Users set the content of the context through a runtime expression. The
+result of the expression is the new value of the context. The expression is
+evaluated against the transformed task output.
+
+Optionally, the context might have an associated schema which is validated against
+the result of the expression.
+
+### Properties {#export-properties}
+
+| Property | Type | Required | Description |
+| --- | :---: | :---: | --- |
+| schema | [`schema`](#schema) | `no` | The [`schema`](#schema) used to describe and validate context.<br />*Included to handle the non frequent case in which the context has a known format.* |
+| as | `string`<br />`object` | `no` | A runtime expression, if any, used to export the output data to the context. |
+
+### Examples {#export-examples}
+
+Merge the task output into the current context.
+
+```yaml
+export:
+  as: ${ $context + . }
+```
+
+Merge the task output into the context under the `task` key.
+
+```yaml
+export:
+  as: '${ $context + { task: . } }'
+```
+
+Replace the context with the task output.
+
+```yaml
+export:
+  as: ${ . }
+```
+
+## Schema
+
+Describes a data schema.
+
+### Properties {#schema-properties}
+
+| Property | Type | Required | Description |
+| --- | :---: | :---: | --- |
+| format | `string` | `yes` | The schema format.<br />*Supported values are:*<br />*- `json`, which indicates the [JSONSchema](https://json-schema.org/) format.* |
+| document | `object` | `yes` | The inline schema document. |
+
+### Examples {#schema-examples}
+
+```yaml
+format: json
+document:
+  type: object
+  properties:
+    id:
+      type: string
+    firstName:
+      type: string
+    lastName:
+      type: string
+  required:
+    - id
+    - firstName
+    - lastName
+```
+
+This expects the output to look something like this:
+
+```json
+{
+  "id": "99a4ab14-29aa-4e1b-8ca8-e6610524b546",
+  "firstName": "Ziggy",
+  "lastName": "Stardust"
+}
+```
+
 ## Timeout
 
 Defines a workflow or task timeout.
@@ -102,10 +218,10 @@ Defines a workflow or task timeout.
 
 ```yaml
 document:
-  dsl: '1.0.2'
+  dsl: 1.0.0
   namespace: default
   name: timeout-example
-  version: '0.1.0'
+  version: 0.1.0
 do:
   - waitAMinute:
       wait:

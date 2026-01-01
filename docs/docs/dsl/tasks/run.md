@@ -53,7 +53,7 @@ document:
 do:
   - nodejs:
       export:
-        as: nodejs
+        as: '${ $context + { nodejs: . } }'
       run:
         script:
           language: js
@@ -68,8 +68,8 @@ do:
           environment:
             NAME: js
   - python:
-      export:
-        as: python
+      output:
+        as: '${ $context + { python: . } }'
       run:
         script:
           language: python
@@ -117,11 +117,13 @@ document:
   version: 0.0.1
 do:
   - runShell:
+      output:
+        as: '${ $context + { shell: . } }'
       run:
         shell:
           command: ls
           arguments:
-            - la
+            - -la
             - /
 ```
 

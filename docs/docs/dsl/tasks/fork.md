@@ -32,17 +32,17 @@ document:
 do:
   - raiseAlarm:
       # A fork is a series of child workflows running in parallel
-      export:
-        as: raiseAlarm
+      output:
+        # Add output to context without the `multiStep` key
+        as:
+          raiseAlarm: '${ $context + del(.multiStep) }'
       fork:
         # If not competing, all tasks will run to the finish - this is the default behaviour
         compete: false
         branches:
-          # A single step is passed in by the Serverless Workflow task - this will be implicitly wrapped in a Do task
+          # A single step is passed in by the Serverless Workflow task
           - callNurse:
               call: http
-              export:
-                as: callNurse
               with:
                 method: get
                 endpoint: https://jsonplaceholder.typicode.com/users/2
@@ -55,14 +55,13 @@ do:
                 - wait2:
                     wait:
                       seconds: 2
-          # Another single step child workflow - this will be implicitly wrapped in a Do task
+          # Another single step child workflow
           - callDoctor:
               call: http
-              export:
-                as: callDoctor
               with:
                 method: get
-                endpoint: https://jsonplaceholder.typicode.com/users/3
+                endpoint: ${ "https://jsonplaceholder.typicode.com/users/" + ($input.userId | tostring) }
+
 ```
 
 This will output an object similar to this, with the workflow data under the

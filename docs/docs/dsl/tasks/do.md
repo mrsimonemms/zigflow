@@ -45,19 +45,20 @@ do:
       wait:
         seconds: 5
   - getUser:
+      output:
+        as:
+          user: ${ . }
       call: http
-      export:
-        as: user
       with:
         method: get
         headers:
-          uuid: ${ .data.key }
+          uuid: ${ $data.key }
         endpoint: https://jsonplaceholder.typicode.com/users/2
 ```
 
 This workflow is very basic, but explain the steps in details:
 1. **setData**: this sets some data, which is randomly generated UUID key. This
-   is available on `${ .data.key }`. See [Set](./set) for a detailed explanation
+   is available on `${ $data.key }`. See [Set](./set) for a detailed explanation
    of why generated data should be used sparingly.
 2. **wait**: pause the workflow, using a [Durable Timer](https://docs.temporal.io/workflow-execution/timers-delays)
 3. **getUser**: call an HTTP endpoint, using the previously generated UUID as a
