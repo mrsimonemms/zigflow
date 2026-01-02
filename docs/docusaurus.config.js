@@ -174,7 +174,7 @@ const config = {
         ],
         copyright: `Licenced under <a href="https://github.com/mrsimonemms/zigflow/blob/main/LICENSE" target="_blank">Apache-2.0</a>
         <br />
-        Copyright &copy; ${new Date().getFullYear()} <a href="https://github.com/mrsimonemms/zigflow/graphs/contributors" target="_blank">Zigflow authors</a>.
+        Copyright &copy; 2025 - ${new Date().getFullYear()} <a href="https://github.com/mrsimonemms/zigflow/graphs/contributors" target="_blank">Zigflow authors</a>.
         Built with Docusaurus.`,
       },
       prism: {
