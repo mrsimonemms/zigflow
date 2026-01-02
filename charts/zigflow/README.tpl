@@ -1,4 +1,5 @@
-{{ template "chart.header" . }}
+# Zigflow
+
 {{ template "chart.deprecationWarning" . }}
 
 {{ template "chart.badgesSection" . }}
@@ -21,6 +22,6 @@ helm install myrelease oci://ghcr.io/mrsimonemms/charts/zigflow@${ZIGFLOW_VERSIO
 
 {{ template "chart.requirementsSection" . }}
 
-{{ template "chart.valuesSection" . }}
+{{ template "chart.valuesSectionHtml" . }}
 
 {{ template "helm-docs.versionFooter" . }}
