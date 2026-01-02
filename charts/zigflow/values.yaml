@@ -37,9 +37,9 @@ envvars:
 workflow:
   # -- Don't add a workflow to the deployment. Useful if you have built an image with the workflow embedded
   enabled: true
-  # -- Use the inline workflow. If false, you must declare a secret with the workflow in `workflow.yaml`
+  # -- Use the inline workflow. If false, you must declare a secret with the workflow in <code>workflow.yaml</code>
   useInline: true
-  # -- Name of the secret containing `workflow.yaml`
+  # -- Name of the secret containing <code>workflow.yaml</code>
   secret: workflow
   # -- Location the workflow volumes is mapped
   file: /data/workflow.yaml
@@ -62,7 +62,7 @@ image:
   repository: ghcr.io/mrsimonemms/zigflow
   # -- Image pull policy
   pullPolicy: IfNotPresent
-  # -- Image tag - defaults to the chart's `Version` if not set
+  # -- Image tag - defaults to the chart's <code>Version</code> if not set
   tag: ""
 
 # -- Docker registry secret names
@@ -82,12 +82,12 @@ serviceAccount:
   # -- The name of the service account to use. If not set and create is true, a name is generated using the fullname template
   name: ""
 
-# -- Pod [annotations](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/)
+# -- Pod <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations" target="_blank">annotations</a>
 podAnnotations: {}
-# -- Pod [labels](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/)
+# -- Pod <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels" target="_blank">labels</a>
 podLabels: {}
 
-# -- Pod's [security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context)
+# -- Pod's <a href="https://kubernetes.io/docs/tasks/configure-pod-container/security-context" target="_blank">security context</a>
 podSecurityContext: {}
 
 # -- Container's security context

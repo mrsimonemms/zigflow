@@ -3,7 +3,7 @@ name: zigflow
 description: A DSL for turning declarative YAML into production-ready Temporal workflows
 type: application
 version: 0.0.0
-icon: https://images.ctfassets.net/0uuz8ydxyd9p/2W8B7bcLSPX9YaSwkfrhmv/eade3fc61520b8cee84cf8605dce3056/Temporal_Symbol_dark_1_2x.png
+icon: https://raw.githubusercontent.com/mrsimonemms/zigflow/refs/heads/main/designs/z-logo.png
 home: https://zigflow.dev
 maintainers:
   - name: Simon Emms
@@ -18,5 +18,6 @@ keywords:
   - Temporal
   - Workflow Management System
   - Workflows
+  - YAML
 annotations:
   org.opencontainers.image.documentation: https://github.com/mrsimonemms/zigflow/tree/main/charts/zigflow

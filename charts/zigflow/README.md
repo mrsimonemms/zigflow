@@ -1,4 +1,4 @@
-# zigflow
+# Zigflow
 
 ![Version: 0.0.0](https://img.shields.io/badge/Version-0.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
@@ -26,45 +26,386 @@ helm install myrelease oci://ghcr.io/mrsimonemms/charts/zigflow@${ZIGFLOW_VERSIO
 
 ## Values
 
-| Key | Type | Default | Description |
-|-----|------|---------|-------------|
-| affinity | object | `{}` | Node affinity |
-| autoscaling.enabled | bool | `false` | Autoscaling enabled |
-| autoscaling.maxReplicas | int | `100` | Maximum replicas |
-| autoscaling.minReplicas | int | `1` | Minimum replicas |
-| autoscaling.targetCPUUtilizationPercentage | int | `80` | When to trigger a new replica |
-| config | object | `{"log-level":"info"}` | Accepts any of the command line arguments |
-| envvars | string | `nil` | Additional environment variables |
-| fullnameOverride | string | `""` | String to fully override names |
-| image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
-| image.repository | string | `"ghcr.io/mrsimonemms/zigflow"` | Image repositiory |
-| image.tag | string | `""` | Image tag - defaults to the chart's `Version` if not set |
-| imagePullSecrets | list | `[]` | Docker registry secret names |
-| livenessProbe.httpGet.path | string | `"/health"` | Path to demonstrate app liveness |
-| livenessProbe.httpGet.port | string | `"health"` | Port to demonstrate app liveness |
-| nameOverride | string | `""` | String to partially override name |
-| nodeSelector | object | `{}` | Node selector |
-| podAnnotations | object | `{}` | Pod [annotations](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) |
-| podLabels | object | `{}` | Pod [labels](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/) |
-| podSecurityContext | object | `{}` | Pod's [security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context) |
-| readinessProbe.httpGet.path | string | `"/health"` | Path to demonstrate app readiness |
-| readinessProbe.httpGet.port | string | `"health"` | Port to demonstrate app readiness |
-| replicaCount | int | `1` | Number of replicas |
-| resources | object | `{}` | Configure resources available |
-| securityContext | object | `{}` | Container's security context |
-| service.health.port | int | `3000` | Health service port |
-| service.metrics.port | int | `9090` | Metrics service port |
-| service.type | string | `"ClusterIP"` | Service type |
-| serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
-| serviceAccount.automount | bool | `true` | Automatically mount a ServiceAccount's API credentials? |
-| serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
-| serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
-| tolerations | list | `[]` | Node toleration |
-| volumeMounts | list | `[]` | Additional volumeMounts on the output Deployment definition. |
-| volumes | list | `[]` | Additional volumes on the output Deployment definition. |
-| workflow.enabled | bool | `true` | Don't add a workflow to the deployment. Useful if you have built an image with the workflow embedded |
-| workflow.file | string | `"/data/workflow.yaml"` | Location the workflow volumes is mapped |
-| workflow.inline | object | `{"do":[{"set":{"export":{"as":"data"},"set":{"message":"Hello from Ziggy"}}}],"document":{"dsl":"1.0.0","name":"simple-workflow","namespace":"zigflow","version":"1.0.0"}}` | Workflow YAML |
-| workflow.secret | string | `"workflow"` | Name of the secret containing `workflow.yaml` |
-| workflow.useInline | bool | `true` | Use the inline workflow. If false, you must declare a secret with the workflow in `workflow.yaml` |
+<table>
+	<thead>
+		<th>Key</th>
+		<th>Type</th>
+		<th>Default</th>
+		<th>Description</th>
+	</thead>
+	<tbody>
+		<tr>
+			<td>affinity</td>
+			<td>object</td>
+			<td><pre lang="json">
+{}
+</pre>
+</td>
+			<td>Node affinity</td>
+		</tr>
+		<tr>
+			<td>autoscaling.enabled</td>
+			<td>bool</td>
+			<td><pre lang="json">
+false
+</pre>
+</td>
+			<td>Autoscaling enabled</td>
+		</tr>
+		<tr>
+			<td>autoscaling.maxReplicas</td>
+			<td>int</td>
+			<td><pre lang="json">
+100
+</pre>
+</td>
+			<td>Maximum replicas</td>
+		</tr>
+		<tr>
+			<td>autoscaling.minReplicas</td>
+			<td>int</td>
+			<td><pre lang="json">
+1
+</pre>
+</td>
+			<td>Minimum replicas</td>
+		</tr>
+		<tr>
+			<td>autoscaling.targetCPUUtilizationPercentage</td>
+			<td>int</td>
+			<td><pre lang="json">
+80
+</pre>
+</td>
+			<td>When to trigger a new replica</td>
+		</tr>
+		<tr>
+			<td>config</td>
+			<td>object</td>
+			<td><pre lang="json">
+{
+  "log-level": "info"
+}
+</pre>
+</td>
+			<td>Accepts any of the command line arguments</td>
+		</tr>
+		<tr>
+			<td>envvars</td>
+			<td>string</td>
+			<td><pre lang="json">
+null
+</pre>
+</td>
+			<td>Additional environment variables</td>
+		</tr>
+		<tr>
+			<td>fullnameOverride</td>
+			<td>string</td>
+			<td><pre lang="json">
+""
+</pre>
+</td>
+			<td>String to fully override names</td>
+		</tr>
+		<tr>
+			<td>image.pullPolicy</td>
+			<td>string</td>
+			<td><pre lang="json">
+"IfNotPresent"
+</pre>
+</td>
+			<td>Image pull policy</td>
+		</tr>
+		<tr>
+			<td>image.repository</td>
+			<td>string</td>
+			<td><pre lang="json">
+"ghcr.io/mrsimonemms/zigflow"
+</pre>
+</td>
+			<td>Image repositiory</td>
+		</tr>
+		<tr>
+			<td>image.tag</td>
+			<td>string</td>
+			<td><pre lang="json">
+""
+</pre>
+</td>
+			<td>Image tag - defaults to the chart's <code>Version</code> if not set</td>
+		</tr>
+		<tr>
+			<td>imagePullSecrets</td>
+			<td>list</td>
+			<td><pre lang="json">
+[]
+</pre>
+</td>
+			<td>Docker registry secret names</td>
+		</tr>
+		<tr>
+			<td>livenessProbe.httpGet.path</td>
+			<td>string</td>
+			<td><pre lang="json">
+"/health"
+</pre>
+</td>
+			<td>Path to demonstrate app liveness</td>
+		</tr>
+		<tr>
+			<td>livenessProbe.httpGet.port</td>
+			<td>string</td>
+			<td><pre lang="json">
+"health"
+</pre>
+</td>
+			<td>Port to demonstrate app liveness</td>
+		</tr>
+		<tr>
+			<td>nameOverride</td>
+			<td>string</td>
+			<td><pre lang="json">
+""
+</pre>
+</td>
+			<td>String to partially override name</td>
+		</tr>
+		<tr>
+			<td>nodeSelector</td>
+			<td>object</td>
+			<td><pre lang="json">
+{}
+</pre>
+</td>
+			<td>Node selector</td>
+		</tr>
+		<tr>
+			<td>podAnnotations</td>
+			<td>object</td>
+			<td><pre lang="json">
+{}
+</pre>
+</td>
+			<td>Pod <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations" target="_blank">annotations</a></td>
+		</tr>
+		<tr>
+			<td>podLabels</td>
+			<td>object</td>
+			<td><pre lang="json">
+{}
+</pre>
+</td>
+			<td>Pod <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels" target="_blank">labels</a></td>
+		</tr>
+		<tr>
+			<td>podSecurityContext</td>
+			<td>object</td>
+			<td><pre lang="json">
+{}
+</pre>
+</td>
+			<td>Pod's <a href="https://kubernetes.io/docs/tasks/configure-pod-container/security-context" target="_blank">security context</a></td>
+		</tr>
+		<tr>
+			<td>readinessProbe.httpGet.path</td>
+			<td>string</td>
+			<td><pre lang="json">
+"/health"
+</pre>
+</td>
+			<td>Path to demonstrate app readiness</td>
+		</tr>
+		<tr>
+			<td>readinessProbe.httpGet.port</td>
+			<td>string</td>
+			<td><pre lang="json">
+"health"
+</pre>
+</td>
+			<td>Port to demonstrate app readiness</td>
+		</tr>
+		<tr>
+			<td>replicaCount</td>
+			<td>int</td>
+			<td><pre lang="json">
+1
+</pre>
+</td>
+			<td>Number of replicas</td>
+		</tr>
+		<tr>
+			<td>resources</td>
+			<td>object</td>
+			<td><pre lang="json">
+{}
+</pre>
+</td>
+			<td>Configure resources available</td>
+		</tr>
+		<tr>
+			<td>securityContext</td>
+			<td>object</td>
+			<td><pre lang="json">
+{}
+</pre>
+</td>
+			<td>Container's security context</td>
+		</tr>
+		<tr>
+			<td>service.health.port</td>
+			<td>int</td>
+			<td><pre lang="json">
+3000
+</pre>
+</td>
+			<td>Health service port</td>
+		</tr>
+		<tr>
+			<td>service.metrics.port</td>
+			<td>int</td>
+			<td><pre lang="json">
+9090
+</pre>
+</td>
+			<td>Metrics service port</td>
+		</tr>
+		<tr>
+			<td>service.type</td>
+			<td>string</td>
+			<td><pre lang="json">
+"ClusterIP"
+</pre>
+</td>
+			<td>Service type</td>
+		</tr>
+		<tr>
+			<td>serviceAccount.annotations</td>
+			<td>object</td>
+			<td><pre lang="json">
+{}
+</pre>
+</td>
+			<td>Annotations to add to the service account</td>
+		</tr>
+		<tr>
+			<td>serviceAccount.automount</td>
+			<td>bool</td>
+			<td><pre lang="json">
+true
+</pre>
+</td>
+			<td>Automatically mount a ServiceAccount's API credentials?</td>
+		</tr>
+		<tr>
+			<td>serviceAccount.create</td>
+			<td>bool</td>
+			<td><pre lang="json">
+true
+</pre>
+</td>
+			<td>Specifies whether a service account should be created</td>
+		</tr>
+		<tr>
+			<td>serviceAccount.name</td>
+			<td>string</td>
+			<td><pre lang="json">
+""
+</pre>
+</td>
+			<td>The name of the service account to use. If not set and create is true, a name is generated using the fullname template</td>
+		</tr>
+		<tr>
+			<td>tolerations</td>
+			<td>list</td>
+			<td><pre lang="json">
+[]
+</pre>
+</td>
+			<td>Node toleration</td>
+		</tr>
+		<tr>
+			<td>volumeMounts</td>
+			<td>list</td>
+			<td><pre lang="json">
+[]
+</pre>
+</td>
+			<td>Additional volumeMounts on the output Deployment definition.</td>
+		</tr>
+		<tr>
+			<td>volumes</td>
+			<td>list</td>
+			<td><pre lang="json">
+[]
+</pre>
+</td>
+			<td>Additional volumes on the output Deployment definition.</td>
+		</tr>
+		<tr>
+			<td>workflow.enabled</td>
+			<td>bool</td>
+			<td><pre lang="json">
+true
+</pre>
+</td>
+			<td>Don't add a workflow to the deployment. Useful if you have built an image with the workflow embedded</td>
+		</tr>
+		<tr>
+			<td>workflow.file</td>
+			<td>string</td>
+			<td><pre lang="json">
+"/data/workflow.yaml"
+</pre>
+</td>
+			<td>Location the workflow volumes is mapped</td>
+		</tr>
+		<tr>
+			<td>workflow.inline</td>
+			<td>object</td>
+			<td><pre lang="json">
+{
+  "do": [
+    {
+      "set": {
+        "export": {
+          "as": "data"
+        },
+        "set": {
+          "message": "Hello from Ziggy"
+        }
+      }
+    }
+  ],
+  "document": {
+    "dsl": "1.0.0",
+    "name": "simple-workflow",
+    "namespace": "zigflow",
+    "version": "1.0.0"
+  }
+}
+</pre>
+</td>
+			<td>Workflow YAML</td>
+		</tr>
+		<tr>
+			<td>workflow.secret</td>
+			<td>string</td>
+			<td><pre lang="json">
+"workflow"
+</pre>
+</td>
+			<td>Name of the secret containing <code>workflow.yaml</code></td>
+		</tr>
+		<tr>
+			<td>workflow.useInline</td>
+			<td>bool</td>
+			<td><pre lang="json">
+true
+</pre>
+</td>
+			<td>Use the inline workflow. If false, you must declare a secret with the workflow in <code>workflow.yaml</code></td>
+		</tr>
+	</tbody>
+</table>
 
