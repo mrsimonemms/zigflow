@@ -237,6 +237,13 @@ jobs:
           signing_passphrase: ${{ secrets.GPG_PASSPHRASE }}
           update_dependencies: true
 
+      - name: Publish Helm chart latest
+        if: steps.branch-name.outputs.is_tag == 'true'
+        run: |
+          docker pull ghcr.io/${{ github.actor }}/charts/zigflow:${{ steps.branch-name.outputs.tag }}
+          docker tag ghcr.io/${{ github.actor }}/charts/zigflow:${{ steps.branch-name.outputs.tag }} ghcr.io/${{ github.actor }}/charts/zigflow:latest
+          docker push ghcr.io/${{ github.actor }}/charts/zigflow:latest
+
       - name: Refresh Go Report Card
         if: steps.branch-name.outputs.is_tag == 'true'
         uses: creekorful/goreportcard-action@v1.0
