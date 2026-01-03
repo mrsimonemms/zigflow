@@ -28,9 +28,9 @@ const githubDomain = `${organizationName}/${projectName}`;
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'Zigflow',
+  title: 'Zigflow: A Temporal DSL',
   tagline:
-    'A DSL for turning declarative YAML into production-ready Temporal workflows',
+    'A Temporal DSL for turning declarative YAML into production-ready workflows',
   favicon: 'img/favicon.ico',
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
@@ -91,6 +91,11 @@ const config = {
         respectPrefersColorScheme: true,
       },
       metadata: [
+        {
+          name: 'description',
+          content:
+            'Zigflow — a Temporal DSL that turns declarative YAML into production-ready workflows on Temporal. Learn how Temporal DSL simplifies workflow definitions.',
+        },
         {
           name: 'keywords',
           content:

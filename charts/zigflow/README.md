@@ -2,7 +2,7 @@
 
 ![Version: 0.0.0](https://img.shields.io/badge/Version-0.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
-A DSL for turning declarative YAML into production-ready Temporal workflows
+A Temporal DSL for turning declarative YAML into production-ready workflows
 
 **Homepage:** <https://zigflow.dev>
 
