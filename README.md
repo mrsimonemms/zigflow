@@ -1,4 +1,4 @@
-# Zigflow: Declarative workflows for Temporal
+# Zigflow: A Temporal DSL for Declarative Workflows
 
 [![Zigflow](./designs/zigflow.png "Zigflow")](https://zigflow.dev)
 
@@ -7,12 +7,23 @@
 [![GitHub Release](https://img.shields.io/github/v/release/mrsimonemms/zigflow?label=Release)](https://github.com/mrsimonemms/zigflow/releases/latest)
 [![Go Report Card](https://goreportcard.com/badge/github.com/mrsimonemms/zigflow)](https://goreportcard.com/report/github.com/mrsimonemms/zigflow)
 
+**Zigflow is a Temporal DSL** — a domain-specific language for defining and running
+[Temporal](https://temporal.io) workflows declaratively.
+
 Zigflow provides a **simple and declarative way** to define and manage
-[Temporal](https://temporal.io) workflows using a DSL built upon the
-[CNCF Serverless Workflow](https://serverlessworkflow.io) specification. It
-enables **low-code** and **no-code** workflow creation that's
-**easy to visualise, share, and maintain**, without sacrificing the power and
-reliability of Temporal.
+[Temporal](https://temporal.io) workflows using a **Temporal DSL** built upon the
+[CNCF Serverless Workflow](https://serverlessworkflow.io) specification.
+
+---
+
+## 🧠 What is a Temporal DSL?
+
+A **Temporal DSL** is a domain-specific language that allows workflows to be
+defined declaratively, rather than imperatively in application code.
+
+Zigflow’s Temporal DSL compiles declarative workflow definitions into fully
+featured Temporal workflows, giving you the reliability, retries, and state
+management of Temporal without requiring SDK boilerplate.
 
 ---
 
@@ -27,6 +38,8 @@ reliability of Temporal.
 
 ## ✨ Features
 
+* ✅ **Temporal DSL** – declarative workflow definitions that compile to Temporal
+  workflows
 * ✅ **CNCF Standard** – fully aligned with Serverless Workflow v1.0+
 * ✅ **Low-code & Visual-ready** – ideal for UI workflow builders and orchestration
   tools
@@ -47,7 +60,7 @@ Sound familiar?
 
 ## 🧩 Example
 
-Define a workflow declaratively in YAML:
+Below is an example workflow written using the Zigflow **Temporal DSL**:
 
 ```yaml
 document:
@@ -112,6 +125,9 @@ or by running Zigflow with:
 ---
 
 ## 🧭 Related Projects
+
+Zigflow is an open-source **Temporal DSL** designed to make workflow authoring
+simpler, more visual, and easier to share.
 
 * [Temporal](https://temporal.io)
 * [CNCF Serverless Workflow](https://serverlessworkflow.io)
