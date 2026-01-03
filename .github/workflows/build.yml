@@ -238,10 +238,9 @@ jobs:
           update_dependencies: true
 
       - name: Publish Helm chart latest
-        if: steps.branch-name.outputs.is_tag == 'true'
         run: |
-          docker pull ghcr.io/${{ github.actor }}/charts/zigflow:${{ steps.branch-name.outputs.tag }}
-          docker tag ghcr.io/${{ github.actor }}/charts/zigflow:${{ steps.branch-name.outputs.tag }} ghcr.io/${{ github.actor }}/charts/zigflow:latest
+          docker pull ghcr.io/${{ github.actor }}/charts/zigflow:0.6.0
+          docker tag ghcr.io/${{ github.actor }}/charts/zigflow:0.6.0 ghcr.io/${{ github.actor }}/charts/zigflow:latest
           docker push ghcr.io/${{ github.actor }}/charts/zigflow:latest
 
       - name: Refresh Go Report Card
