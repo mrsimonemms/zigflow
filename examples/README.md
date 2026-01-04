@@ -19,28 +19,28 @@ A collection of examples
 
 | Name | Description |
 | --- | --- |
-| [Activity Call Workflow](./activity-call) | Invoke a Temporal activity from Zigflow |
+| [Activity Call](./activity-call) | Invoke an external Temporal activity from Zigflow |
 | [Authorise Change Request](./authorise-change-request) | Authorise and implement or reject a change request |
-| [Basic Workflow](./basic) | An example of how to use Serverless Workflow to define Temporal Workflows |
-| [Child Workflow](./child-workflows) | An example of how to declare and use a child workflow |
+| [Basic](./basic) | An example of how to use Serverless Workflow to define Temporal Workflows |
+| [Child Workflows](./child-workflows) | Define multiple workflows and call a child workflow from a parent |
 | [Competing Concurrent Tasks](./competing-concurrent-tasks) | Have two tasks competing and the first to finish wins |
-| [Conditional Workflow](./conditionally-execute) | Execute tasks conditionally |
-| [External Calls](./external-calls) | An example of how to use Serverless Workflow to make external calls |
-| [For loops](./for-loop) | An example of how to use the for loop task |
+| [Conditional Tasks](./conditionally-execute) | Execute tasks conditionally |
+| [External Calls](./external-calls) | An example of how to use Zigflow to make external gRPC and HTTP calls |
+| [For](./for-loop) | How to use the for loop task |
 | [Hello World](./hello-world) | Hello world with Zigflow |
-| [Money Transfer Demo](./money-transfer) | Temporal's world-famous Money Transfer Demo, in Serverless Workflow form |
-| [Multiple Workflows](./multiple-workflows) | Configure multiple Temporal workflows |
+| [Money Transfer Demo](./money-transfer) | Temporal's world-famous Money Transfer Demo, in Zigflow form |
+| [Multiple Workflows](./multiple-workflows) | Configure multiple Temporal workflows from a single Zigflow definition |
 | [Python](./python) | The basic example, but in Python |
-| [Listener Workflow (Query)](./query) | Listen for Temporal query events |
-| [Erroring Workflow](./raise) | Raise a bug |
-| [Run Task Workflow](./run-task) | An example of how to use Serverless Workflow to run scripts and shell commands |
-| [Serverless Workflow](./schedule) | Schedule the tasks to be triggered automatically |
-| [Custom Search Attributes](./search-attributes) | An example of how to add custom search attribute data into your Temporal calls |
-| [Listener Workflow (Signal)](./signal) | Listen for Temporal signal events |
-| [Switch Workflow](./switch) | Perform a switch statement |
+| [Query Listeners](./query) | Listen for Temporal query events |
+| [Throw an error](./raise) | Throw an error from a Temporal workflow |
+| [Run Task](./run-task) | How to execute code in NodeJS, Python and Shell |
+| [Scheduling](./schedule) | Schedule the tasks to be triggered automatically |
+| [Custom Search Attributes](./search-attributes) | How to add custom search attribute data into your Temporal workflows |
+| [Signal Listeners](./signal) | Listen for Temporal signal events |
+| [Switching](./switch) | Perform a switch statement |
 | [Try/Catch](./try-catch) | An example of how to catch an erroring workflow |
 | [TypeScript](./typescript) | The basic example, but in TypeScript |
-| [Listener Workflow (Update)](./update) | Listen for Temporal update events |
+| [Update Listeners](./update) | Listen for Temporal update events |
 
 <!-- apps-end -->
 

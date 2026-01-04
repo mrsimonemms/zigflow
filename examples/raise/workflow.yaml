@@ -1,12 +1,12 @@
-# This is a simple Serverless Workflow that will be
-# translated into a Temporal workflow
 document:
   dsl: 1.0.0
   namespace: zigflow
-  name: raise # Workflow name
+  name: raise
   version: 0.0.1
-  title: Erroring Workflow
-  summary: Raise a bug
+  title: Throw an error
+  summary: Throw an error from a Temporal workflow
+  metadata:
+    display: false
 timeout:
   after:
     minutes: 1
@@ -14,7 +14,7 @@ do:
   - wait:
       wait:
         seconds: 1
-  - bug:
+  - error:
       raise:
         error:
           type: https://serverlessworkflow.io/spec/1.0.0/errors/communication

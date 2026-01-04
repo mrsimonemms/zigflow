@@ -20,10 +20,12 @@
 document:
   dsl: 1.0.0
   namespace: zigflow
-  name: authoriseChangeRequest # Workflow name
+  name: authoriseChangeRequest
   version: 0.0.1
   title: Authorise Change Request
   summary: Authorise and implement or reject a change request
+  metadata:
+    display: false
 input:
   schema:
     format: json

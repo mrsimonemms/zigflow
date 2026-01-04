@@ -1,13 +1,12 @@
-# This is a simple Serverless Workflow that will be
-# translated into a Temporal workflow
 document:
   dsl: 1.0.0
-  namespace: zigflow # Mapped to the task queue
-  name: basic-typescript # Workflow name
+  namespace: zigflow
+  name: basic-typescript
   version: 0.0.1
   title: TypeScript
   summary: The basic example, but in TypeScript
-# Optionally validate the input received
+  metadata:
+    display: false
 input:
   schema:
     format: json

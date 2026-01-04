@@ -1,11 +1,9 @@
-# This is a simple Serverless Workflow that will be
-# translated into a Temporal workflow
 document:
   dsl: 1.0.0
-  namespace: zigflow # Mapped to the task queue
-  name: basic # Workflow name
+  namespace: zigflow
+  name: basic
   version: 0.0.1
-  title: Basic Workflow
+  title: Basic
   summary: An example of how to use Serverless Workflow to define Temporal Workflows
   metadata:
     # Acts as override to test out continue-as-new
@@ -15,6 +13,7 @@ document:
     activityOptions:
       retryPolicy:
         maximumAttempts: 3
+    display: false
 # Optionally validate the input received
 input:
   schema:

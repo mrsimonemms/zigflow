@@ -1,12 +1,12 @@
-# This is a simple Serverless Workflow that will be
-# translated into a Temporal workflow
 document:
   dsl: 1.0.0
-  namespace: zigflow # Mapped to the task queue
-  name: basic-python # Workflow name
+  namespace: zigflow
+  name: basic-python
   version: 0.0.1
   title: Python
   summary: The basic example, but in Python
+  metadata:
+    display: false
 # Optionally validate the input received
 input:
   schema:

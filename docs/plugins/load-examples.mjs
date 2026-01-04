@@ -25,39 +25,46 @@ export default function loadExamplesPlugin() {
       const examplesDir = path.resolve(process.cwd(), '..', 'examples');
       const files = await fs.readdir(examplesDir, { withFileTypes: true });
 
-      const examples = await Promise.all(
-        files
-          .map((item) => {
-            if (!item.isDirectory()) {
-              return;
-            }
-            return item;
-          })
-          .filter((item) => item)
-          .map(async (item) => {
-            const content = await fs.readFile(
-              path.join(item.parentPath, item.name, 'workflow.yaml'),
-              'utf8',
-            );
+      return (
+        await Promise.all(
+          files
+            .map((item) => {
+              if (!item.isDirectory()) {
+                return;
+              }
+              return item;
+            })
+            .filter((item) => item)
+            .map(async (item) => {
+              const content = await fs.readFile(
+                path.join(item.parentPath, item.name, 'workflow.yaml'),
+                'utf8',
+              );
 
-            return {
-              name: item,
-              isDefault: item.name === 'hello-world',
-              content,
-              workflow: yaml.load(content),
-            };
-          }),
-      );
+              const workflow = yaml.load(content);
 
-      return examples.sort((a, b) => {
-        if (a.workflow.document.title > b.workflow.document.title) {
-          return 1;
-        }
-        if (a.workflow.document.title < b.workflow.document.title) {
-          return -1;
-        }
-        return 0;
-      });
+              if (!(workflow.document.metadata?.display ?? true)) {
+                return;
+              }
+
+              return {
+                name: item,
+                content,
+                workflow,
+              };
+            }),
+        )
+      )
+        .filter((item) => item)
+        .sort((a, b) => {
+          if (a.workflow.document.title > b.workflow.document.title) {
+            return 1;
+          }
+          if (a.workflow.document.title < b.workflow.document.title) {
+            return -1;
+          }
+          return 0;
+        });
     },
 
     async contentLoaded({ content, actions }) {

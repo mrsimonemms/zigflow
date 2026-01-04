@@ -1,12 +1,12 @@
-# This is a simple Serverless Workflow that will be
-# translated into a Temporal workflow
 document:
   dsl: 1.0.0
   namespace: zigflow
-  name: switch # Workflow name
+  name: switch
   version: 0.0.1
-  title: Switch Workflow
+  title: Switching
   summary: Perform a switch statement
+  metadata:
+    display: false
 timeout:
   after:
     minutes: 1

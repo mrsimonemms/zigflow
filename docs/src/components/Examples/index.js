@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import { usePluginData } from '@docusaurus/useGlobalData';
 import CodeBlock from '@theme/CodeBlock';
@@ -55,7 +54,6 @@ export default function Examples() {
               key={ex.name.name}
               value={ex.name.name}
               label={ex.workflow.document.title}
-              default={ex.isDefault}
             >
               <h3>{ex.workflow.document.title}</h3>
               <p>{ex.workflow.document.summary}</p>
@@ -64,12 +62,26 @@ export default function Examples() {
                 {ex.content}
               </CodeBlock>
 
-              <Link
-                className="button button--primary"
-                to={`${siteConfig.customFields.githubURL}/tree/main/examples/${ex.name.name}`}
-              >
-                View in repo
-              </Link>
+              <ul>
+                <li>
+                  <a
+                    href={`${siteConfig.customFields.githubURL}/tree/main/examples/${ex.name.name}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    View example in repo
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href={`${siteConfig.customFields.githubURL}/tree/main/examples`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Additional examples
+                  </a>
+                </li>
+              </ul>
             </TabItem>
           ))}
         </Tabs>

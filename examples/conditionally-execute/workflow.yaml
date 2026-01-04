@@ -1,12 +1,12 @@
-# This is a simple Serverless Workflow that will be
-# translated into a Temporal workflow
 document:
   dsl: 1.0.0
-  namespace: zigflow # Mapped to the task queue
-  name: conditional # Workflow name
+  namespace: zigflow
+  name: conditional
   version: 0.0.1
-  title: Conditional Workflow
+  title: Conditional Tasks
   summary: Execute tasks conditionally
+  metadata:
+    display: false
 input:
   schema:
     format: json
