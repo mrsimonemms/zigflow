@@ -33,22 +33,32 @@ export const builder = (y) =>
 
 export const handler = async (argv) => {
   // Get all the data
-  const files = await Promise.all(
-    (await fs.readdir(argv.dir, { withFileTypes: true }))
-      .filter((d) => d.isDirectory())
-      .map(async (d) => {
-        const workflowFile = path.join(argv.dir, d.name, 'workflow.yaml');
+  const files = (
+    await Promise.all(
+      (await fs.readdir(argv.dir, { withFileTypes: true }))
+        .filter((d) => d.isDirectory())
+        .map(async (d) => {
+          const workflowFile = path.join(argv.dir, d.name, 'workflow.yaml');
 
-        const { document } = yaml.parse(
-          await fs.readFile(workflowFile, 'utf-8'),
-        );
+          const { document } = yaml.parse(
+            await fs.readFile(workflowFile, 'utf-8'),
+          );
 
-        return {
-          name: `[${document.title ?? document.name}](./${d.name})`,
-          description: document.summary,
-        };
-      }),
-  );
+          return {
+            name: `[${document.title ?? document.name}](./${d.name})`,
+            description: document.summary,
+          };
+        }),
+    )
+  ).sort((a, b) => {
+    if (a.title > b.title) {
+      return 1;
+    }
+    if (a.title < b.title) {
+      return -1;
+    }
+    return 0;
+  });
 
   // Generate the table
   const table = ['| Name | Description |', '| --- | --- |'];

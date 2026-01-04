@@ -60,13 +60,16 @@ Sound familiar?
 
 ## 🧩 Example
 
+> [!TIP]
+> There is a runnable version of this in [examples/hello-world](./examples/hello-world)
+
 Below is an example workflow written using the Zigflow **Temporal DSL**:
 
 ```yaml
 document:
   dsl: 1.0.0
   namespace: zigflow # Mapped to the task queue
-  name: simple-workflow # Workflow type
+  name: hello-world # Workflow type
   version: 1.0.0
 do:
   - set:
@@ -92,7 +95,7 @@ the [Temporal CLI](https://docs.temporal.io/cli/workflow#start).
 
 * [**Task Queue**](https://docs.temporal.io/task-queue): `zigflow`
 * [**Workflow Type**](https://docs.temporal.io/workflows#intro-to-workflows):
-  `simple-workflow`
+  `hello-world`
 
 ---
 

@@ -1,0 +1,14 @@
+document:
+  dsl: 1.0.0
+  namespace: zigflow # Mapped to the task queue
+  name: hello-world # Workflow type
+  version: 0.0.1
+  title: Hello World
+  summary: Hello world with Zigflow
+do:
+  - set:
+      output:
+        as:
+          data: ${ . }
+      set:
+        message: Hello from Ziggy
