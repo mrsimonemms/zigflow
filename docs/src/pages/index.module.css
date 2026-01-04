@@ -95,3 +95,24 @@
     display: none;
   }
 }
+
+.info_box {
+  background: var(--ifm-color-primary); /* strong accent */
+  color: white;
+  padding: 4rem 0;
+  text-align: center;
+
+  :global(.container) {
+    :global(.row) {
+      justify-content: center;
+
+      :global(p) {
+        font-weight: bold;
+
+        font-size: 1.25rem;
+        opacity: 0.93;
+        max-width: 720px;
+      }
+    }
+  }
+}

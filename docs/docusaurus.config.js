@@ -20,9 +20,12 @@
 // See: https://docusaurus.io/docs/api/docusaurus-config
 import { themes as prismThemes } from 'prism-react-renderer';
 
+import loadExamplesPlugin from './plugins/load-examples.mjs';
+
 const organizationName = 'mrsimonemms';
 const projectName = 'zigflow';
 const githubDomain = `${organizationName}/${projectName}`;
+const githubURL = `https://github.com/${githubDomain}`;
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -32,6 +35,10 @@ const config = {
   tagline:
     'A Temporal DSL for turning declarative YAML into production-ready workflows',
   favicon: 'img/favicon.ico',
+
+  customFields: {
+    githubURL,
+  },
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
@@ -59,6 +66,8 @@ const config = {
     locales: ['en'],
   },
 
+  plugins: [loadExamplesPlugin],
+
   presets: [
     [
       'classic',
@@ -68,7 +77,7 @@ const config = {
           sidebarPath: './sidebars.js',
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
-          editUrl: `https://github.com/${githubDomain}/tree/main/docs/`,
+          editUrl: `${githubURL}/tree/main/docs/`,
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
@@ -137,7 +146,7 @@ const config = {
             href: 'https://temporal.io',
           },
           {
-            href: `https://github.com/${githubDomain}`,
+            href: githubURL,
             label: 'GitHub',
             position: 'right',
           },
@@ -155,7 +164,7 @@ const config = {
               },
               {
                 label: 'GitHub Discussions',
-                href: `https://github.com/${githubDomain}/discussions`,
+                href: `${githubURL}/discussions`,
               },
             ],
           },
@@ -172,14 +181,14 @@ const config = {
               },
               {
                 label: 'GitHub',
-                href: `https://github.com/${githubDomain}`,
+                href: githubURL,
               },
             ],
           },
         ],
-        copyright: `Licenced under <a href="https://github.com/mrsimonemms/zigflow/blob/main/LICENSE" target="_blank">Apache-2.0</a>
+        copyright: `Licenced under <a href="${githubURL}/blob/main/LICENSE" target="_blank">Apache-2.0</a>
         <br />
-        Copyright &copy; 2025 - ${new Date().getFullYear()} <a href="https://github.com/mrsimonemms/zigflow/graphs/contributors" target="_blank">Zigflow authors</a>.
+        Copyright &copy; 2025 - ${new Date().getFullYear()} <a href="${githubURL}/graphs/contributors" target="_blank">Zigflow authors</a>.
         Built with Docusaurus.`,
       },
       prism: {
