@@ -27,6 +27,7 @@ A collection of examples
 | [Conditional Workflow](./conditionally-execute) | Execute tasks conditionally |
 | [External Calls](./external-calls) | An example of how to use Serverless Workflow to make external calls |
 | [For loops](./for-loop) | An example of how to use the for loop task |
+| [Hello World](./hello-world) | Hello world with Zigflow |
 | [Money Transfer Demo](./money-transfer) | Temporal's world-famous Money Transfer Demo, in Serverless Workflow form |
 | [Multiple Workflows](./multiple-workflows) | Configure multiple Temporal workflows |
 | [Python](./python) | The basic example, but in Python |
