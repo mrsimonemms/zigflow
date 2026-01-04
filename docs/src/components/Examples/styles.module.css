@@ -26,7 +26,6 @@
 }
 
 .exampleTabs {
-  :global(.tabs__item) {
-    min-width: 175px;
-  }
+  font-weight: inherit;
+  word-wrap: normal;
 }

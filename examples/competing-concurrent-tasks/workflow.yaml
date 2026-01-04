@@ -1,12 +1,12 @@
-# This is a simple Serverless Workflow that will be
-# translated into a Temporal workflow
 document:
   dsl: 1.0.0
   namespace: zigflow
-  name: competing-tasks # Workflow name
+  name: competing-tasks
   version: 0.0.1
   title: Competing Concurrent Tasks
   summary: Have two tasks competing and the first to finish wins
+  metadata:
+    display: false
 timeout:
   after:
     minutes: 1

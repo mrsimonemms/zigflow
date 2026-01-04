@@ -1,12 +1,10 @@
-# This is a simple Serverless Workflow that will be
-# translated into a Temporal workflow
 document:
   dsl: 1.0.0
   namespace: zigflow
-  name: childWorkflow # Workflow name
+  name: childWorkflow
   version: 0.0.1
-  title: Child Workflow
-  summary: An example of how to declare and use a child workflow
+  title: Child Workflows
+  summary: Define multiple workflows and call a child workflow from a parent
 timeout:
   after:
     minutes: 1

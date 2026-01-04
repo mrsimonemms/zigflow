@@ -1,12 +1,12 @@
-# This is a simple Serverless Workflow that will be
-# translated into a Temporal workflow
 document:
   dsl: 1.0.0
-  namespace: zigflow # Mapped to the task queue
-  name: run-task # Workflow name
+  namespace: zigflow
+  name: run-task
   version: 0.0.1
-  title: Run Task Workflow
-  summary: An example of how to use Serverless Workflow to run scripts and shell commands
+  title: Run Task
+  summary: How to execute code in NodeJS, Python and Shell
+  metadata:
+    display: false
 timeout:
   after:
     minutes: 1

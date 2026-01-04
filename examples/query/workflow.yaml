@@ -3,7 +3,7 @@ document:
   namespace: zigflow
   name: query
   version: 0.0.1
-  title: Listener Workflow (Query)
+  title: Query Listeners
   summary: Listen for Temporal query events
   metadata:
     # Acts as override to test out continue-as-new

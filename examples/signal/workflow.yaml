@@ -3,7 +3,7 @@ document:
   namespace: zigflow
   name: signal
   version: 0.0.1
-  title: Listener Workflow (Signal)
+  title: Signal Listeners
   summary: Listen for Temporal signal events
 do:
   - approveListener:

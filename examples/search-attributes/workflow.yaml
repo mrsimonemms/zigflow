@@ -4,8 +4,7 @@ document:
   name: searchAttributes # Workflow name
   version: 0.0.1
   title: Custom Search Attributes
-  summary: An example of how to add custom search attribute data into your Temporal calls
-# Optionally validate the input received
+  summary: How to add custom search attribute data into your Temporal workflows
 input:
   schema:
     format: json

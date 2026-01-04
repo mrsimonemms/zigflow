@@ -1,11 +1,9 @@
-# This is a simple Serverless Workflow that will be
-# translated into a Temporal workflow
 document:
   dsl: 1.0.0
   namespace: zigflow
-  name: schedule # Workflow name
+  name: schedule
   version: 0.0.1
-  title: Serverless Workflow
+  title: Scheduling
   summary: Schedule the tasks to be triggered automatically
   metadata:
     # Set the workflow name to trigger - this will either be the document.name or the Do task (see multiple-workflows example)

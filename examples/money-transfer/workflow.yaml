@@ -1,6 +1,3 @@
-# This is a simple Serverless Workflow that will be
-# translated into a Temporal workflow
-
 # Use YAML anchors to declare reusable components
 .anchors:
   deposit: &deposit
@@ -181,14 +178,15 @@
           wait:
             seconds: 1
 
-# Declare the Serverless Workflow spec
 document:
   dsl: 1.0.0
   namespace: MoneyTransfer
-  name: money-transfer # Workflow name
+  name: money-transfer
   version: 0.0.1
   title: Money Transfer Demo
-  summary: Temporal's world-famous Money Transfer Demo, in Serverless Workflow form
+  summary: Temporal's world-famous Money Transfer Demo, in Zigflow form
+  metadata:
+    display: false
 timeout:
   after:
     minutes: 1

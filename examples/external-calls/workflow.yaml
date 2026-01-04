@@ -1,10 +1,10 @@
 document:
   dsl: 1.0.0
-  namespace: zigflow # Mapped to the task queue
-  name: external-calls # Workflow name
+  namespace: zigflow
+  name: external-calls
   version: 0.0.1
   title: External Calls
-  summary: An example of how to use Serverless Workflow to make external calls
+  summary: An example of how to use Zigflow to make external gRPC and HTTP calls
 do:
   - fork:
       fork:

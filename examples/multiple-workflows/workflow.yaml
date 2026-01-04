@@ -1,12 +1,12 @@
-# This is a simple Serverless Workflow that will be
-# translated into a Temporal workflow
 document:
   dsl: 1.0.0
-  namespace: zigflow # Mapped to the task queue
+  namespace: zigflow
   name: workflow1 # Workflow name - not registered if every top-level task is a "do"
   version: 0.0.1
   title: Multiple Workflows
-  summary: Configure multiple Temporal workflows
+  summary: Configure multiple Temporal workflows from a single Zigflow definition
+  metadata:
+    display: false
 timeout:
   after:
     minutes: 1
