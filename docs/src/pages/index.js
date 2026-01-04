@@ -15,6 +15,7 @@
  */
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
+import Examples from '@site/src/components/Examples';
 import HomepageFeatures from '@site/src/components/HomepageFeatures';
 import Heading from '@theme/Heading';
 import Layout from '@theme/Layout';
@@ -60,6 +61,19 @@ export default function Home() {
       <HomepageHeader />
       <main>
         <HomepageFeatures />
+
+        <section className={styles.info_box}>
+          <div className="container">
+            <div className="row">
+              <p>
+                Zigflow is a Temporal DSL — a domain-specific language for
+                defining and running Temporal workflows declaratively.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <Examples />
       </main>
     </Layout>
   );
