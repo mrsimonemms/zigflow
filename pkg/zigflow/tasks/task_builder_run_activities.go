@@ -159,12 +159,30 @@ func (r *RunActivities) runExecCommand(
 	if err := cmd.Run(); err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok {
 			// The command received an exit code above 0 - return as-is
-			logger.Error("Shell error", "error", err)
-			return nil, temporal.NewApplicationErrorWithCause("Error calling command", "command", exitErr, stderr.String())
+			logger.Error("Shell error",
+				"error", err,
+				"command", command,
+				"stderr", r.stdToString(stdout),
+				"stdout", r.stdToString(stdout),
+			)
+			return nil, temporal.NewApplicationErrorWithCause(
+				"Error calling command",
+				"command",
+				exitErr,
+				map[string]any{
+					"command": command,
+					"stderr":  r.stdToString(stderr),
+					"stdout":  r.stdToString(stdout),
+				},
+			)
 		}
 		logger.Error("Error running command", "error", err)
 		return nil, fmt.Errorf("error running command: %w", err)
 	}
 
-	return strings.TrimSpace(stdout.String()), nil
+	return r.stdToString(stdout), nil
+}
+
+func (r *RunActivities) stdToString(std bytes.Buffer) string {
+	return strings.TrimSpace(std.String())
 }
