@@ -68,6 +68,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+
       - uses: actions/setup-node@v6
         with:
           node-version: lts/*
@@ -77,6 +82,10 @@ jobs:
 
       - name: Test
         run: npm run lint
+
+      - name: Generate CLI docs
+        working-directory: .
+        run: go run . generate-docs
 
       - name: Build docs
         env:

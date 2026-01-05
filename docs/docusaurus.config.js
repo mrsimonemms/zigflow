@@ -131,6 +131,12 @@ const config = {
           },
           {
             type: 'docSidebar',
+            sidebarId: 'cliSidebar',
+            position: 'left',
+            label: 'CLI',
+          },
+          {
+            type: 'docSidebar',
             sidebarId: 'deploymentSidebar',
             position: 'left',
             label: 'Deploying',
