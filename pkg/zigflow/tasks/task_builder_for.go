@@ -204,7 +204,7 @@ func (t *ForTaskBuilder) iterator(ctx workflow.Context, key, value any, state *u
 
 	logger.Info("Triggering forked child workflow", "name", t.childWorkflowName)
 
-	var res map[string]any
+	var res any
 	if err := workflow.ExecuteChildWorkflow(childCtx, t.childWorkflowName, state.Input, state).Get(ctx, &res); err != nil {
 		logger.Error("Error calling for workflow", "error", err, "workflow", t.childWorkflowName)
 		return nil, fmt.Errorf("error calling for workflow: %w", err)
