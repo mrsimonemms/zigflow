@@ -19,7 +19,7 @@ jobs:
     env:
       GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0 # fetch-depth is required
 
@@ -28,7 +28,7 @@ jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0 # Required for pre-commit to be able scan history
 
@@ -54,7 +54,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set up Go
         uses: actions/setup-go@v6
@@ -78,7 +78,7 @@ jobs:
     env:
       ZIGGY_EXAMPLE_ENVVAR: some-example-envvar
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install Temporal CLI
         uses: temporalio/setup-temporal@v0
@@ -110,7 +110,7 @@ jobs:
       - pre-commit
       - test
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0 # Required for goreleaser changelog to work correctly
 
@@ -129,7 +129,7 @@ jobs:
 
       - name: Get branch names
         id: branch-name
-        uses: tj-actions/branch-names@v8
+        uses: tj-actions/branch-names@v9
         with:
           strip_tag_prefix: v
 
@@ -171,7 +171,7 @@ jobs:
           echo "gitRepo=github.com/${GITHUB_REPOSITORY}" >> "$GITHUB_OUTPUT"
 
       - name: Build and push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           build-args: |

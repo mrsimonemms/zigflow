@@ -29,11 +29,11 @@ jobs:
       url: ${{ steps.vars.outputs.url }}
       destination: ${{ steps.vars.outputs.destination }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Get branch names
         id: branch-name
-        uses: tj-actions/branch-names@v8
+        uses: tj-actions/branch-names@v9
         with:
           strip_tag_prefix: v
 
@@ -64,7 +64,7 @@ jobs:
     needs:
       - setup
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -132,7 +132,7 @@ jobs:
     needs:
       - setup
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: gh-pages
 
