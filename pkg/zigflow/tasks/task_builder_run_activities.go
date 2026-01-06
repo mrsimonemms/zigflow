@@ -138,7 +138,7 @@ func (r *RunActivities) runExecCommand(
 		command = append(command, fmt.Sprintf("%v", v))
 	}
 
-	envvars := make([]string, 0)
+	envvars := os.Environ()
 	for k, v := range data["env"].(map[string]string) {
 		envvars = append(envvars, fmt.Sprintf("%s=%v", k, v))
 	}
