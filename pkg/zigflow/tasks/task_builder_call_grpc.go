@@ -18,7 +18,6 @@ package tasks
 
 import (
 	"github.com/mrsimonemms/zigflow/pkg/utils"
-	"github.com/mrsimonemms/zigflow/pkg/zigflow/activities"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
 	"go.temporal.io/sdk/worker"
 	"go.temporal.io/sdk/workflow"
@@ -53,6 +52,6 @@ func (t *CallGRPCTaskBuilder) Build() (TemporalWorkflowFunc, error) {
 	}
 
 	return func(ctx workflow.Context, input any, state *utils.State) (output any, err error) {
-		return t.executeActivity(ctx, (*activities.CallGRPC).CallGRPCActivity, input, state)
+		return t.executeActivity(ctx, (*CallGRPCActivities).CallGRPCActivity, input, state)
 	}, nil
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package activities
+package tasks
 
 import (
 	"bytes"
@@ -36,27 +36,12 @@ import (
 )
 
 func init() {
-	Registry = append(Registry, &CallHTTP{})
+	activitiesRegistry = append(activitiesRegistry, &CallHTTPActivities{})
 }
 
-// @link: https://github.com/serverlessworkflow/specification/blob/main/dsl-reference.md#http-response
-type HTTPResponse struct {
-	Request    HTTPRequest       `json:"request"`
-	StatusCode int               `json:"statusCode"`
-	Headers    map[string]string `json:"headers,omitempty"`
-	Content    any               `json:"content,omitempty"`
-}
+type CallHTTPActivities struct{}
 
-// @link: https://github.com/serverlessworkflow/specification/blob/main/dsl-reference.md#http-request
-type HTTPRequest struct {
-	Method  string            `json:"method"`
-	URI     string            `json:"uri"`
-	Headers map[string]string `json:"headers,omitempty"`
-}
-
-type CallHTTP struct{}
-
-func (c *CallHTTP) CallHTTPActivity(ctx context.Context, task *model.CallHTTP, input any, state *utils.State) (any, error) {
+func (c *CallHTTPActivities) CallHTTPActivity(ctx context.Context, task *model.CallHTTP, input any, state *utils.State) (any, error) {
 	logger := activity.GetLogger(ctx)
 	logger.Debug("Running call HTTP activity")
 
@@ -145,10 +130,10 @@ func (c *CallHTTP) CallHTTPActivity(ctx context.Context, task *model.CallHTTP, i
 		Content:    content,
 	}
 
-	return ParseOutput(task.With.Output, httpResponse, bodyRes), err
+	return c.parseOutput(task.With.Output, httpResponse, bodyRes), err
 }
 
-func (c *CallHTTP) callHTTPAction(ctx context.Context, task *model.CallHTTP, timeout time.Duration, state *utils.State) (
+func (c *CallHTTPActivities) callHTTPAction(ctx context.Context, task *model.CallHTTP, timeout time.Duration, state *utils.State) (
 	resp *http.Response,
 	method, url string,
 	reqHeaders map[string]string,
@@ -156,7 +141,7 @@ func (c *CallHTTP) callHTTPAction(ctx context.Context, task *model.CallHTTP, tim
 ) {
 	logger := activity.GetLogger(ctx)
 
-	args, err := ParseHTTPArguments(task, state)
+	args, err := c.parseHTTPArguments(task, state)
 	if err != nil {
 		return resp,
 			method, url,
@@ -207,10 +192,10 @@ func (c *CallHTTP) callHTTPAction(ctx context.Context, task *model.CallHTTP, tim
 	return resp, method, url, reqHeaders, err
 }
 
-// ParseHTTPArguments note that I looked at the github.com/go-viper/mapstructure/v2.Decode
+// parseHTTPArguments note that I looked at the github.com/go-viper/mapstructure/v2.Decode
 // function, but this wasn't able to decode some of the more complex data types. This is
 // more heavyweight than I'd like, but it's fine for now.
-func ParseHTTPArguments(task *model.CallHTTP, state *utils.State) (*model.HTTPArguments, error) {
+func (c *CallHTTPActivities) parseHTTPArguments(task *model.CallHTTP, state *utils.State) (*model.HTTPArguments, error) {
 	// First, we need to convert it to map[string]any
 	b, err := json.Marshal(task.With)
 	if err != nil {
@@ -245,7 +230,7 @@ func ParseHTTPArguments(task *model.CallHTTP, state *utils.State) (*model.HTTPAr
 	return &result, nil
 }
 
-func ParseOutput(outputType string, httpResp HTTPResponse, raw []byte) any {
+func (c *CallHTTPActivities) parseOutput(outputType string, httpResp HTTPResponse, raw []byte) any {
 	var output any
 	switch outputType {
 	case "raw":

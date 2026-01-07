@@ -21,7 +21,6 @@ import (
 	"time"
 
 	"github.com/mrsimonemms/zigflow/pkg/utils"
-	"github.com/mrsimonemms/zigflow/pkg/zigflow/activities"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -204,7 +203,7 @@ func TestRunTaskBuilderRunScriptValidation(t *testing.T) {
 func TestRunTaskBuilderRunScriptExecutesActivity(t *testing.T) {
 	var s testsuite.WorkflowTestSuite
 	env := s.NewTestWorkflowEnvironment()
-	runActivities := &activities.Run{}
+	runActivities := &RunActivities{}
 
 	task := &model.RunTask{
 		Run: model.RunTaskConfiguration{
@@ -248,7 +247,7 @@ func TestRunTaskBuilderRunScriptExecutesActivity(t *testing.T) {
 func TestRunTaskBuilderRunShellExecutesActivity(t *testing.T) {
 	var s testsuite.WorkflowTestSuite
 	env := s.NewTestWorkflowEnvironment()
-	runActivities := &activities.Run{}
+	runActivities := &RunActivities{}
 
 	task := &model.RunTask{
 		Run: model.RunTaskConfiguration{

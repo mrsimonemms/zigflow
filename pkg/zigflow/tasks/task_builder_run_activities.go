@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package activities
+package tasks
 
 import (
 	"bytes"
@@ -33,12 +33,12 @@ import (
 )
 
 func init() {
-	Registry = append(Registry, &Run{})
+	activitiesRegistry = append(activitiesRegistry, &RunActivities{})
 }
 
-type Run struct{}
+type RunActivities struct{}
 
-func (r *Run) CallScriptActivity(ctx context.Context, task *model.RunTask, input any, state *utils.State) (any, error) {
+func (r *RunActivities) CallScriptActivity(ctx context.Context, task *model.RunTask, input any, state *utils.State) (any, error) {
 	command := make([]string, 0)
 	var file string
 
@@ -89,7 +89,7 @@ func (r *Run) CallScriptActivity(ctx context.Context, task *model.RunTask, input
 	)
 }
 
-func (r *Run) CallShellActivity(ctx context.Context, task *model.RunTask, input any, state *utils.State) (any, error) {
+func (r *RunActivities) CallShellActivity(ctx context.Context, task *model.RunTask, input any, state *utils.State) (any, error) {
 	logger := activity.GetLogger(ctx)
 	logger.Debug("Running call script activity")
 
@@ -104,7 +104,7 @@ func (r *Run) CallShellActivity(ctx context.Context, task *model.RunTask, input 
 }
 
 // runExecCommand a general purpose function to build and execute a command in an activity
-func (r *Run) runExecCommand(
+func (r *RunActivities) runExecCommand(
 	ctx context.Context,
 	command []string,
 	args *model.RunArguments,
@@ -183,6 +183,6 @@ func (r *Run) runExecCommand(
 	return r.stdToString(stdout), nil
 }
 
-func (r *Run) stdToString(std bytes.Buffer) string {
+func (r *RunActivities) stdToString(std bytes.Buffer) string {
 	return strings.TrimSpace(std.String())
 }

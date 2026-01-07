@@ -20,7 +20,6 @@ import (
 	"fmt"
 
 	"github.com/mrsimonemms/zigflow/pkg/utils"
-	"github.com/mrsimonemms/zigflow/pkg/zigflow/activities"
 	"github.com/mrsimonemms/zigflow/pkg/zigflow/metadata"
 	"github.com/rs/zerolog/log"
 	swUtils "github.com/serverlessworkflow/sdk-go/v3/impl/utils"
@@ -30,8 +29,10 @@ import (
 	"go.temporal.io/sdk/workflow"
 )
 
+var activitiesRegistry []any = make([]any, 0)
+
 func ActivitiesList() []any {
-	return activities.Registry
+	return activitiesRegistry
 }
 
 type TaskBuilder interface {
