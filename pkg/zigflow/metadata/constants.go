@@ -24,6 +24,8 @@ import (
 
 const MetadataActivityOptions string = "activityOptions"
 
+const MetadataHeartbeat string = "heartbeat"
+
 const MetadataSearchAttribute string = "searchAttributes"
 
 const (

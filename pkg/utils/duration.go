@@ -17,10 +17,37 @@
 package utils
 
 import (
+	"context"
 	"time"
 
+	"github.com/rs/zerolog/log"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
 )
+
+// ExecuteEvery executes the given function on the duration until the context has stopped
+func ExecuteEvery(ctx context.Context, duration time.Duration, fn func(context.Context)) (cctx context.Context, cancel func()) {
+	cctx, cancel = context.WithCancel(ctx)
+
+	go func() {
+		ticker := time.NewTicker(duration)
+		defer ticker.Stop()
+
+		l := log.With().Ctx(cctx).Dur("duration", duration).Logger()
+
+		for {
+			select {
+			case <-ticker.C:
+				l.Debug().Msg("Triggering background function")
+				fn(cctx)
+			case <-cctx.Done():
+				l.Debug().Msg("Stopping background function")
+				return
+			}
+		}
+	}()
+
+	return cctx, cancel
+}
 
 // Convert the Serverless Workflow duration into a time Duration
 func ToDuration(v *model.Duration) (duration time.Duration) {
