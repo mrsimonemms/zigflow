@@ -26,6 +26,7 @@ import (
 )
 
 type ActivityOptions struct {
+	HeartbeatTimeout       *model.Duration   `json:"heartbeatTimeout,omitempty"`
 	ScheduleToCloseTimeout *model.Duration   `json:"scheduleToCloseTimeout"`
 	ScheduleToStartTimeout *model.Duration   `json:"scheduleToStartTimeout"`
 	StartToCloseTimeout    *model.Duration   `json:"startToCloseTimeout"`
@@ -36,6 +37,11 @@ type ActivityOptions struct {
 }
 
 func (a *ActivityOptions) ToTemporal(opts *workflow.ActivityOptions) workflow.ActivityOptions {
+	if a.HeartbeatTimeout != nil {
+		opts.HeartbeatTimeout = utils.ToDuration(a.HeartbeatTimeout)
+	}
+	fmt.Printf("%+v\n", opts.HeartbeatTimeout)
+
 	if a.ScheduleToCloseTimeout != nil {
 		opts.ScheduleToCloseTimeout = utils.ToDuration(a.ScheduleToCloseTimeout)
 	}

@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/mrsimonemms/zigflow/pkg/utils"
+	"github.com/mrsimonemms/zigflow/pkg/zigflow/activities"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
 	"github.com/stretchr/testify/assert"
 )
@@ -44,7 +45,7 @@ func TestParseHTTPArguments(t *testing.T) {
 		},
 	}
 
-	got, err := (&CallHTTPActivities{}).parseHTTPArguments(task, state)
+	got, err := activities.ParseHTTPArguments(task, state)
 	assert.NoError(t, err)
 	assert.Equal(t, "GET", got.Method)
 	assert.Equal(t, "https://example.com", got.Endpoint.String())
@@ -53,7 +54,7 @@ func TestParseHTTPArguments(t *testing.T) {
 }
 
 func TestParseOutput(t *testing.T) {
-	httpResp := HTTPResponse{
+	httpResp := activities.HTTPResponse{
 		StatusCode: 200,
 		Content: map[string]any{
 			"message": "ok",
@@ -85,7 +86,7 @@ func TestParseOutput(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got := (&CallHTTPActivities{}).parseOutput(tc.outputType, httpResp, raw)
+			got := activities.ParseOutput(tc.outputType, httpResp, raw)
 			assert.Equal(t, tc.expect, got)
 		})
 	}

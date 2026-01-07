@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package tasks
+package activities
 
 import (
 	"bytes"
@@ -34,12 +34,12 @@ import (
 )
 
 func init() {
-	activitiesRegistry = append(activitiesRegistry, &CallGRPCActivities{})
+	Registry = append(Registry, &CallGRPC{})
 }
 
-type CallGRPCActivities struct{}
+type CallGRPC struct{}
 
-func (c *CallGRPCActivities) CallGRPCActivity(
+func (c *CallGRPC) CallGRPCActivity(
 	ctx context.Context, task *model.CallGRPC, input any, state *utils.State,
 ) (any, error) {
 	logger := activity.GetLogger(ctx)
