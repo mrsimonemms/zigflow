@@ -21,6 +21,7 @@ import (
 	"slices"
 
 	"github.com/mrsimonemms/zigflow/pkg/utils"
+	"github.com/mrsimonemms/zigflow/pkg/zigflow/activities"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
 	"go.temporal.io/api/enums/v1"
 	"go.temporal.io/sdk/temporal"
@@ -111,11 +112,11 @@ func (t *RunTaskBuilder) executeCommand(ctx workflow.Context, activityFn, input 
 }
 
 func (t *RunTaskBuilder) runScript(ctx workflow.Context, input any, state *utils.State) (any, error) {
-	return t.executeCommand(ctx, (*RunActivities).CallScriptActivity, input, state)
+	return t.executeCommand(ctx, (*activities.Run).CallScriptActivity, input, state)
 }
 
 func (t *RunTaskBuilder) runShell(ctx workflow.Context, input any, state *utils.State) (any, error) {
-	return t.executeCommand(ctx, (*RunActivities).CallShellActivity, input, state)
+	return t.executeCommand(ctx, (*activities.Run).CallShellActivity, input, state)
 }
 
 func (t *RunTaskBuilder) runWorkflow(ctx workflow.Context, input any, state *utils.State) (any, error) {

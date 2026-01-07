@@ -18,25 +18,11 @@ package tasks
 
 import (
 	"github.com/mrsimonemms/zigflow/pkg/utils"
+	"github.com/mrsimonemms/zigflow/pkg/zigflow/activities"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
 	"go.temporal.io/sdk/worker"
 	"go.temporal.io/sdk/workflow"
 )
-
-// @link: https://github.com/serverlessworkflow/specification/blob/main/dsl-reference.md#http-response
-type HTTPResponse struct {
-	Request    HTTPRequest       `json:"request"`
-	StatusCode int               `json:"statusCode"`
-	Headers    map[string]string `json:"headers,omitempty"`
-	Content    any               `json:"content,omitempty"`
-}
-
-// @link: https://github.com/serverlessworkflow/specification/blob/main/dsl-reference.md#http-request
-type HTTPRequest struct {
-	Method  string            `json:"method"`
-	URI     string            `json:"uri"`
-	Headers map[string]string `json:"headers,omitempty"`
-}
 
 func NewCallHTTPTaskBuilder(
 	temporalWorker worker.Worker,
@@ -60,6 +46,6 @@ type CallHTTPTaskBuilder struct {
 
 func (t *CallHTTPTaskBuilder) Build() (TemporalWorkflowFunc, error) {
 	return func(ctx workflow.Context, input any, state *utils.State) (any, error) {
-		return t.executeActivity(ctx, (*CallHTTPActivities).CallHTTPActivity, input, state)
+		return t.executeActivity(ctx, (*activities.CallHTTP).CallHTTPActivity, input, state)
 	}, nil
 }
