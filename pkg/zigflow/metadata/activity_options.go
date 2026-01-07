@@ -40,6 +40,7 @@ func (a *ActivityOptions) ToTemporal(opts *workflow.ActivityOptions) workflow.Ac
 	if a.HeartbeatTimeout != nil {
 		opts.HeartbeatTimeout = utils.ToDuration(a.HeartbeatTimeout)
 	}
+	fmt.Printf("%+v\n", opts.HeartbeatTimeout)
 
 	if a.ScheduleToCloseTimeout != nil {
 		opts.ScheduleToCloseTimeout = utils.ToDuration(a.ScheduleToCloseTimeout)
