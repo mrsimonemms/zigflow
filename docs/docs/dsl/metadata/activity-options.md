@@ -29,6 +29,7 @@ cases. In most scenarios, you probably won't need to configure this.
 
 | Name | Type | Required | Default | Description |
 | :--- | :---: | :---: | :---: | :--- |
+| heartbeatTimeout | [`duration`](../intro#duration) | `no` | - | Heartbeat interval. A [`heartbeat`](./heartbeat) must be set and be called before the interval passes. |
 | scheduleToCloseTimeout | [`duration`](../intro#duration) | `no` | - | Total time that a workflow is willing to wait for an Activity to complete |
 | scheduleToStartTimeout | [`duration`](../intro#duration) | `no` | - | Time that the Activity Task can stay in the Task Queue before it is picked up by a Worker. Do not specify this timeout unless using host specific Task Queues for Activity Tasks are being used for routing |
 | startToCloseTimeout | [`duration`](../intro#duration) | `no` | `{"minutes":5}` | Maximum time of a single Activity execution attempt |
