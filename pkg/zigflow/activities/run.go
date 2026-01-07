@@ -26,6 +26,7 @@ import (
 	"strings"
 
 	"github.com/mrsimonemms/zigflow/pkg/utils"
+	"github.com/mrsimonemms/zigflow/pkg/zigflow/metadata"
 	swUtil "github.com/serverlessworkflow/sdk-go/v3/impl/utils"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
 	"go.temporal.io/sdk/activity"
@@ -86,6 +87,7 @@ func (r *Run) CallScriptActivity(ctx context.Context, task *model.RunTask, input
 		task.Run.Script.Environment,
 		state,
 		dir,
+		task.GetBase(),
 	)
 }
 
@@ -100,6 +102,7 @@ func (r *Run) CallShellActivity(ctx context.Context, task *model.RunTask, input 
 		task.Run.Shell.Environment,
 		state,
 		"",
+		task.GetBase(),
 	)
 }
 
@@ -111,8 +114,12 @@ func (r *Run) runExecCommand(
 	env map[string]string,
 	state *utils.State,
 	dir string,
+	task *model.TaskBase,
 ) (any, error) {
 	logger := activity.GetLogger(ctx)
+
+	stopHeartbeat := metadata.StartActivityHeartbeat(ctx, task)
+	defer stopHeartbeat()
 
 	if args == nil {
 		args = &model.RunArguments{}
