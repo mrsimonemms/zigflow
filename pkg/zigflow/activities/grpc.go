@@ -26,6 +26,7 @@ import (
 
 	"github.com/fullstorydev/grpcurl"
 	"github.com/mrsimonemms/zigflow/pkg/utils"
+	"github.com/mrsimonemms/zigflow/pkg/zigflow/metadata"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
 	"go.temporal.io/sdk/activity"
 	"go.temporal.io/sdk/temporal"
@@ -43,6 +44,9 @@ func (c *CallGRPC) CallGRPCActivity(
 	ctx context.Context, task *model.CallGRPC, input any, state *utils.State,
 ) (any, error) {
 	logger := activity.GetLogger(ctx)
+
+	stopHeartbeat := metadata.StartActivityHeartbeat(ctx, task.GetBase())
+	defer stopHeartbeat()
 
 	ob, err := utils.TraverseAndEvaluateObj(model.NewObjectOrRuntimeExpr(map[string]any{
 		"service": task.With.Service,

@@ -29,6 +29,7 @@ import (
 	"time"
 
 	"github.com/mrsimonemms/zigflow/pkg/utils"
+	"github.com/mrsimonemms/zigflow/pkg/zigflow/metadata"
 	swUtil "github.com/serverlessworkflow/sdk-go/v3/impl/utils"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
 	"go.temporal.io/sdk/activity"
@@ -59,6 +60,9 @@ type CallHTTP struct{}
 func (c *CallHTTP) CallHTTPActivity(ctx context.Context, task *model.CallHTTP, input any, state *utils.State) (any, error) {
 	logger := activity.GetLogger(ctx)
 	logger.Debug("Running call HTTP activity")
+
+	stopHeartbeat := metadata.StartActivityHeartbeat(ctx, task.GetBase())
+	defer stopHeartbeat()
 
 	state = state.AddActivityInfo(ctx)
 
