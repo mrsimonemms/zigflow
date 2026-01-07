@@ -138,7 +138,7 @@ func SetActivityOptions(ctx workflow.Context, wf *model.Workflow, task *model.Ta
 	}
 
 	// Override any global activity options
-	if a, ok := wf.Document.Metadata[MetadataActvitiyOptions]; ok {
+	if a, ok := wf.Document.Metadata[MetadataActivityOptions]; ok {
 		var opts ActivityOptions
 		if err := utils.ToType(a, &opts); err != nil {
 			return nil, fmt.Errorf("error decoding global activity options metadata: %w", err)
@@ -149,7 +149,7 @@ func SetActivityOptions(ctx workflow.Context, wf *model.Workflow, task *model.Ta
 	}
 
 	// Override any task-specific activity options
-	if a, ok := task.Metadata[MetadataActvitiyOptions]; ok {
+	if a, ok := task.Metadata[MetadataActivityOptions]; ok {
 		var opts ActivityOptions
 		if err := utils.ToType(a, &opts); err != nil {
 			return nil, fmt.Errorf("error decoding task activity options metadata: %w", err)
