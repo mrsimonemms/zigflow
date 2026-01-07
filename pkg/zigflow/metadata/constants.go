@@ -22,7 +22,7 @@ import (
 	"go.temporal.io/sdk/temporal"
 )
 
-const MetadataActivityOptions string = "activityOptions"
+const MetadataActvitiyOptions string = "activityOptions"
 
 const MetadataSearchAttribute string = "searchAttributes"
 
