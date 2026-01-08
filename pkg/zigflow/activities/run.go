@@ -25,6 +25,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/mrsimonemms/zigflow/pkg/utils"
 	"github.com/mrsimonemms/zigflow/pkg/zigflow/metadata"
 	swUtil "github.com/serverlessworkflow/sdk-go/v3/impl/utils"
@@ -38,6 +39,20 @@ func init() {
 }
 
 type Run struct{}
+
+func (r *Run) CallContainerActivity(ctx context.Context, task *model.RunTask, input any, state *utils.State) (any, error) {
+	logger := activity.GetLogger(ctx)
+	// @todo(sje): support Kubernetes (and other container runtimes) in addition to Docker #181
+	logger.Debug("Running call Docker container activity")
+
+	if task.Run.Container.Name == "" {
+		n := uuid.NewString()
+		logger.Debug("Container name not set", "name", n)
+		task.Run.Container.Name = n
+	}
+
+	return r.runDockerCommand(ctx, task, state)
+}
 
 func (r *Run) CallScriptActivity(ctx context.Context, task *model.RunTask, input any, state *utils.State) (any, error) {
 	command := make([]string, 0)
@@ -104,6 +119,57 @@ func (r *Run) CallShellActivity(ctx context.Context, task *model.RunTask, input 
 		"",
 		task.GetBase(),
 	)
+}
+
+// runDockerCommand runs the script on a container using the Docker runtime
+func (r *Run) runDockerCommand(ctx context.Context, task *model.RunTask, state *utils.State) (any, error) {
+	info := activity.GetInfo(ctx)
+
+	if _, err := exec.LookPath("docker"); err != nil {
+		return nil, temporal.NewNonRetryableApplicationError("Docker not installed", "container", err)
+	}
+
+	cmd := []string{
+		"docker",
+		"run",
+		"--pull=always",
+		fmt.Sprintf("--label=workflowId=%s", info.WorkflowExecution.ID),
+		fmt.Sprintf("--label=runId=%s", info.WorkflowExecution.RunID),
+		fmt.Sprintf("--label=activityId=%s", info.ActivityID),
+		fmt.Sprintf("--name=%s", task.Run.Container.Name),
+	}
+
+	if c := task.Run.Container.Command; c != "" {
+		cmd = append(cmd, fmt.Sprintf("--entrypoint=%s", c))
+	}
+
+	if task.Run.Container.Lifetime == nil || task.Run.Container.Lifetime.Cleanup == "always" {
+		cmd = append(cmd, "--rm")
+	}
+
+	if envs := task.Run.Container.Environment; envs != nil {
+		for k, v := range envs {
+			cmd = append(cmd, fmt.Sprintf("--env=%s=%s", k, v))
+		}
+	}
+
+	if vols := task.Run.Container.Volumes; vols != nil {
+		for k, remote := range vols {
+			local, err := filepath.Abs(k)
+			if err != nil {
+				return nil, fmt.Errorf("error getting volume absolute path: %w", err)
+			}
+
+			cmd = append(cmd, fmt.Sprintf("--volume=%s:%s", local, remote))
+		}
+	}
+	// Add in the image
+	cmd = append(cmd, task.Run.Container.Image)
+
+	// Add in arguments
+	cmd = append(cmd, task.Run.Container.Arguments...)
+
+	return r.runExecCommand(ctx, []string{cmd[0]}, &model.RunArguments{Value: cmd[1:]}, nil, state, "", task.GetBase())
 }
 
 // runExecCommand a general purpose function to build and execute a command in an activity

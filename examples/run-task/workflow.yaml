@@ -11,6 +11,16 @@ timeout:
   after:
     minutes: 1
 do:
+  - container:
+      export:
+        as: '${ $context + { container: . } }'
+      run:
+        container:
+          image: alpine
+          arguments:
+            - env
+          environment:
+            hello: world
   - nodejs:
       export:
         as: '${ $context + { nodejs: . } }'

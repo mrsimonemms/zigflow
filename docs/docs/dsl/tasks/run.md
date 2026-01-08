@@ -6,15 +6,70 @@ Provides the capability to run execute external commands
 
 | Name | Type | Required | Description |
 | --- | :---: | :---: | --- |
-| run.script | [`script`](#script-process) | `no` | The definition of the script to run.<br />*Required if `shell` and `workflow` have not been set.* |
-| run.shell | [`shell`](#shell-process) | `no` | The definition of the shell command to run.<br />*Required if `script` and `workflow` have not been set.* |
-| run.workflow | [`workflow`](#workflow-process) | `no` | The definition of the workflow to run.<br />*Required if `script` and `shell` have not been set.* |
+| run.container | [`container`](#container) | `no` | The definition of the container to run.<br />*Required if `script`, `shell` and `workflow` have not been set.* |
+| run.script | [`script`](#script) | `no` | The definition of the script to run.<br />*Required if `container`, `shell` and `workflow` have not been set.* |
+| run.shell | [`shell`](#shell) | `no` | The definition of the shell command to run.<br />*Required if `container`, `script` and `workflow` have not been set.* |
+| run.workflow | [`workflow`](#workflow) | `no` | The definition of the workflow to run.<br />*Required if `container`, `script` and `shell` have not been set.* |
 | await | `boolean` | `no` | Determines whether or not the process to run should be awaited for.<br />*When set to `false`, the task cannot wait for the process to complete and thus cannot output the process’s result.* Only available for workflows.<br />*Defaults to `true`.* |
 
-## Script Process
+## Container
+
+:::info
+Currently, this only supports Docker containers run via the `docker` binary on
+your local machine. Additional container runtimes are planned - please upvote
+[#181](https://github.com/mrsimonemms/zigflow/issues/181) to influence prioritsation.
+:::
+
+Enables the execution of external processes encapsulated within a containerised
+environment, allowing workflows to interact with and execute complex operations
+using containerised applications, scripts, or commands.
+
+### Properties {#container-properties}
+
+| Name | Type | Required | Description |
+| --- | :---: | :---: | --- |
+| image | `string` | `yes` | The name of the container image to run |
+| name | `string` | `no` | A [runtime expression](./intro.md#runtime-expressions), if any, used to give specific name to the container. Uses a UUID if not set. |
+| command | `string` | `no` | The command, if any, to execute on the container |
+| ports | `map` | `no` | The container's port mappings, if any |
+| volumes | `map` | `no` | The container's volume mappings, if any |
+| environment | `map` | `no` | A key/value mapping of the environment variables, if any, to use when running the configured process |
+| arguments | `string[]` | `no` | A list of the arguments, if any, passed as argv to the command or default container CMD |
+| lifetime | [`containerLifetime`](#container-lifetime) | `no` | An object used to configure the container's lifetime |
+
+### Example {#container-example}
+
+```yaml
+document:
+  dsl: 1.0.0
+  namespace: zigflow
+  name: example
+  version: 0.0.1
+do:
+  - container:
+      run:
+        container:
+          image: alpine
+          arguments:
+            - env
+          environment:
+            hello: world
+```
+
+### Container Lifetime
+
+Configures the lifetime of a container.
+
+#### Properties {#container-lifetime-properties}
+
+| Property | Type | Required | Description |
+| --- | :---: | :---: | --- |
+| cleanup | `string` | `yes` | The cleanup policy to use.<br />*Supported values are:<br />- `always`: the container is deleted immediately after execution.<br />- `never`: the runtime should never delete the container.*<br />*Defaults to `always`.* |
+
+## Script
 
 Enables the execution of custom scripts or code within a workflow, empowering
-workflows to perform specialized logic, data processing, or integration tasks by
+workflows to perform specialised logic, data processing, or integration tasks by
 executing user-defined scripts written in various programming languages.
 
 ### Properties {#script-properties}
@@ -42,7 +97,7 @@ This is a list of available languages and the command that is called.
 | `js` | `node` |
 | `python` | `python` |
 
-### Examples {#script-examples}
+### Example {#script-example}
 
 ```yaml
 document:
@@ -92,7 +147,7 @@ do:
             NAME: python
 ```
 
-## Shell Process
+## Shell
 
 Enables the execution of shell commands within a workflow, enabling workflows to
 interact with the underlying operating system and perform system-level operations,
@@ -127,7 +182,7 @@ do:
             - /
 ```
 
-## Workflow Process
+## Workflow
 
 Enables the invocation and execution of [child workflows](https://docs.temporal.io/child-workflows)
 from a parent workflow, facilitating modularization, reusability, and abstraction
