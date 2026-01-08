@@ -2,7 +2,8 @@
 
 {{ template "chart.deprecationWarning" . }}
 
-{{ template "chart.badgesSection" . }}
+[![Version](https://img.shields.io/github/v/release/mrsimonemms/zigflow?label=Version&color=007ec6)](https://github.com/mrsimonemms/zigflow/tree/main/charts/zigflow)
+![Type: Application](https://img.shields.io/badge/Type-Application-informational)
 
 {{ template "chart.description" . }}
 

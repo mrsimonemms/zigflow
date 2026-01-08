@@ -1,6 +1,7 @@
 # Zigflow
 
-![Version: 0.0.0](https://img.shields.io/badge/Version-0.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+[![Version](https://img.shields.io/github/v/release/mrsimonemms/zigflow?label=Version&color=007ec6)](https://github.com/mrsimonemms/zigflow/tree/main/charts/zigflow)
+![Type: Application](https://img.shields.io/badge/Type-Application-informational)
 
 A Temporal DSL for turning declarative YAML into production-ready workflows
 
