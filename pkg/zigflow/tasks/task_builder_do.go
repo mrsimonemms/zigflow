@@ -80,11 +80,15 @@ func (t *DoTaskBuilder) Build() (TemporalWorkflowFunc, error) {
 
 	var hasNoDo bool
 	for _, task := range *t.task.Do {
-		l := log.With().Str("task", task.Key).Logger()
+		l := log.With().Str("task", task.Key).Str("workflow", t.GetTaskName()).Logger()
 
+		addTasks := true
 		if do := task.AsDoTask(); do == nil {
 			l.Debug().Msg("No do task detected")
 			hasNoDo = true
+		} else if hasNoDo {
+			l.Debug().Msg("Nested do task detected - ignoring")
+			addTasks = false
 		}
 
 		// Build a task builder
@@ -100,7 +104,8 @@ func (t *DoTaskBuilder) Build() (TemporalWorkflowFunc, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error building task: %w", err)
 		}
-		if fn != nil {
+		if fn != nil && addTasks {
+			l.Debug().Msg("Adding task to workflow")
 			tasks = append(tasks, workflowFunc{
 				Func:        fn,
 				Name:        builder.GetTaskName(),
