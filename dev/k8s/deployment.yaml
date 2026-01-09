@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zigflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zigflow
+  template:
+    metadata:
+      labels:
+        app: zigflow
+    spec:
+      containers:
+        - name: zigflow
+          image: zigflow
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: health
+              containerPort: 3000

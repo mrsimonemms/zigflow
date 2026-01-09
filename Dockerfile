@@ -17,9 +17,11 @@ ARG GIT_COMMIT
 ARG GIT_REPO="github.com/mrsimonemms/zigflow"
 ARG PROJECT_NAME="zigflow"
 ARG VERSION
+ARG GOFLAGS=""
 ENV CGO_ENABLED=0
 ENV GOOS=linux
 ENV GOCACHE=/go/.cache
+ENV GOFLAGS="${GOFLAGS}"
 ENV PROJECT_NAME="${PROJECT_NAME}"
 ENV WORKFLOW_FILE=/go/app/workflow.example.yaml
 RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - \

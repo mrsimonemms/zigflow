@@ -1,0 +1,41 @@
+apiVersion: skaffold/v4beta13
+kind: Config
+metadata:
+  name: zigflow
+build:
+  local:
+    push: false
+  artifacts:
+    - image: zigflow
+      docker:
+        dockerfile: Dockerfile
+        target: builder
+        buildArgs:
+          GIT_COMMIT: dev
+          GOFLAGS: -buildvcs=false
+          VERSION: dev
+      sync:
+        infer:
+          - "**/*.go"
+
+deploy:
+  kubectl:
+    defaultNamespace: zigflow
+    remoteManifests:
+      - dev/k8s/*.yaml
+  # helm:
+  #   releases:
+  #     - name: zigflow
+  #       chartPath: charts/zigflow
+  #       namespace: zigflow
+  #       createNamespace: true
+  #       setValues:
+  #         config: {}
+  #         image:
+  #           repository: zigflow
+  #         workflow:
+  #           enabled: false
+  #       setValueTemplates:
+  #         image:
+  #           tag: "{{.IMAGE_TAG_zigflow}}"
+
