@@ -21,8 +21,11 @@ import (
 	"testing"
 
 	"github.com/mrsimonemms/zigflow/pkg/utils"
+	"github.com/nexus-rpc/sdk-go/nexus"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"go.temporal.io/sdk/activity"
 	"go.temporal.io/sdk/testsuite"
 	"go.temporal.io/sdk/workflow"
 )
@@ -441,6 +444,73 @@ func TestDoTaskBuilderShouldSkip(t *testing.T) {
 	}
 }
 
+func TestDoTaskBuilderBuildSkipsNestedDoAfterNonDoTask(t *testing.T) {
+	// Outer do: first a non-do task, then a nested do task.
+	task := &model.DoTask{
+		Do: &model.TaskList{
+			{
+				Key: "step1",
+				Task: &model.SetTask{
+					Set: map[string]any{"a": "Homer"},
+				},
+			},
+			{
+				Key: "nested",
+				Task: &model.DoTask{
+					Do: &model.TaskList{
+						{
+							Key: "step2",
+							Task: &model.SetTask{
+								Set: map[string]any{"b": "Marge"},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	temporalWorker := new(WorkflowRegistryMock)
+
+	temporalWorker.
+		On("RegisterWorkflowWithOptions", mock.Anything, workflow.RegisterOptions{
+			Name: "nested",
+		}).
+		Once()
+	temporalWorker.
+		On("RegisterWorkflowWithOptions", mock.Anything, workflow.RegisterOptions{
+			Name: "do-task",
+		}).
+		Once()
+
+	builder, err := NewDoTaskBuilder(temporalWorker, task, "do-task", &model.Workflow{})
+	assert.NoError(t, err)
+
+	fn, err := builder.Build()
+	assert.NoError(t, err)
+
+	state := utils.NewState()
+
+	var s testsuite.WorkflowTestSuite
+	env := s.NewTestWorkflowEnvironment()
+
+	env.RegisterWorkflowWithOptions(func(ctx workflow.Context) (any, error) {
+		return fn(ctx, nil, state)
+	}, workflow.RegisterOptions{Name: "do-task"})
+
+	env.ExecuteWorkflow("do-task")
+	assert.NoError(t, env.GetWorkflowError())
+
+	var result any
+	assert.NoError(t, env.GetWorkflowResult(&result))
+
+	// Because a non-do task ran first, the nested do should be skipped,
+	// so the result and state should only reflect step1.
+	assert.Equal(t, map[string]any{"a": "Homer"}, result)
+	assert.Equal(t, "Homer", state.Data["a"])
+	assert.Nil(t, state.Data["b"])
+}
+
 func newOutputWorkflowFuncs(runOrder *[]string, capturedState **utils.State) []workflowFunc {
 	taskOneBase := &model.TaskBase{
 		Export: &model.Export{
@@ -556,4 +626,57 @@ func newTestDoTaskBuilder(name string, opts ...DoTaskOpts) *DoTaskBuilder {
 		},
 		opts: doOpts,
 	}
+}
+
+type WorkflowRegistryMock struct {
+	mock.Mock
+}
+
+// RegisterActivity implements [worker.Worker].
+func (m *WorkflowRegistryMock) RegisterActivity(a any) {
+	panic("unimplemented")
+}
+
+// RegisterActivityWithOptions implements [worker.Worker].
+func (m *WorkflowRegistryMock) RegisterActivityWithOptions(a any, options activity.RegisterOptions) {
+	panic("unimplemented")
+}
+
+// RegisterDynamicActivity implements [worker.Worker].
+func (m *WorkflowRegistryMock) RegisterDynamicActivity(a any, options activity.DynamicRegisterOptions) {
+	panic("unimplemented")
+}
+
+// RegisterDynamicWorkflow implements [worker.Worker].
+func (m *WorkflowRegistryMock) RegisterDynamicWorkflow(w any, options workflow.DynamicRegisterOptions) {
+	panic("unimplemented")
+}
+
+// RegisterNexusService implements [worker.Worker].
+func (m *WorkflowRegistryMock) RegisterNexusService(*nexus.Service) {
+	panic("unimplemented")
+}
+
+// RegisterWorkflow implements [worker.Worker].
+func (m *WorkflowRegistryMock) RegisterWorkflow(w any) {
+	panic("unimplemented")
+}
+
+// Run implements [worker.Worker].
+func (m *WorkflowRegistryMock) Run(interruptCh <-chan any) error {
+	panic("unimplemented")
+}
+
+// Start implements [worker.Worker].
+func (m *WorkflowRegistryMock) Start() error {
+	panic("unimplemented")
+}
+
+// Stop implements [worker.Worker].
+func (m *WorkflowRegistryMock) Stop() {
+	panic("unimplemented")
+}
+
+func (m *WorkflowRegistryMock) RegisterWorkflowWithOptions(w any, opts workflow.RegisterOptions) {
+	m.Called(w, opts)
 }
