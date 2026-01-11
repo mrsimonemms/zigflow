@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -218,11 +219,17 @@ func (r *Run) runExecCommand(
 
 	var stderr bytes.Buffer
 	var stdout bytes.Buffer
+	logWriter := utils.LogWriter{
+		Logger: logger,
+		Level:  "info",
+		Msg:    "Run task response",
+	}
+
 	//nolint:gosec // Allow dynamic commands
 	cmd := exec.CommandContext(ctx, command[0], command[1:]...)
 	cmd.Env = envvars
-	cmd.Stderr = &stderr
-	cmd.Stdout = &stdout
+	cmd.Stdout = io.MultiWriter(&stdout, logWriter.AddFields([]any{"type", "stdout"}))
+	cmd.Stderr = io.MultiWriter(&stderr, logWriter.AddFields([]any{"type", "stderr"}))
 
 	if dir != "" {
 		cmd.Dir = dir
