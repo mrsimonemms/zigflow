@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"github.com/mrsimonemms/zigflow/pkg/utils"
+	"github.com/rs/zerolog/log"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
 	"go.temporal.io/sdk/worker"
 	"go.temporal.io/sdk/workflow"
@@ -57,6 +58,9 @@ func (t *SwitchTaskBuilder) Build() (TemporalWorkflowFunc, error) {
 			}
 		}
 	}
+	if !hasDefault {
+		log.Warn().Str("task", t.GetTaskName()).Msg("No default switch task detected")
+	}
 
 	return func(ctx workflow.Context, input any, state *utils.State) (any, error) {
 		logger := workflow.GetLogger(ctx)
@@ -86,7 +90,7 @@ func (t *SwitchTaskBuilder) Build() (TemporalWorkflowFunc, error) {
 				}
 
 				// Stop it executing anything else
-				return nil, nil
+				return res, nil
 			}
 		}
 

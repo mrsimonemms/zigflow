@@ -17,10 +17,10 @@ do:
         seconds: 2
   - switcher:
       switch:
-        - case1:
+        - electronic:
             when: ${ $input.orderType == "electronic" }
             then: processElectronicOrder
-        - case2:
+        - physical:
             when: ${ $input.orderType == "physical" }
             then: processPhysicalOrder
         - default:
