@@ -6,3 +6,4 @@
 | --- | --- | --- | --- |
 | [pkg/zigflow/activities/run.go](pkg/zigflow/activities/run.go#L46) | 46 | Simon Emms <simon@simonemms.com> | in addition to Docker #181 |
 | [pkg/zigflow/tasks/task_builder_listen.go](pkg/zigflow/tasks/task_builder_listen.go#L323) | 323 | Simon Emms <simon@simonemms.com> | configure the "until" EventConsumptionUntil for "any" events |
+| [ui/src/lib/components/navbar.svelte](ui/src/lib/components/navbar.svelte#L50) | 50 | Simon Emms <simon@simonemms.com> | build the path --> |
