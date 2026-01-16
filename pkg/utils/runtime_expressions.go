@@ -19,6 +19,7 @@ package utils
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/itchyny/gojq"
@@ -41,6 +42,19 @@ var jqFuncs []jqFunc = []jqFunc{
 		Name: "uuid",
 		Func: func(_ any, _ []any) any {
 			return uuid.New().String()
+		},
+	},
+	{
+		Name: "timestamp",
+		Func: func(_ any, _ []any) any {
+			// Convert to int so it can be formatted by strftime
+			return int(time.Now().Unix())
+		},
+	},
+	{
+		Name: "timestamp_iso8601",
+		Func: func(_ any, _ []any) any {
+			return time.Now().UTC().Format(time.RFC3339)
 		},
 	},
 }

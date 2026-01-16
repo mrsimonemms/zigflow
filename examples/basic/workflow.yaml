@@ -41,6 +41,11 @@ do:
           hello: world
           uuid: ${ uuid }
         inputUserId: ${ $input.userId }
+        now: ${ now }
+        now_formatted: ${ now | strftime("%Y-%m-%d %H:%M:%S") }
+        timestamp: ${ timestamp }
+        timestamp_formatted: ${ timestamp | strftime("%Y-%m-%d %H:%M:%S") }
+        now_iso8601: ${ timestamp_iso8601 }
         array:
           - ${ uuid }
           - hello: world

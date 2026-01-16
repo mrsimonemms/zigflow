@@ -43,6 +43,10 @@ In Temporal, a task may add logic to:
 
 :::tip
 Runtime expressions use the format for [jq](https://jqlang.org/), wrapped in `${}`
+Underneath, this uses [gojq](https://github.com/itchyny/gojq) to parse the
+runtime expression. This is similar to jq, but omits some functions by design.
+
+Please refer to this documentation as well as Zigflow.
 :::
 
 Runtime expressions serve as dynamic elements that enable flexible and adaptable
@@ -60,6 +64,18 @@ Variables able to be referenced within runtime expressions.
 | `$env` | Any environment variable prefixed with `ZIGFLOW_`. The prefix is _NOT_ used in this object | `${ $env.EXAMPLE_ENVVAR }` |
 | `$input` | Any input received when the workflow was triggered | `${ $input.val1 }` |
 | `$output` | Any output exported from a task - see [output](../intro#output) | `${ $output }` |
+
+### Functions
+
+| Function | Description | Example output |
+| --- | --- | --- |
+| `${uuid}` | Generate a [UUIDv4](https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_(random)) | `6377413e-7a8c-4416-af5e-347a6d60e260` |
+| `${timestamp}` | Display the current [Unix timestamp](https://en.wikipedia.org/wiki/Unix_time) | `1768584562` |
+| `${timestamp_iso8601}` | Display the current time in [ISO8601](https://en.wikipedia.org/wiki/ISO_8601) format | `2026-01-16T17:29:22Z` |
+
+This can be further manipulated by piping the response to another `jq` function.
+For example, `${timestamp | strftime("%Y-%m-%d %H:%M:%S")}` would return
+`2026-01-16 17:29:22`.
 
 ### Data
 
