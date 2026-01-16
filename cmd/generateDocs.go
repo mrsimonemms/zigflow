@@ -34,12 +34,17 @@ var generateDocsCmd = &cobra.Command{
 	Short:  "Generate documentation",
 	Hidden: true,
 	Run: func(cmd *cobra.Command, args []string) {
-		root, err := os.Getwd()
-		if err != nil {
-			log.Fatal().Err(err).Msg("Error getting working directory")
-		}
+		var outDir string
+		if len(args) == 0 {
+			root, err := os.Getwd()
+			if err != nil {
+				log.Fatal().Err(err).Msg("Error getting working directory")
+			}
 
-		outDir := path.Join(root, "docs", "docs", "cli")
+			outDir = path.Join(root, "docs", "docs", "cli")
+		} else {
+			outDir = args[0]
+		}
 
 		if err := os.MkdirAll(outDir, 0o755); err != nil {
 			log.Fatal().Err(err).Msg("Error creating directory")
