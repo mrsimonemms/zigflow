@@ -29,6 +29,7 @@ A collection of examples
 | [For](./for-loop) | How to use the for loop task |
 | [Heartbeat](./heartbeat) | Set [activity heartbeat](https://docs.temporal.io/encyclopedia/detecting-activity-failures#activity-heartbeat). Useful on long-running activities. |
 | [Hello World](./hello-world) | Hello world with Zigflow |
+| [Hello World Encrypted](./hello-world-encrypted) | Hello world with Zigflow, but [encrypted](https://github.com/mrsimonemms/temporal-codec-server) |
 | [Money Transfer Demo](./money-transfer) | Temporal's world-famous Money Transfer Demo, in Zigflow form |
 | [Multiple Workflows](./multiple-workflows) | Configure multiple Temporal workflows from a single Zigflow definition |
 | [Python](./python) | The basic example, but in Python |
