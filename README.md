@@ -1,6 +1,6 @@
 # Zigflow: A Temporal DSL for Declarative Workflows
 
-[![Zigflow](./designs/zigflow.png "Zigflow")](https://zigflow.dev)
+[![Zigflow](./designs/zigflow.png "Zigflow")](https://zigflow.dev?utm_source=github&utm_medium=readme&utm_campaign=header)
 
 [![Contributions Welcome](https://img.shields.io/badge/Contributions-Welcome-green.svg?style=flat)](https://github.com/mrsimonemms/zigflow/issues)
 [![Licence](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/mrsimonemms/zigflow/blob/master/LICENSE)
@@ -29,9 +29,9 @@ management of Temporal without requiring SDK boilerplate.
 
 ## 🛟 Help
 
-* [Homepage](https://zigflow.dev)
+* [Homepage](https://zigflow.dev?utm_source=github&utm_medium=readme&utm_campaign=help)
 * [Helm chart](https://github.com/mrsimonemms/zigflow/tree/main/charts/zigflow)
-* [Documentation](https://zigflow.dev/docs)
+* [Documentation](https://zigflow.dev/docs?utm_source=github&utm_medium=readme&utm_campaign=help)
 * [Slack Community](https://temporalio.slack.com/archives/C09UMNG4YP7)
 
 ---
@@ -134,7 +134,7 @@ simpler, more visual, and easier to share.
 
 * [Temporal](https://temporal.io)
 * [CNCF Serverless Workflow](https://serverlessworkflow.io)
-* [Helm Chart Repository](./charts//zigflow)
+* [Helm Chart Repository](./charts/zigflow)
 
 ---
 
