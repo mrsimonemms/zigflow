@@ -5,37 +5,49 @@ metadata:
 build:
   local:
     push: false
+    useBuildkit: true
   artifacts:
     - image: zigflow
       docker:
         dockerfile: Dockerfile
-        target: builder
         buildArgs:
-          GIT_COMMIT: dev
-          GOFLAGS: -buildvcs=false
-          VERSION: dev
+          GIT_COMMIT: "{{.GIT_COMMIT}}"
+          VERSION: "{{.VERSION}}"
+          GOFLAGS: "-buildvcs=false"
       sync:
-        infer:
-          - "**/*.go"
+        manual:
+          - src: "**/*.go"
+            dest: /go/app
+            strip: ""
+
+manifests:
+  rawYaml:
+    - dev/k8s/namespace.yaml
+    - dev/k8s/deployment.yaml
 
 deploy:
   kubectl:
     defaultNamespace: zigflow
-    remoteManifests:
-      - dev/k8s/*.yaml
-  # helm:
-  #   releases:
-  #     - name: zigflow
-  #       chartPath: charts/zigflow
-  #       namespace: zigflow
-  #       createNamespace: true
-  #       setValues:
-  #         config: {}
-  #         image:
-  #           repository: zigflow
-  #         workflow:
-  #           enabled: false
-  #       setValueTemplates:
-  #         image:
-  #           tag: "{{.IMAGE_TAG_zigflow}}"
+
+profiles:
+  - name: dev
+    activation:
+      - command: dev
+    build:
+      artifacts:
+        - image: zigflow
+          docker:
+            dockerfile: Dockerfile
+            target: builder
+            buildArgs:
+              GIT_COMMIT: dev
+              VERSION: dev
+              GOFLAGS: "-buildvcs=false"
+    manifests:
+      rawYaml:
+        - dev/k8s/namespace.yaml
+        - dev/k8s/deployment.yaml
+    deploy:
+      kubectl:
+        defaultNamespace: zigflow
 

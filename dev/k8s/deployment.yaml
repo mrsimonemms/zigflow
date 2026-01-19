@@ -2,6 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: zigflow
+  namespace: zigflow
+  labels:
+    app: zigflow
 spec:
   replicas: 1
   selector:
@@ -19,3 +22,83 @@ spec:
           ports:
             - name: health
               containerPort: 3000
+          env:
+            - name: TEMPORAL_ADDRESS
+              valueFrom:
+                secretKeyRef:
+                  name: temporal-cloud
+                  key: address
+            - name: TEMPORAL_NAMESPACE
+              valueFrom:
+                secretKeyRef:
+                  name: temporal-cloud
+                  key: namespace
+            - name: TEMPORAL_TLS_CERT
+              value: /etc/temporal/tls/client.pem
+            - name: TEMPORAL_TLS_KEY
+              value: /etc/temporal/tls/client.key
+            - name: DISABLE_TELEMETRY
+              value: "false"
+            - name: WORKFLOW_FILE
+              value: /workflow.yaml
+          volumeMounts:
+            - name: workflow
+              mountPath: /workflow.yaml
+              subPath: workflow.yaml
+              readOnly: true
+            - name: temporal-tls
+              mountPath: /etc/temporal/tls
+              readOnly: true
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: health
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: health
+            initialDelaySeconds: 5
+            periodSeconds: 5
+      volumes:
+        - name: workflow
+          configMap:
+            name: zigflow-workflow
+        - name: temporal-tls
+          secret:
+            secretName: temporal-cloud-tls
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zigflow-workflow
+  namespace: zigflow
+data:
+  workflow.yaml: |
+    # Example workflow configuration
+    # Replace with your actual workflow definition
+    version: v1
+    name: example-workflow
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zigflow
+  namespace: zigflow
+  labels:
+    app: zigflow
+spec:
+  selector:
+    app: zigflow
+  ports:
+    - name: health
+      port: 3000
+      targetPort: health
