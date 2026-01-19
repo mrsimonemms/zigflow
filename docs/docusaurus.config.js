@@ -66,7 +66,16 @@ const config = {
     locales: ['en'],
   },
 
-  plugins: [loadExamplesPlugin],
+  plugins: [
+    loadExamplesPlugin,
+    [
+      '@docusaurus/plugin-google-gtag',
+      {
+        trackingID: process.env.GA_TRACKING_ID,
+        anonymizeIP: true,
+      },
+    ],
+  ],
 
   presets: [
     [
