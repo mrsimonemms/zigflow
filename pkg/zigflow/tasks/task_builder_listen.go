@@ -97,6 +97,7 @@ func (t *ListenTaskBuilder) Build() (TemporalWorkflowFunc, error) {
 
 		var cancel workflow.CancelFunc
 		ctx, cancel = workflow.WithCancel(ctx)
+		defer cancel()
 
 		for i, event := range events {
 			if isAll {
