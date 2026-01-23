@@ -27,6 +27,19 @@ const projectName = 'zigflow';
 const githubDomain = `${organizationName}/${projectName}`;
 const githubURL = `https://github.com/${githubDomain}`;
 
+/** @type {import('@docusaurus/types').PluginConfig[]} */
+const plugins = [loadExamplesPlugin];
+
+if (process.env.GA_TRACKING_ID) {
+  plugins.push([
+    '@docusaurus/plugin-google-gtag',
+    {
+      trackingID: process.env.GA_TRACKING_ID,
+      anonymizeIP: true,
+    },
+  ]);
+}
+
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 /** @type {import('@docusaurus/types').Config} */
@@ -66,16 +79,7 @@ const config = {
     locales: ['en'],
   },
 
-  plugins: [
-    loadExamplesPlugin,
-    [
-      '@docusaurus/plugin-google-gtag',
-      {
-        trackingID: process.env.GA_TRACKING_ID,
-        anonymizeIP: true,
-      },
-    ],
-  ],
+  plugins,
 
   presets: [
     [
