@@ -33,9 +33,20 @@ function HomepageHeader() {
           {siteConfig.title}
         </Heading>
         <p className="hero__subtitle">{siteConfig.tagline}</p>
-        <div className={styles.buttons}>
+        <div
+          className={styles.buttons}
+          style={{ display: 'flex', gap: '1rem' }}
+        >
           <Link className="button button--primary button--lg" to="/docs/intro">
             Getting Started - 5min ⏱️
+          </Link>
+
+          <Link
+            className="button button--info button--lg"
+            to={siteConfig.customFields.githubURL + '/stargazers'}
+            rel="noopener noreferrer"
+          >
+            Star on GitHub ⭐
           </Link>
         </div>
       </div>
