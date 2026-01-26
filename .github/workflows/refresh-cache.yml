@@ -1,0 +1,24 @@
+name: Refresh cache
+on:
+  schedule:
+    - cron: 0 3 * * 1
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+          persist-credentials: true
+
+      - name: Bum contrib.rocks cache
+        run: |
+          TS=$(date +%s)
+          sed -i -E "s|(&v=)[0-9]+|\1${TS}|g" README.md
+
+      - uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "chore: refresh contrib.rocks image"
+          commit_options: "--no-verify --signoff"
