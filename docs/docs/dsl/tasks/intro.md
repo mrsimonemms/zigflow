@@ -61,7 +61,7 @@ Variables able to be referenced within runtime expressions.
 | :--- | :--- | :--- |
 | `$context` | Anything set to the output in previous steps. Typically used within [output](../intro#output) and [export](../intro#export) | `${ $context }` |
 | `$data` | Data set to the workflow's state - see [data](#data) | `${ $data.someData }` |
-| `$env` | Any environment variable prefixed with `ZIGFLOW_`. The prefix is _NOT_ used in this object | `${ $env.EXAMPLE_ENVVAR }` |
+| `$env` | Any environment variable prefixed with `ZIGGY_`. The prefix is _NOT_ used in this object. This can be set with the [`--env-prefix` flag](../../cli/zigflow#options) | `${ $env.EXAMPLE_ENVVAR }` |
 | `$input` | Any input received when the workflow was triggered | `${ $input.val1 }` |
 | `$output` | Any output exported from a task - see [output](../intro#output) | `${ $output }` |
 
