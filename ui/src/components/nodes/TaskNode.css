@@ -1,0 +1,76 @@
+.task-node {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  min-width: 200px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.15s;
+}
+
+.task-node.selected {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1), 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.task-node:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.task-node-header {
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  border-radius: 6px 6px 0 0;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.task-node-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.task-node-type {
+  flex: 1;
+}
+
+.task-node-delete {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.15s;
+}
+
+.task-node:hover .task-node-delete {
+  opacity: 1;
+}
+
+.task-node-delete:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.task-node-body {
+  padding: 12px;
+}
+
+.task-node-name {
+  font-size: 14px;
+  color: #374151;
+  font-weight: 500;
+}
+
+.task-handle {
+  width: 12px;
+  height: 12px;
+  background: #4f46e5;
+  border: 2px solid white;
+}
