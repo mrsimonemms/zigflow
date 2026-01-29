@@ -17,6 +17,8 @@
 package telemetry
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -36,12 +38,21 @@ const (
 
 func Notify(version string) (err error) {
 	if version == "development" {
-		return err
+		return nil
 	}
 
-	distinctID, err := getID()
-	if err != nil {
-		return fmt.Errorf("error generating distinct id")
+	var distinctID string
+	isContainer := false
+	if id, ok := os.LookupEnv("HOSTNAME"); ok {
+		// If HOSTNAME envvar exists, assume it's a containerised environment
+		// Avoid spaffing anything sensitive from hostname
+		sum := sha256.Sum256([]byte(id))
+		distinctID = hex.EncodeToString(sum[:])
+	} else {
+		distinctID, err = getID()
+		if err != nil {
+			return fmt.Errorf("error generating distinct id: %w", err)
+		}
 	}
 
 	client, err := posthog.NewWithConfig(apiKey, posthog.Config{Endpoint: endpoint})
@@ -55,7 +66,9 @@ func Notify(version string) (err error) {
 	data := posthog.Capture{
 		DistinctId: distinctID,
 		Event:      "hello",
-		Properties: posthog.NewProperties().Set("version", version),
+		Properties: posthog.NewProperties().
+			Set("is_container", isContainer).
+			Set("version", version),
 	}
 
 	// For transparency, show the data we're capturing
