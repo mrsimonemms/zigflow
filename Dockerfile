@@ -44,7 +44,7 @@ ARG VERSION
 ENV DISABLE_TELEMETRY=false
 ENV GIT_COMMIT="${GIT_COMMIT}"
 ENV VERSION="${VERSION}"
-ENV WORKFLOW_FILE=/workflow.yaml
+ENV WORKFLOW_FILE=/app/workflow.yaml
 WORKDIR /app
 RUN apk add --no-cache python3 \
   && node --version \
