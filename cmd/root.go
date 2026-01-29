@@ -95,7 +95,7 @@ platform.`,
 	},
 	PreRun: func(cmd *cobra.Command, args []string) {
 		if !rootOpts.DisableTelemetry {
-			// Thank you - it helps us to see who's using it
+			// Thank you - it helps us to see usage
 			if err := telemetry.Notify(Version); err != nil {
 				// Log the error, but that's all
 				log.Trace().Err(err).Msg("Failed to send anonymous telemetry - oh well")
