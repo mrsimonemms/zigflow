@@ -17,7 +17,6 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"os"
 
@@ -203,13 +202,11 @@ platform.`,
 		log.Debug().Str("prefix", prefix).Msg("Loading envvars to state")
 		envvars := utils.LoadEnvvars(prefix)
 
-		ctx := context.Background()
-
 		log.Debug().Msg("Starting health check service")
-		temporal.NewHealthCheck(ctx, taskQueue, rootOpts.HealthListenAddress, client)
+		temporal.NewHealthCheck(cmd.Context(), taskQueue, rootOpts.HealthListenAddress, client)
 
 		log.Info().Msg("Updating schedules")
-		if err := zigflow.UpdateSchedules(ctx, client, workflowDefinition, envvars); err != nil {
+		if err := zigflow.UpdateSchedules(cmd.Context(), client, workflowDefinition, envvars); err != nil {
 			return gh.FatalError{
 				Cause: err,
 				Msg:   "Error updating Temporal schedules",
