@@ -30,7 +30,7 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.11.1
-	go.temporal.io/api v1.61.0
+	go.temporal.io/api v1.62.0
 	go.temporal.io/sdk/contrib/envconfig v0.1.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
