@@ -55,9 +55,10 @@ func TestCallActivityTaskBuilderExecute(t *testing.T) {
 
 	workflowFunc := func(ctx workflow.Context) (string, error) {
 		state := utils.NewState().AddWorkflowInfo(ctx)
-		state.Input = map[string]any{"message": "ping"}
+		input := map[string]any{"message": "ping"}
+		state.Input = input
 		ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{StartToCloseTimeout: time.Minute})
-		result, err := fn(ctx, nil, state)
+		result, err := fn(ctx, input, state)
 		if err != nil {
 			return "", err
 		}

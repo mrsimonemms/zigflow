@@ -67,7 +67,8 @@ func (t *CallActivityTaskBuilder) Build() (TemporalWorkflowFunc, error) {
 	return func(ctx workflow.Context, input any, state *utils.State) (any, error) {
 		logger := workflow.GetLogger(ctx)
 
-		if err := t.parseArgs(state); err != nil {
+		args, err := t.parseArgs(state)
+		if err != nil {
 			logger.Error("Error parsing call activity arguments", "error", err)
 			return nil, err
 		}
@@ -79,7 +80,7 @@ func (t *CallActivityTaskBuilder) Build() (TemporalWorkflowFunc, error) {
 
 		logger.Info("Executing Temporal activity", "activity", t.activity.Name, "task", t.GetTaskName())
 
-		future := workflow.ExecuteActivity(ctx, t.activity.Name, t.activity.Arguments...)
+		future := workflow.ExecuteActivity(ctx, t.activity.Name, args...)
 
 		var res any
 		if err := future.Get(ctx, &res); err != nil {
@@ -123,16 +124,14 @@ func (t *CallActivityTaskBuilder) convertToType() error {
 	return nil
 }
 
-func (t *CallActivityTaskBuilder) parseArgs(state *utils.State) error {
+func (t *CallActivityTaskBuilder) parseArgs(state *utils.State) ([]any, error) {
 	parsedArgs, err := utils.TraverseAndEvaluateObj(model.NewObjectOrRuntimeExpr(map[string]any{
 		"args": swUtil.DeepCloneValue(t.activity.Arguments),
 	}), nil, state)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	// Replace the arguments with the parsed values
-	t.activity.Arguments = parsedArgs.(map[string]any)["args"].([]any)
-
-	return nil
+	// Return the parsed arguments
+	return parsedArgs.(map[string]any)["args"].([]any), nil
 }
