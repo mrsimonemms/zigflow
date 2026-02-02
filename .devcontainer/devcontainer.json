@@ -20,7 +20,8 @@
       "extensions": [
         "esbenp.prettier-vscode",
         "unifiedjs.vscode-mdx",
-        "DrBlury.protobuf-vsc"
+        "DrBlury.protobuf-vsc",
+        "svelte.svelte-vscode"
       ],
       "settings": {}
     }
@@ -38,6 +39,7 @@
   },
   "forwardPorts": [
     3000,
+    5173,
     7070,
     7233,
     8080,
