@@ -1,0 +1,42 @@
+// Copyright 2025 - 2026 Zigflow authors <https://github.com/mrsimonemms/zigflow/graphs/contributors>
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Bulma variable overrides
+// Customize Bulma colors, spacing, etc.
+
+// Primary color (Zigflow brand color)
+$primary: #3298dc;
+$link: $primary;
+
+// Typography
+$family-sans-serif:
+  -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu,
+  Cantarell, 'Helvetica Neue', sans-serif;
+$family-monospace:
+  'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New',
+  monospace;
+
+// Task type colors
+$task-call: #3298dc;
+$task-do: #48c774;
+$task-fork: #ffdd57;
+$task-emit: #f14668;
+$task-for: #00d1b2;
+$task-listen: #485fc7;
+$task-raise: #f14668;
+$task-run: #3e8ed0;
+$task-set: #48c774;
+$task-switch: #ffdd57;
+$task-try: #ff9f43;
+$task-wait: #b5b5b5;
