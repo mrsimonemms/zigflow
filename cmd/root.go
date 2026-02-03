@@ -23,6 +23,7 @@ import (
 	gh "github.com/mrsimonemms/golang-helpers"
 	"github.com/mrsimonemms/golang-helpers/temporal"
 	"github.com/mrsimonemms/temporal-codec-server/packages/golang/algorithms/aes"
+	"github.com/mrsimonemms/zigflow/pkg/debug"
 	"github.com/mrsimonemms/zigflow/pkg/telemetry"
 	"github.com/mrsimonemms/zigflow/pkg/utils"
 	"github.com/mrsimonemms/zigflow/pkg/zigflow"
@@ -38,6 +39,7 @@ import (
 var rootOpts struct {
 	ConvertData          bool
 	ConvertKeyPath       string
+	Debug                bool
 	DisableTelemetry     bool
 	EnvPrefix            string
 	FilePath             string
@@ -89,6 +91,9 @@ platform.`,
 			return err
 		}
 		zerolog.SetGlobalLevel(level)
+
+		log.Debug().Bool("debug_enabled", rootOpts.Debug).Msg("Creating debugger singleton")
+		debug.New(rootOpts.Debug)
 
 		return nil
 	},
@@ -260,6 +265,12 @@ func init() {
 	rootCmd.Flags().StringVar(
 		&rootOpts.ConvertKeyPath, "converter-key-path",
 		viper.GetString("converter_key_path"), "Path to AES conversion keys",
+	)
+
+	viper.SetDefault("debug", false)
+	rootCmd.Flags().BoolVar(
+		&rootOpts.Debug, "debug",
+		viper.GetBool("debug"), "Enable debugging",
 	)
 
 	viper.SetDefault("disable_telemetry", false)

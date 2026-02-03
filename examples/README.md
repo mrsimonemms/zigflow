@@ -25,6 +25,7 @@ A collection of examples
 | [Child Workflows](./child-workflows) | Define multiple workflows and call a child workflow from a parent |
 | [Competing Concurrent Tasks](./competing-concurrent-tasks) | Have two tasks competing and the first to finish wins |
 | [Conditional Tasks](./conditionally-execute) | Execute tasks conditionally |
+| [Debug](./debug) | How to debug your workflows with Zigflow |
 | [External Calls](./external-calls) | An example of how to use Zigflow to make external gRPC and HTTP calls |
 | [For](./for-loop) | How to use the for loop task |
 | [Heartbeat](./heartbeat) | Set [activity heartbeat](https://docs.temporal.io/encyclopedia/detecting-activity-failures#activity-heartbeat). Useful on long-running activities. |

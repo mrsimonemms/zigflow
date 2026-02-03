@@ -1,0 +1,14 @@
+document:
+  dsl: 1.0.0
+  namespace: zigflow
+  name: debug
+  version: 0.0.1
+  title: Debug
+  summary: How to debug your workflows with Zigflow
+do:
+  - set:
+      output:
+        as:
+          data: ${ . }
+      set:
+        message: Hello from Ziggy
