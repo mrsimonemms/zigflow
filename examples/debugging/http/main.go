@@ -17,9 +17,36 @@
 package main
 
 import (
-	"github.com/mrsimonemms/zigflow/cmd"
+	"context"
+	"log"
+
+	cloudevents "github.com/cloudevents/sdk-go/v2"
 )
 
 func main() {
-	cmd.Execute()
+	p, err := cloudevents.NewHTTP()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	c, err := cloudevents.NewClient(p)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Fatal(c.StartReceiver(context.Background(), receive))
+}
+
+func receive(ctx context.Context, event cloudevents.Event) {
+	log.Printf("Received event %s of type %s from %s",
+		event.ID(),
+		event.Type(),
+		event.Source(),
+	)
+
+	// Access event data
+	var data map[string]any
+	if err := event.DataAs(&data); err == nil {
+		log.Printf("Data: %+v", data)
+	}
 }

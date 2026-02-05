@@ -23,6 +23,7 @@ import (
 	gh "github.com/mrsimonemms/golang-helpers"
 	"github.com/mrsimonemms/golang-helpers/temporal"
 	"github.com/mrsimonemms/temporal-codec-server/packages/golang/algorithms/aes"
+	"github.com/mrsimonemms/zigflow/internal/events"
 	"github.com/mrsimonemms/zigflow/pkg/telemetry"
 	"github.com/mrsimonemms/zigflow/pkg/utils"
 	"github.com/mrsimonemms/zigflow/pkg/zigflow"
@@ -36,6 +37,7 @@ import (
 )
 
 var rootOpts struct {
+	CloudEventsConfig    string
 	ConvertData          bool
 	ConvertKeyPath       string
 	DisableTelemetry     bool
@@ -126,13 +128,13 @@ platform.`,
 			log.Fatal().Err(err).Msg("Unable to load workflow file")
 		}
 
+		validator, err := utils.NewValidator()
+		if err != nil {
+			log.Fatal().Err(err).Msg("Error creating validator")
+		}
+
 		if rootOpts.Validate {
 			log.Debug().Msg("Running validation")
-
-			validator, err := utils.NewValidator()
-			if err != nil {
-				log.Fatal().Err(err).Msg("Error creating validator")
-			}
 
 			if res, err := validator.ValidateStruct(workflowDefinition); err != nil {
 				return gh.FatalError{
@@ -150,6 +152,22 @@ platform.`,
 			}
 			log.Debug().Msg("Validation passed")
 		}
+
+		log.Debug().Str("cloudEventsConfig", rootOpts.CloudEventsConfig).Msg("Registering CloudEvents handler")
+		events, err := events.Load(rootOpts.CloudEventsConfig, validator, workflowDefinition)
+		if err != nil {
+			return gh.FatalError{
+				Cause: err,
+				Msg:   "Error creating CloudEvents handler",
+			}
+		}
+		events.Emit(
+			cmd.Context(),
+			"todo",
+			// func(e cloudevents.Event) {
+
+			// },
+		)
 
 		var converter converter.DataConverter
 		if rootOpts.ConvertData {
@@ -179,7 +197,7 @@ platform.`,
 			),
 			temporal.WithDataConverter(converter),
 			temporal.WithZerolog(&log.Logger),
-			temporal.WithPrometheusMetrics(rootOpts.MetricsListenAddress, rootOpts.MetricsPrefix),
+			temporal.WithPrometheusMetrics(rootOpts.MetricsListenAddress, rootOpts.MetricsPrefix, nil),
 		)
 		if err != nil {
 			return gh.FatalError{
@@ -250,6 +268,11 @@ func Execute() {
 
 func init() {
 	viper.AutomaticEnv()
+
+	rootCmd.Flags().StringVar(
+		&rootOpts.CloudEventsConfig, "cloudevents-config",
+		viper.GetString("cloudevents_config"), "Path to CloudEvents config file",
+	)
 
 	rootCmd.Flags().BoolVar(
 		&rootOpts.ConvertData, "convert-data",

@@ -1,0 +1,9 @@
+clients:
+  - name: http
+    disabled: false # This is default behaviour
+    protocol: http
+    target: "{{ .env.HTTP_TARGET }}"
+    # Optional - this default values
+    options:
+      timeout: 5s
+      method: POST
