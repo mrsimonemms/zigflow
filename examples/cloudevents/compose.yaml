@@ -1,0 +1,54 @@
+services:
+  http:
+    build:
+      context: ../../
+      target: builder
+    volumes:
+      - ./http:/go/app
+
+  temporal:
+    image: temporalio/temporal
+    ports:
+      - 8080:8233
+    command: server start-dev --ip 0.0.0.0 --search-attribute Step=text
+    healthcheck:
+      test: ["CMD-SHELL", "temporal operator cluster health"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+
+  workflow: &trigger
+    build:
+      context: ../../
+      target: builder
+    environment:
+      CLOUDEVENTS_CONFIG: ./examples/cloudevents/cloudevents.yaml
+      FILE_TARGET: ./tmp/events
+      HTTP_TARGET: http://http:8080/events
+      LOG_LEVEL: "${LOG_LEVEL:-debug}"
+      TEMPORAL_ADDRESS: ${TEMPORAL_ADDRESS:-temporal:7233}
+      TEMPORAL_NAMESPACE: ${TEMPORAL_NAMESPACE:-default}
+      TEMPORAL_API_KEY: ${TEMPORAL_API_KEY:-}
+      TEMPORAL_TLS: ${TEMPORAL_TLS:-false}
+      WORKFLOW_FILE: ./examples/cloudevents/workflow.yaml
+    volumes:
+      - ../../:/go/app
+    links:
+      - temporal
+    depends_on:
+      http:
+        condition: service_started
+      temporal:
+        condition: service_healthy
+
+  trigger:
+    <<: *trigger
+    depends_on:
+      workflow:
+        condition: service_started
+    working_dir: /go/app/examples/cloudevents
+    entrypoint: ""
+    command:
+      - go
+      - run
+      - .

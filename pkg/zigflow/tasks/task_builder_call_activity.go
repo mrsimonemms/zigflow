@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/mrsimonemms/zigflow/pkg/cloudevents"
 	"github.com/mrsimonemms/zigflow/pkg/utils"
 	"github.com/mrsimonemms/zigflow/pkg/zigflow/models"
 	"github.com/rs/zerolog/log"
@@ -35,6 +36,7 @@ func NewCallActivityTaskBuilder(
 	task *model.CallFunction,
 	taskName string,
 	doc *model.Workflow,
+	emitter *cloudevents.Events,
 ) (*CallActivityTaskBuilder, error) {
 	if task.Call != customCallFunctionActivity {
 		return nil, fmt.Errorf("unsupported call task '%s' for activity builder", task.Call)
@@ -43,6 +45,7 @@ func NewCallActivityTaskBuilder(
 	return &CallActivityTaskBuilder{
 		builder: builder[*model.CallFunction]{
 			doc:            doc,
+			eventEmitter:   emitter,
 			name:           taskName,
 			task:           task,
 			temporalWorker: temporalWorker,

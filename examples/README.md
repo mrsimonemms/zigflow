@@ -23,6 +23,7 @@ A collection of examples
 | [Authorise Change Request](./authorise-change-request) | Authorise and implement or reject a change request |
 | [Basic](./basic) | An example of how to use Serverless Workflow to define Temporal Workflows |
 | [Child Workflows](./child-workflows) | Define multiple workflows and call a child workflow from a parent |
+| [Debugging](./cloudevents) | An example of how to use CloudEvents for debugging workflows |
 | [Competing Concurrent Tasks](./competing-concurrent-tasks) | Have two tasks competing and the first to finish wins |
 | [Conditional Tasks](./conditionally-execute) | Execute tasks conditionally |
 | [External Calls](./external-calls) | An example of how to use Zigflow to make external gRPC and HTTP calls |

@@ -1,0 +1,86 @@
+document:
+  dsl: 1.0.0
+  namespace: zigflow
+  name: cloudevents
+  version: 0.0.1
+  title: Debugging
+  summary: An example of how to use CloudEvents for debugging workflows
+# Optionally validate the input received
+input:
+  schema:
+    format: json
+    document:
+      type: object
+      required:
+        - userId
+      properties:
+        userId:
+          type: number
+timeout:
+  after:
+    minutes: 1
+do:
+  - baseData:
+      export:
+        as:
+          baseData: ${ . }
+      set:
+        # Set a variable from an envvar
+        envvar: ${ $env.EXAMPLE_ENVVAR }
+        uuid: ${ uuid }
+        object:
+          hello: world
+          uuid: ${ uuid }
+        inputUserId: ${ $input.userId }
+        now: ${ now }
+        now_formatted: ${ now | strftime("%Y-%m-%d %H:%M:%S") }
+        timestamp: ${ timestamp }
+        timestamp_formatted: ${ timestamp | strftime("%Y-%m-%d %H:%M:%S") }
+        now_iso8601: ${ timestamp_iso8601 }
+        array:
+          - ${ uuid }
+          - hello: world
+  - wait:
+      wait:
+        seconds: 5
+  - getUser:
+      call: http
+      export:
+        as: '${ $context + { getUser: . } }'
+      metadata:
+        # Configure activity options for this task only
+        activityOptions:
+          retryPolicy:
+            maximumAttempts: 5
+      with:
+        method: get
+        endpoint: ${ "https://jsonplaceholder.typicode.com/users/" + ($input.userId | tostring) }
+  - raiseAlarm:
+      # A fork is a series of child workflows running in parallel
+      output:
+        as: '${ $context + del(.multiStep) }'
+      fork:
+        # If not competing, all tasks will run to the finish - this is the default behaviour
+        compete: false
+        branches:
+          # A single step is passed in by the Serverless Workflow task
+          - callNurse:
+              call: http
+              with:
+                method: get
+                endpoint: https://jsonplaceholder.typicode.com/users/2
+          # Multiple steps can be passed in by the Serverless Workflow do task
+          - multiStep:
+              do:
+                - wait1:
+                    wait:
+                      seconds: 3
+                - wait2:
+                    wait:
+                      seconds: 2
+          # Another single step child workflow
+          - callDoctor:
+              call: http
+              with:
+                method: get
+                endpoint: ${ "https://jsonplaceholder.typicode.com/users/" + ($input.userId | tostring) }

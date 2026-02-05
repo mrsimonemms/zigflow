@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/mrsimonemms/zigflow/pkg/cloudevents"
 	"github.com/mrsimonemms/zigflow/pkg/utils"
 	"github.com/serverlessworkflow/sdk-go/v3/impl/expr"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
@@ -33,10 +34,12 @@ func NewRaiseTaskBuilder(
 	task *model.RaiseTask,
 	taskName string,
 	doc *model.Workflow,
+	emitter *cloudevents.Events,
 ) (*RaiseTaskBuilder, error) {
 	return &RaiseTaskBuilder{
 		builder: builder[*model.RaiseTask]{
 			doc:            doc,
+			eventEmitter:   emitter,
 			name:           taskName,
 			task:           task,
 			temporalWorker: temporalWorker,

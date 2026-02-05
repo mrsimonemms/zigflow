@@ -19,6 +19,7 @@ package tasks
 import (
 	"fmt"
 
+	"github.com/mrsimonemms/zigflow/pkg/cloudevents"
 	"github.com/mrsimonemms/zigflow/pkg/utils"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
 	"go.temporal.io/sdk/temporal"
@@ -31,10 +32,12 @@ func NewWaitTaskBuilder(
 	task *model.WaitTask,
 	taskName string,
 	doc *model.Workflow,
+	emitter *cloudevents.Events,
 ) (*WaitTaskBuilder, error) {
 	return &WaitTaskBuilder{
 		builder: builder[*model.WaitTask]{
 			doc:            doc,
+			eventEmitter:   emitter,
 			name:           taskName,
 			task:           task,
 			temporalWorker: temporalWorker,

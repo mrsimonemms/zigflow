@@ -19,6 +19,7 @@ package tasks
 import (
 	"fmt"
 
+	"github.com/mrsimonemms/zigflow/pkg/cloudevents"
 	"github.com/mrsimonemms/zigflow/pkg/utils"
 	swUtils "github.com/serverlessworkflow/sdk-go/v3/impl/utils"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
@@ -31,10 +32,12 @@ func NewSetTaskBuilder(
 	task *model.SetTask,
 	taskName string,
 	doc *model.Workflow,
+	emitter *cloudevents.Events,
 ) (*SetTaskBuilder, error) {
 	return &SetTaskBuilder{
 		builder: builder[*model.SetTask]{
 			doc:            doc,
+			eventEmitter:   emitter,
 			name:           taskName,
 			task:           task,
 			temporalWorker: temporalWorker,

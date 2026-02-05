@@ -19,6 +19,7 @@ package tasks
 import (
 	"fmt"
 
+	"github.com/mrsimonemms/zigflow/pkg/cloudevents"
 	"github.com/mrsimonemms/zigflow/pkg/utils"
 	"github.com/rs/zerolog/log"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
@@ -31,10 +32,12 @@ func NewTryTaskBuilder(
 	task *model.TryTask,
 	taskName string,
 	doc *model.Workflow,
+	emitter *cloudevents.Events,
 ) (*TryTaskBuilder, error) {
 	return &TryTaskBuilder{
 		builder: builder[*model.TryTask]{
 			doc:            doc,
+			eventEmitter:   emitter,
 			name:           taskName,
 			task:           task,
 			temporalWorker: temporalWorker,
@@ -136,7 +139,7 @@ func (t *TryTaskBuilder) createBuilder(
 
 	childWorkflowName = utils.GenerateChildWorkflowName(taskType, t.GetTaskName())
 
-	b, err := NewTaskBuilder(childWorkflowName, &model.DoTask{Do: list}, t.temporalWorker, t.doc)
+	b, err := NewTaskBuilder(childWorkflowName, &model.DoTask{Do: list}, t.temporalWorker, t.doc, t.eventEmitter)
 	if err != nil {
 		l.Error().Msg("Error creating the for task builder")
 		err = fmt.Errorf("error creating the for task builder: %w", err)

@@ -42,7 +42,7 @@ func TestSwitchTaskBuilderBuildRejectsMultipleDefaults(t *testing.T) {
 		},
 	}
 
-	builder, err := NewSwitchTaskBuilder(nil, task, "switch-task", nil)
+	builder, err := NewSwitchTaskBuilder(nil, task, "switch-task", nil, testEvents)
 	assert.NoError(t, err)
 
 	fn, err := builder.Build()
@@ -65,7 +65,7 @@ func TestSwitchTaskBuilderExecutesMatchingCase(t *testing.T) {
 		},
 	}
 
-	builder, err := NewSwitchTaskBuilder(nil, task, "switch-task", nil)
+	builder, err := NewSwitchTaskBuilder(nil, task, "switch-task", nil, testEvents)
 	assert.NoError(t, err)
 
 	fn, err := builder.Build()

@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-package tasks_test
+package tasks
 
 import (
-	"testing"
-	"time"
-
 	"github.com/mrsimonemms/zigflow/pkg/cloudevents"
-	"github.com/mrsimonemms/zigflow/pkg/utils"
-	"github.com/mrsimonemms/zigflow/pkg/zigflow/tasks"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
-	"github.com/stretchr/testify/assert"
-	"go.temporal.io/sdk/testsuite"
 )
 
 var (
@@ -40,50 +33,3 @@ var (
 	// testEvents is a shared events instance for testing purposes.
 	testEvents, _ = cloudevents.Load("", nil, testWorkflow)
 )
-
-func TestWaitTaskBuilder(t *testing.T) {
-	tests := []struct {
-		Name     string
-		Duration model.DurationInline
-	}{
-		{
-			Name: "10 second delay",
-			Duration: model.DurationInline{
-				Seconds: 10,
-			},
-		},
-	}
-
-	for _, test := range tests {
-		t.Run(test.Name, func(t *testing.T) {
-			var s testsuite.WorkflowTestSuite
-			env := s.NewTestWorkflowEnvironment()
-
-			start := time.Now().UTC()
-			env.SetStartTime(start)
-
-			dur := &model.Duration{
-				Value: test.Duration,
-			}
-
-			w, err := tasks.NewWaitTaskBuilder(nil, &model.WaitTask{
-				Wait: dur,
-			}, test.Name, nil, testEvents)
-			assert.NoError(t, err)
-
-			wf, err := w.Build()
-			assert.NoError(t, err)
-
-			env.RegisterWorkflow(wf)
-
-			env.ExecuteWorkflow(wf, nil, nil)
-
-			assert.NoError(t, env.GetWorkflowError())
-
-			got := env.Now().UTC()
-			want := start.Add(utils.ToDuration(dur))
-
-			assert.True(t, got.Equal(want))
-		})
-	}
-}

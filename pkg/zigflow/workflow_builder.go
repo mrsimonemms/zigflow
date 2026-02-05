@@ -19,6 +19,7 @@ package zigflow
 import (
 	"fmt"
 
+	"github.com/mrsimonemms/zigflow/pkg/cloudevents"
 	"github.com/mrsimonemms/zigflow/pkg/zigflow/metadata"
 	"github.com/mrsimonemms/zigflow/pkg/zigflow/tasks"
 	"github.com/rs/zerolog/log"
@@ -26,7 +27,7 @@ import (
 	"go.temporal.io/sdk/worker"
 )
 
-func NewWorkflow(temporalWorker worker.Worker, doc *model.Workflow, envvars map[string]any) error {
+func NewWorkflow(temporalWorker worker.Worker, doc *model.Workflow, envvars map[string]any, emitter *cloudevents.Events) error {
 	workflowName := doc.Document.Name
 	l := log.With().Str("workflowName", workflowName).Logger()
 
@@ -41,6 +42,7 @@ func NewWorkflow(temporalWorker worker.Worker, doc *model.Workflow, envvars map[
 		&model.DoTask{Do: doc.Do},
 		workflowName,
 		doc,
+		emitter,
 		tasks.DoTaskOpts{
 			// Pass the envvars - this will be passed to the state object
 			Envvars: envvars,
@@ -76,6 +78,7 @@ func newWorkflowPostLoad(doc *model.Workflow) error {
 		&model.DoTask{Do: doc.Do},
 		workflowName,
 		doc,
+		&cloudevents.Events{}, // Stubbed as not used by the post loader
 	)
 	if err != nil {
 		l.Error().Err(err).Msg("Error creating Do prep builder")

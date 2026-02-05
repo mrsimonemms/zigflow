@@ -17,6 +17,7 @@
 package tasks
 
 import (
+	"github.com/mrsimonemms/zigflow/pkg/cloudevents"
 	"github.com/mrsimonemms/zigflow/pkg/utils"
 	"github.com/mrsimonemms/zigflow/pkg/zigflow/activities"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
@@ -29,10 +30,12 @@ func NewCallGRPCTaskBuilder(
 	task *model.CallGRPC,
 	taskName string,
 	doc *model.Workflow,
+	emitter *cloudevents.Events,
 ) (*CallGRPCTaskBuilder, error) {
 	return &CallGRPCTaskBuilder{
 		builder: builder[*model.CallGRPC]{
 			doc:            doc,
+			eventEmitter:   emitter,
 			name:           taskName,
 			task:           task,
 			temporalWorker: temporalWorker,

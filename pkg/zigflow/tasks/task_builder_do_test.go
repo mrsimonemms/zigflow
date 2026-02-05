@@ -64,9 +64,10 @@ func TestDoTaskBuilderWorkflowExecutor(t *testing.T) {
 
 			builder := &DoTaskBuilder{
 				builder: builder[*model.DoTask]{
-					doc:  &model.Workflow{},
-					name: "test-workflow",
-					task: &model.DoTask{},
+					doc:          testWorkflow,
+					eventEmitter: testEvents,
+					name:         "test-workflow",
+					task:         &model.DoTask{},
 				},
 				opts: DoTaskOpts{
 					Envvars: map[string]any{
@@ -179,9 +180,10 @@ func TestDoTaskBuilderIterateTasksFlowControl(t *testing.T) {
 
 			builder := &DoTaskBuilder{
 				builder: builder[*model.DoTask]{
-					doc:  &model.Workflow{},
-					name: "iterate-workflow",
-					task: &model.DoTask{},
+					doc:          testWorkflow,
+					eventEmitter: testEvents,
+					name:         "iterate-workflow",
+					task:         &model.DoTask{},
 				},
 			}
 
@@ -483,7 +485,7 @@ func TestDoTaskBuilderBuildSkipsNestedDoAfterNonDoTask(t *testing.T) {
 		}).
 		Once()
 
-	builder, err := NewDoTaskBuilder(temporalWorker, task, "do-task", &model.Workflow{})
+	builder, err := NewDoTaskBuilder(temporalWorker, task, "do-task", testWorkflow, testEvents)
 	assert.NoError(t, err)
 
 	fn, err := builder.Build()
@@ -620,9 +622,10 @@ func newTestDoTaskBuilder(name string, opts ...DoTaskOpts) *DoTaskBuilder {
 
 	return &DoTaskBuilder{
 		builder: builder[*model.DoTask]{
-			doc:  &model.Workflow{},
-			name: name,
-			task: &model.DoTask{},
+			doc:          testWorkflow,
+			eventEmitter: testEvents,
+			name:         name,
+			task:         &model.DoTask{},
 		},
 		opts: doOpts,
 	}

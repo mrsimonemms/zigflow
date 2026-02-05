@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"maps"
 
+	"github.com/mrsimonemms/zigflow/pkg/cloudevents"
 	"github.com/mrsimonemms/zigflow/pkg/utils"
 	"github.com/rs/zerolog/log"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
@@ -34,10 +35,12 @@ func NewForkTaskBuilder(
 	task *model.ForkTask,
 	taskName string,
 	doc *model.Workflow,
+	emitter *cloudevents.Events,
 ) (*ForkTaskBuilder, error) {
 	return &ForkTaskBuilder{
 		builder: builder[*model.ForkTask]{
 			doc:            doc,
+			eventEmitter:   emitter,
 			name:           taskName,
 			task:           task,
 			temporalWorker: temporalWorker,
@@ -129,7 +132,7 @@ func (t *ForkTaskBuilder) buildOrPostLoad() ([]*forkedTask, []TaskBuilder, error
 			}
 		}
 
-		builder, err := NewTaskBuilder(childWorkflowName, branch.Task, t.temporalWorker, t.doc)
+		builder, err := NewTaskBuilder(childWorkflowName, branch.Task, t.temporalWorker, t.doc, t.eventEmitter)
 		if err != nil {
 			log.Error().Err(err).Msg("Error creating the forked task builder")
 			return nil, nil, fmt.Errorf("error creating the forked task builder: %w", err)

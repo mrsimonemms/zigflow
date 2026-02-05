@@ -17,8 +17,11 @@
 package tasks
 
 import (
+	"context"
 	"fmt"
 
+	ceSDK "github.com/cloudevents/sdk-go/v2"
+	"github.com/mrsimonemms/zigflow/pkg/cloudevents"
 	"github.com/mrsimonemms/zigflow/pkg/utils"
 	"github.com/mrsimonemms/zigflow/pkg/zigflow/metadata"
 	"github.com/rs/zerolog/log"
@@ -41,6 +44,7 @@ func NewDoTaskBuilder(
 	task *model.DoTask,
 	workflowName string,
 	doc *model.Workflow,
+	emitter *cloudevents.Events,
 	opts ...DoTaskOpts,
 ) (*DoTaskBuilder, error) {
 	var doOpts DoTaskOpts
@@ -54,6 +58,7 @@ func NewDoTaskBuilder(
 	return &DoTaskBuilder{
 		builder: builder[*model.DoTask]{
 			doc:            doc,
+			eventEmitter:   emitter,
 			name:           workflowName,
 			neverSkipCAN:   true,
 			task:           task,
@@ -93,7 +98,7 @@ func (t *DoTaskBuilder) Build() (TemporalWorkflowFunc, error) {
 
 		// Build a task builder
 		l.Debug().Msg("Creating task builder")
-		builder, err := NewTaskBuilder(task.Key, task.Task, t.temporalWorker, t.doc)
+		builder, err := NewTaskBuilder(task.Key, task.Task, t.temporalWorker, t.doc, t.eventEmitter)
 		if err != nil {
 			return nil, fmt.Errorf("error creating task builder: %w", err)
 		}
@@ -135,7 +140,7 @@ func (t *DoTaskBuilder) PostLoad() error {
 
 		// Build a task builder
 		l.Debug().Msg("Creating prep task builder")
-		builder, err := NewTaskBuilder(task.Key, task.Task, t.temporalWorker, t.doc)
+		builder, err := NewTaskBuilder(task.Key, task.Task, t.temporalWorker, t.doc, t.eventEmitter)
 		if err != nil {
 			return fmt.Errorf("error creating task prep builder: %w", err)
 		}
@@ -191,10 +196,25 @@ func (t *DoTaskBuilder) workflowExecutor(tasks []workflowFunc) TemporalWorkflowF
 			}
 		}
 
+		t.eventEmitter.Emit(context.Background(), "workflow.started", func(e *ceSDK.Event) {
+			e.SetID(workflow.GetInfo(ctx).WorkflowExecution.ID)
+			_ = e.SetData(ceSDK.ApplicationJSON, map[string]any{
+				"input": input,
+				"state": state,
+			})
+		})
+
 		// Iterate through the tasks to create the workflow
 		if err := t.iterateTasks(ctx, tasks, input, state); err != nil {
 			return nil, err
 		}
+
+		t.eventEmitter.Emit(context.Background(), "workflow.completed", func(e *ceSDK.Event) {
+			e.SetID(workflow.GetInfo(ctx).WorkflowExecution.ID)
+			_ = e.SetData(ceSDK.ApplicationJSON, map[string]any{
+				"output": state.Output,
+			})
+		})
 
 		return state.Output, nil
 	}
@@ -371,13 +391,49 @@ func (t *DoTaskBuilder) processTaskOutput(task workflowFunc, taskOutput any, sta
 func (t *DoTaskBuilder) runTask(ctx workflow.Context, task workflowFunc, input any, state *utils.State) error {
 	logger := workflow.GetLogger(ctx)
 
+	cctx := context.Background()
+	info := workflow.GetInfo(ctx)
+	workflowID := info.WorkflowExecution.ID
+
+	t.eventEmitter.Emit(cctx, "task.started", func(e *ceSDK.Event) {
+		e.SetID(workflowID)
+		e.SetSubject(task.Name)
+		_ = e.SetData(ceSDK.ApplicationJSON, map[string]any{
+			"attempt": info.Attempt,
+			"input":   input,
+			"state":   state,
+		})
+	})
+
+	if a := info.Attempt; a > 1 {
+		t.eventEmitter.Emit(cctx, "task.retried", func(e *ceSDK.Event) {
+			e.SetID(workflowID)
+			e.SetSubject(task.Name)
+			_ = e.SetData(ceSDK.ApplicationJSON, map[string]any{
+				"attempt": a,
+			})
+		})
+	}
+
 	logger.Info("Running task", "name", task.Name)
 	output, err := task.Func(ctx, input, state)
 	if err != nil {
 		if temporal.IsCanceledError(err) {
 			logger.Debug("Task cancelled", "name", task.Name)
+			t.eventEmitter.Emit(cctx, "task.cancelled", func(e *ceSDK.Event) {
+				e.SetID(workflowID)
+				e.SetSubject(task.Name)
+			})
 			return nil
 		}
+
+		t.eventEmitter.Emit(cctx, "task.faulted", func(e *ceSDK.Event) {
+			e.SetID(workflowID)
+			e.SetSubject(task.Name)
+			_ = e.SetData(ceSDK.ApplicationJSON, map[string]any{
+				"error": err.Error(),
+			})
+		})
 
 		logger.Error("Error running task", "name", task.Name, "error", err)
 		return err
@@ -392,6 +448,16 @@ func (t *DoTaskBuilder) runTask(ctx workflow.Context, task workflowFunc, input a
 	if err := t.processTaskExport(task, output, state); err != nil {
 		return fmt.Errorf("error processing task export: %w", err)
 	}
+
+	t.eventEmitter.Emit(cctx, "task.completed", func(e *ceSDK.Event) {
+		e.SetID(workflowID)
+		e.SetSubject(task.Name)
+		_ = e.SetData(ceSDK.ApplicationJSON, map[string]any{
+			"input":  input,
+			"output": output,
+			"state":  state,
+		})
+	})
 
 	return nil
 }

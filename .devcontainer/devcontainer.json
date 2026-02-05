@@ -29,6 +29,7 @@
     "install-air": "go install github.com/air-verse/air@latest"
   },
   "containerEnv": {
+    "CLOUDEVENTS_CONFIG": "./cloudevents.example.yaml",
     "CONVERTER_KEY_PATH": "/workspaces/zigflow/keys.example.yaml",
     "GIT_REPO": "github.com/mrsimonemms/zigflow",
     "LOG_LEVEL": "trace",

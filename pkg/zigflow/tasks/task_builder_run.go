@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"slices"
 
+	"github.com/mrsimonemms/zigflow/pkg/cloudevents"
 	"github.com/mrsimonemms/zigflow/pkg/utils"
 	"github.com/mrsimonemms/zigflow/pkg/zigflow/activities"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
@@ -34,10 +35,12 @@ func NewRunTaskBuilder(
 	task *model.RunTask,
 	taskName string,
 	doc *model.Workflow,
+	emitter *cloudevents.Events,
 ) (*RunTaskBuilder, error) {
 	return &RunTaskBuilder{
 		builder: builder[*model.RunTask]{
 			doc:            doc,
+			eventEmitter:   emitter,
 			name:           taskName,
 			task:           task,
 			temporalWorker: temporalWorker,

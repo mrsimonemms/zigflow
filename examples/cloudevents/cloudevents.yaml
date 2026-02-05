@@ -1,0 +1,13 @@
+clients:
+  - name: file-output
+    protocol: file
+    target: "{{ .env.FILE_TARGET }}"
+
+  - name: http-output
+    disabled: false # This is default behaviour
+    protocol: http
+    target: "{{ .env.HTTP_TARGET }}"
+    # Optional - this default values
+    options:
+      timeout: 5s
+      method: POST

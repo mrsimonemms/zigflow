@@ -21,6 +21,7 @@ import (
 	"slices"
 	"time"
 
+	"github.com/mrsimonemms/zigflow/pkg/cloudevents"
 	"github.com/mrsimonemms/zigflow/pkg/utils"
 	swUtil "github.com/serverlessworkflow/sdk-go/v3/impl/utils"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
@@ -42,10 +43,12 @@ func NewListenTaskBuilder(
 	task *model.ListenTask,
 	taskName string,
 	doc *model.Workflow,
+	emitter *cloudevents.Events,
 ) (*ListenTaskBuilder, error) {
 	return &ListenTaskBuilder{
 		builder: builder[*model.ListenTask]{
 			doc:            doc,
+			eventEmitter:   emitter,
 			name:           taskName,
 			neverSkipCAN:   true,
 			task:           task,
