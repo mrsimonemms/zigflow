@@ -25,7 +25,7 @@ import (
 type ClientConfig struct {
 	Name     string         `json:"name" validate:"required"`
 	Disabled bool           `json:"disabled"`
-	Protocol string         `json:"protocol" validate:"required_if=Enabled true,oneof=http rabbitmq"`
+	Protocol string         `json:"protocol" validate:"required_if=Enabled true,oneof=file http"`
 	Target   string         `json:"target" validate:"required_if=Enabled true"`
 	Options  map[string]any `json:"options,omitempty"`
 
@@ -40,6 +40,8 @@ func (c *ClientConfig) load() error {
 	var client cloudevents.Client
 	var err error
 	switch c.Protocol {
+	case "file":
+		client, err = c.loadFileClient()
 	case "http":
 		client, err = c.loadHTTPClient()
 	default:

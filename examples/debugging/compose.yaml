@@ -24,6 +24,7 @@ services:
     environment:
       CLOUDEVENTS_CONFIG: ./examples/debugging/cloudevents.yaml
       HTTP_TARGET: http://http:8080/events
+      FILE_TARGET: ./examples/debugging/events.json
       LOG_LEVEL: "${LOG_LEVEL:-debug}"
       TEMPORAL_ADDRESS: ${TEMPORAL_ADDRESS:-temporal:7233}
       TEMPORAL_NAMESPACE: ${TEMPORAL_NAMESPACE:-default}
