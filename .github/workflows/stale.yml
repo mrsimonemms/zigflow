@@ -15,6 +15,8 @@ jobs:
         with:
           days-before-stale: 60
           days-before-close: 7
+          exempt-issue-labels: never-stale
+          exempt-pr-labels: never-stale
           stale-issue-message: |
             This issue is stale because it has been open 60 days with no activity. It will be closed in 7 days if no further activity.
           stale-pr-message: |
