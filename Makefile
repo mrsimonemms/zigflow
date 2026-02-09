@@ -68,6 +68,15 @@ helm:
 		zigflow ./charts/zigflow
 .PHONY: helm
 
+install-deps:
+	@for dir in $(shell ls ./*/package.json); do \
+		cd $$(dirname $$dir); \
+		echo "Installing $$PWD"; \
+		npm ci; \
+		cd - > /dev/null; \
+	done
+.PHONY: install-deps
+
 minikube:
 	@minikube profile list | grep minikube | grep OK || minikube start
 .PHONY: minikube
