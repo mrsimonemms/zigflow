@@ -22,12 +22,14 @@
     MiniMap,
     useSvelteFlow,
   } from '@xyflow/svelte';
+  import { onMount } from 'svelte';
 
   type Node = {
     id: string;
     type?: string;
     data: { label: string };
     position: { x: number; y: number };
+    selected?: boolean;
   };
 
   type Edge = {
@@ -46,7 +48,7 @@
     nodeId: number;
   } = $props();
 
-  const { screenToFlowPosition } = useSvelteFlow();
+  const { screenToFlowPosition, getNodes } = useSvelteFlow();
 
   function onDragOver(event: DragEvent) {
     event.preventDefault();
@@ -85,6 +87,28 @@
     nodes = [...nodes, newNode];
     nodeId++;
   }
+
+  // Prevent browser back navigation when deleting nodes with backspace
+  function handleKeyDown(event: KeyboardEvent) {
+    if (event.key === 'Backspace') {
+      // Check if any node is selected using SvelteFlow's getNodes
+      const currentNodes = getNodes();
+      const hasSelectedNode = currentNodes.some((node) => node.selected);
+      if (hasSelectedNode) {
+        // Prevent browser back navigation
+        event.preventDefault();
+      }
+    }
+  }
+
+  onMount(() => {
+    // Use capture phase to intercept the event earlier
+    document.addEventListener('keydown', handleKeyDown, true);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown, true);
+    };
+  });
 </script>
 
 <div
