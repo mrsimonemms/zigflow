@@ -13,6 +13,8 @@ permissions:
   contents: write
   packages: write
   pull-requests: read
+env:
+  WORKFLOWS_DATA_DIR: ${{ github.workspace }}/ui/data
 jobs:
   commitlint:
     runs-on: ubuntu-latest
