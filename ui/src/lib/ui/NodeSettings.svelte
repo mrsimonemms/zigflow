@@ -15,7 +15,7 @@
   -->
 
 <script lang="ts">
-  import type { Node } from '$lib/types/flow';
+  import type { Node } from '@xyflow/svelte';
 
   let { node, onClose }: { node: Node; onClose: () => void } = $props();
 </script>

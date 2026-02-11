@@ -15,56 +15,21 @@
   -->
 
 <script lang="ts">
-  import type { Edge, Node } from '$lib/types/flow';
   import FlowCanvas from '$lib/ui/FlowCanvas.svelte';
   import NodeSettings from '$lib/ui/NodeSettings.svelte';
   import Sidebar from '$lib/ui/Sidebar.svelte';
-  import { SvelteFlowProvider } from '@xyflow/svelte';
+  import { type Edge, type Node, SvelteFlowProvider } from '@xyflow/svelte';
   import '@xyflow/svelte/dist/style.css';
 
-  import type { PageData } from './$types';
+  const props = $props();
 
-  let { data }: { data: PageData } = $props();
-
-  const workflowId = $derived(data.workflowId);
+  const workflowId = props.data.workflowId;
 
   let nodeId = $state(5); // Counter for generating unique node IDs
 
-  // Initial nodes - example workflow using Zigflow tasks
-  let nodes = $state<Node[]>([
-    {
-      id: '1',
-      type: 'call-http',
-      data: { label: 'Fetch Data' },
-      position: { x: 250, y: 0 },
-    },
-    {
-      id: '2',
-      type: 'set',
-      data: { label: 'Transform Data' },
-      position: { x: 100, y: 120 },
-    },
-    {
-      id: '3',
-      type: 'fork',
-      data: { label: 'Process in Parallel' },
-      position: { x: 400, y: 120 },
-    },
-    {
-      id: '4',
-      type: 'wait',
-      data: { label: 'Wait 5s' },
-      position: { x: 250, y: 240 },
-    },
-  ]);
+  let nodes = $state.raw<Node[]>(props.data.graph.nodes);
 
-  // Initial edges
-  let edges = $state<Edge[]>([
-    { id: 'e1-2', source: '1', target: '2' },
-    { id: 'e1-3', source: '1', target: '3' },
-    { id: 'e2-4', source: '2', target: '4' },
-    { id: 'e3-4', source: '3', target: '4' },
-  ]);
+  let edges = $state.raw<Edge[]>(props.data.graph.edges);
 
   // Track selected node
   const selectedNode = $derived(nodes.find((node) => node.selected));

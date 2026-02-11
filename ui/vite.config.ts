@@ -22,4 +22,10 @@ export default defineConfig({
     host: process.env.HOST ?? '0.0.0.0',
     port: Number(process.env.PORT ?? 5173),
   },
+  optimizeDeps: {
+    include: ['@serverlessworkflow/sdk'],
+  },
+  ssr: {
+    noExternal: ['@serverlessworkflow/sdk'],
+  },
 });

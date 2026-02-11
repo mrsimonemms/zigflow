@@ -15,7 +15,7 @@
   -->
 
 <script lang="ts">
-  import type { Edge, Node } from '$lib/types/flow';
+  import type { Edge, Node } from '@xyflow/svelte';
   import {
     Background,
     Controls,

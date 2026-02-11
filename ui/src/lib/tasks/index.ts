@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as sdk from '@serverlessworkflow/sdk';
+import type { Workflow } from '@serverlessworkflow/sdk/lib/generated/classes/workflow';
+
 import CallActivityTask from './call-activity';
 import CallGrpcTask from './call-grpc';
 import CallHttpTask from './call-http';
@@ -47,6 +50,10 @@ export {
   TryTask,
   WaitTask,
 };
+
+export function fromYAML(text: string): Workflow {
+  return sdk.Classes.Workflow.deserialize(text);
+}
 
 /**
  * Returns all available Zigflow tasks in alphabetical order by label

@@ -19,6 +19,7 @@
   "devDependencies": {
     "@eslint/compat": "^2.0.2",
     "@eslint/js": "^9.39.2",
+    "@serverlessworkflow/sdk": "^1.0.1",
     "@sveltejs/adapter-node": "^5.5.2",
     "@sveltejs/kit": "^2.50.2",
     "@sveltejs/vite-plugin-svelte": "^6.2.4",
