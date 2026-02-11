@@ -15,8 +15,9 @@
  */
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = ({ params }) => {
+export const load: PageLoad = ({ data, params }) => {
   return {
+    ...data,
     workflowId: params.workflowId,
   };
 };
