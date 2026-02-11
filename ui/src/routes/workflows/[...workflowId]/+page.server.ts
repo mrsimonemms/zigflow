@@ -15,64 +15,50 @@
  */
 import { detectTaskTypeFromNode } from '$lib/export/taskTypeDetector';
 import {
+  isDirectory,
+  listDirectory,
+  loadWorkflowFile,
+} from '$lib/export/workflowLoader';
+import {
   type TranslationOptions,
   filterSystemNodes,
   translateGraph,
 } from '$lib/export/workflowTranslator';
 import { fromYAML } from '$lib/tasks';
+import { error } from '@sveltejs/kit';
 
 import type { PageServerLoad } from './$types';
 
-const workflowContent = `# This is a simple Serverless Workflow that will be
-# translated into a Temporal workflow
-document:
-  dsl: 1.0.0
-  namespace: zigflow # Mapped to the task queue
-  name: example # Workflow name
-  version: 0.0.1
-  title: Example Workflow
-  summary: An example of how to use Serverless Workflow to define Temporal Workflows
-timeout:
-  after:
-    minutes: 1
-# Validate the input schema
-input:
-  schema:
-    format: json
-    document:
-      type: object
-      required:
-        - userId
-      properties:
-        userId:
-          type: number
-do:
-  # Set some data to the state
-  - step1:
-      export:
-        as:
-          data: \${ . }
-      set:
-        # Set a variable from an envvar
-        envvar: \${ $env.EXAMPLE_ENVVAR }
-        # Generate a UUID at a workflow level
-        uuid: \${ uuid }
-  # Pause the workflow
-  - wait:
-      wait:
-        seconds: 5
-  # Make an HTTP call, using the userId received from the input
-  - getUser:
-      call: http
-      # Expose the response to the output
-      output:
-        as: '\${ $context + { user: . }}'
-      with:
-        method: get
-        endpoint: \${ "https://jsonplaceholder.typicode.com/users/" + ($input.userId | tostring) }
-`;
+export const load: PageServerLoad = async ({ params }) => {
+  const workflowPath = params.workflowId;
 
-export const load: PageServerLoad = () => {
+  // Check if the path is a directory
+  const isDir = await isDirectory(workflowPath);
+
+  if (isDir) {
+    // Return directory listing
+    try {
+      const entries = await listDirectory(workflowPath);
+      return {
+        type: 'directory' as const,
+        entries,
+        currentPath: workflowPath,
+      };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      throw error(404, `Failed to load directory: ${message}`);
+    }
+  }
+
+  // It's a file - load the workflow
+  let workflowContent: string;
+  try {
+    workflowContent = await loadWorkflowFile(workflowPath);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    throw error(404, `Failed to load workflow: ${message}`);
+  }
+
   const workflow = fromYAML(workflowContent);
   const graph = workflow.toGraph();
 
@@ -111,6 +97,7 @@ export const load: PageServerLoad = () => {
   });
 
   return {
+    type: 'workflow' as const,
     graph: {
       ...filteredGraph,
       nodes: enhancedNodes,

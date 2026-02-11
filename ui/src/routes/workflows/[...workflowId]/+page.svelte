@@ -23,13 +23,25 @@
 
   const props = $props();
 
+  // Make isDirectory reactive so it updates when navigating
+  const isDirectory = $derived(props.data.type === 'directory');
   const workflowId = props.data.workflowId;
 
   let nodeId = $state(5); // Counter for generating unique node IDs
 
-  let nodes = $state.raw<Node[]>(props.data.graph.nodes);
+  let nodes = $state.raw<Node[]>([]);
+  let edges = $state.raw<Edge[]>([]);
 
-  let edges = $state.raw<Edge[]>(props.data.graph.edges);
+  // Update nodes and edges when data changes
+  $effect(() => {
+    if (props.data.type === 'workflow') {
+      nodes = props.data.graph.nodes;
+      edges = props.data.graph.edges;
+    } else {
+      nodes = [];
+      edges = [];
+    }
+  });
 
   // Track selected node
   const selectedNode = $derived(nodes.find((node) => node.selected));
@@ -40,22 +52,42 @@
   }
 </script>
 
-<div class="workflow-editor">
-  <header>
-    <h1>Workflow Editor</h1>
-    <p>Workflow ID: <code>{workflowId}</code></p>
-  </header>
+{#if isDirectory}
+  <div class="directory-list">
+    <h1>Directory: {props.data.type === 'directory' ? props.data.currentPath || '/' : '/'}</h1>
 
-  <SvelteFlowProvider>
-    <div class="editor-layout">
-      <Sidebar />
-      <FlowCanvas bind:nodes bind:edges bind:nodeId />
-      {#if selectedNode}
-        <NodeSettings node={selectedNode} onClose={handleCloseSettings} />
-      {/if}
-    </div>
-  </SvelteFlowProvider>
-</div>
+    {#if props.data.type === 'directory' && props.data.entries.length === 0}
+      <p>Directory empty</p>
+    {:else if props.data.type === 'directory'}
+      <ul>
+        {#each props.data.entries as entry}
+          <li>
+            <a href="/workflows/{entry.path}">
+              {entry.name}{entry.isDirectory ? '/' : ''}
+            </a>
+          </li>
+        {/each}
+      </ul>
+    {/if}
+  </div>
+{:else}
+  <div class="workflow-editor">
+    <header>
+      <h1>Workflow Editor</h1>
+      <p>Workflow ID: <code>{workflowId}</code></p>
+    </header>
+
+    <SvelteFlowProvider>
+      <div class="editor-layout">
+        <Sidebar />
+        <FlowCanvas bind:nodes bind:edges bind:nodeId />
+        {#if selectedNode}
+          <NodeSettings node={selectedNode} onClose={handleCloseSettings} />
+        {/if}
+      </div>
+    </SvelteFlowProvider>
+  </div>
+{/if}
 
 <style lang="scss">
   @use '../../../styles/tokens' as *;
@@ -84,5 +116,31 @@
     flex: 1;
     display: flex;
     overflow: hidden;
+  }
+
+  .directory-list {
+    padding: $spacing-lg;
+  }
+
+  .directory-list h1 {
+    margin: 0 0 $spacing-lg 0;
+  }
+
+  .directory-list ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .directory-list li {
+    margin: $spacing-sm 0;
+  }
+
+  .directory-list a {
+    color: $color-text;
+    text-decoration: none;
+  }
+
+  .directory-list a:hover {
+    text-decoration: underline;
   }
 </style>
