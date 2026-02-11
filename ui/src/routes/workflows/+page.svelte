@@ -12,7 +12,55 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
--->
+  -->
 
-<h1>Workflows</h1>
-<p>Available workflows will be listed here.</p>
+<script lang="ts">
+  const props = $props();
+  const { entries } = props.data;
+</script>
+
+<div class="workflows-list">
+  <h1>Workflows</h1>
+
+  {#if entries.length === 0}
+    <p>Directory empty</p>
+  {:else}
+    <ul>
+      {#each entries as entry}
+        <li>
+          <a href="/workflows/{entry.path}">
+            {entry.name}{entry.isDirectory ? '/' : ''}
+          </a>
+        </li>
+      {/each}
+    </ul>
+  {/if}
+</div>
+
+<style>
+  .workflows-list {
+    padding: 2rem;
+  }
+
+  h1 {
+    margin-bottom: 1rem;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  li {
+    margin: 0.5rem 0;
+  }
+
+  a {
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+</style>
