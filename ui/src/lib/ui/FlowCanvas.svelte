@@ -109,6 +109,12 @@
   // Prevent browser back navigation when deleting nodes with backspace
   function handleKeyDown(event: KeyboardEvent) {
     if (event.key === 'Backspace') {
+      // Don't prevent backspace if user is interacting with the node settings sidebar
+      const activeElement = document.activeElement;
+      if (activeElement?.closest('.node-settings')) {
+        return;
+      }
+
       // Check if any node is selected using SvelteFlow's getNodes
       const currentNodes = getNodes();
       const hasSelectedNode = currentNodes.some((node) => node.selected);
