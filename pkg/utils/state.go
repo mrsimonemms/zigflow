@@ -68,7 +68,7 @@ func (s *State) AddActivityInfo(ctx context.Context) *State {
 		"started_time":              info.StartedTime,
 		"task_queue":                info.TaskQueue,
 		"task_token":                string(info.TaskToken),
-		"workflow_namespace":        info.WorkflowNamespace,
+		"workflow_namespace":        info.Namespace,
 		"workflow_execution_id":     info.WorkflowExecution.ID,
 		"workflow_execution_run_id": info.WorkflowExecution.RunID,
 	}
