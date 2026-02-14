@@ -12,7 +12,7 @@ operations across datasets.
 | for.each | `string` | `no` | The name of the variable used to store the current item being enumerated.<br />Defaults to `item`. |
 | for.in | `string` | `yes` | A [runtime expression](intro#runtime-expressions) used to get the collection to enumerate. |
 | for.at | `string` | `no` | The name of the variable used to store the index of the current item being enumerated.<br />Defaults to `index`. |
-| while | `string` | `no` | A [runtime expression](intro#runtime-expressions) that represents the condition, if any, that must be met for the iteration to continue. |
+| while | `string` | `no` | A [runtime expression](intro#runtime-expressions) that represents the condition, if any, that must be met for the iteration to continue.<br />The result of each iteration is stored in `$data.<taskName>`, allowing the while expression to conditionally stop the loop. |
 | do | [`map[string, task]`](intro) | `yes` | The [task(s)](intro) to perform for each item in the collection. These will be run as a [child workflow](https://docs.temporal.io/child-workflows) |
 
 ## Example

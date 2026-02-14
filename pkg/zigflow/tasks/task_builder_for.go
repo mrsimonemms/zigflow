@@ -17,9 +17,11 @@
 package tasks
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
+	ceSDK "github.com/cloudevents/sdk-go/v2"
 	"github.com/mrsimonemms/zigflow/pkg/cloudevents"
 	"github.com/mrsimonemms/zigflow/pkg/utils"
 	"github.com/rs/zerolog/log"
@@ -88,6 +90,32 @@ func (t *ForTaskBuilder) PostLoad() error {
 	return nil
 }
 
+// addIterationResult adds the latest iteration to the data - this will be overidden
+// with each iteration so should only be relied upon inside the iterator
+func (t *ForTaskBuilder) addIterationResult(ctx workflow.Context, state *utils.State, response any) {
+	logger := workflow.GetLogger(ctx)
+
+	cctx := context.Background()
+	info := workflow.GetInfo(ctx)
+	workflowID := info.WorkflowExecution.ID
+
+	taskName := t.GetTaskName()
+
+	logger.Debug("Adding iteration result to data object")
+	state.AddData(map[string]any{
+		taskName: response,
+	})
+
+	t.eventEmitter.Emit(cctx, "iteration.completed", func(e *ceSDK.Event) {
+		e.SetID(workflowID)
+		e.SetSubject(taskName)
+		_ = e.SetData(ceSDK.ApplicationJSON, map[string]any{
+			"state": state,
+			"while": t.task.While,
+		})
+	})
+}
+
 func (t *ForTaskBuilder) createBuilder() (TaskBuilder, error) {
 	if len(*t.task.Do) == 0 {
 		log.Warn().Str("task", t.GetTaskName()).Msg("No do tasks detected in for task")
@@ -129,6 +157,8 @@ func (t *ForTaskBuilder) exec() (TemporalWorkflowFunc, error) {
 					return nil, err
 				}
 
+				t.addIterationResult(ctx, state, res)
+
 				output[key] = res
 			}
 
@@ -145,6 +175,8 @@ func (t *ForTaskBuilder) exec() (TemporalWorkflowFunc, error) {
 					return nil, err
 				}
 
+				t.addIterationResult(ctx, state, res)
+
 				output = append(output, res)
 			}
 
@@ -160,6 +192,8 @@ func (t *ForTaskBuilder) exec() (TemporalWorkflowFunc, error) {
 					}
 					return nil, err
 				}
+
+				t.addIterationResult(ctx, state, res)
 
 				output = append(output, res)
 			}
