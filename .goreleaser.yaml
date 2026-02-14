@@ -1,5 +1,6 @@
 # This is an example .goreleaser.yml file with some sensible defaults.
 # Make sure to check the documentation at https://goreleaser.com
+version: 2
 before:
   hooks:
     # You may remove this if you don't use go modules.
@@ -16,7 +17,8 @@ builds:
     ldflags:
       - -w -s -X {{ .Env.GIT_REPO }}/cmd.Version={{ .Version }} -X {{ .Env.GIT_REPO }}/cmd.GitCommit={{ .FullCommit }}
 archives:
-  - format: binary
+  - formats:
+      - binary
     # this name template makes the OS and Arch compatible with the results of uname.
     name_template: >-
       {{ .ProjectName }}_
@@ -28,7 +30,10 @@ archives:
 checksum:
   name_template: "checksums.txt"
 snapshot:
-  name_template: "{{ incpatch .Version }}-next"
+  version_template: "{{ incpatch .Version }}-next"
+release:
+  prerelease: '{{ eq .Env.IS_PRERELEASE "true" }}'
+  make_latest: '{{ ne .Env.IS_PRERELEASE "true" }}'
 changelog:
   sort: asc
   filters:
