@@ -26,6 +26,62 @@ import (
 	"go.temporal.io/sdk/workflow"
 )
 
+func TestForTaskBuilderAddIterationResult(t *testing.T) {
+	tests := []struct {
+		name     string
+		taskName string
+		response any
+	}{
+		{
+			name:     "adds string response to state data",
+			taskName: "my-task",
+			response: "some-result",
+		},
+		{
+			name:     "adds map response to state data",
+			taskName: "map-task",
+			response: map[string]any{"key": "value"},
+		},
+		{
+			name:     "adds nil response to state data",
+			taskName: "nil-task",
+			response: nil,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			state := utils.NewState()
+
+			b := &ForTaskBuilder{
+				builder: builder[*model.ForTask]{
+					doc:          testWorkflow,
+					eventEmitter: testEvents,
+					name:         tc.taskName,
+					task: &model.ForTask{
+						For: model.ForTaskConfiguration{In: "${ .data.items }"},
+						Do:  &model.TaskList{},
+					},
+				},
+			}
+
+			var s testsuite.WorkflowTestSuite
+			env := s.NewTestWorkflowEnvironment()
+
+			workflowName := "add-iteration-" + tc.name
+			env.RegisterWorkflowWithOptions(func(ctx workflow.Context) error {
+				b.addIterationResult(ctx, state, tc.response)
+				return nil
+			}, workflow.RegisterOptions{Name: workflowName})
+
+			env.ExecuteWorkflow(workflowName)
+			assert.NoError(t, env.GetWorkflowError())
+
+			assert.Equal(t, tc.response, state.Data[tc.taskName])
+		})
+	}
+}
+
 func TestForTaskBuilderCheckWhile(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -76,7 +132,8 @@ func TestForTaskBuilderCheckWhile(t *testing.T) {
 
 			builder := &ForTaskBuilder{
 				builder: builder[*model.ForTask]{
-					name: "for-task",
+					eventEmitter: testEvents,
+					name:         "for-task",
 					task: &model.ForTask{
 						For:   model.ForTaskConfiguration{In: "${ .data.items }"},
 						While: tc.while,
@@ -118,7 +175,9 @@ func TestForTaskBuilderIterator(t *testing.T) {
 
 	builder := &ForTaskBuilder{
 		builder: builder[*model.ForTask]{
-			name: "iterate",
+			doc:          testWorkflow,
+			eventEmitter: testEvents,
+			name:         "iterate",
 			task: &model.ForTask{
 				For: model.ForTaskConfiguration{
 					Each: "value",
