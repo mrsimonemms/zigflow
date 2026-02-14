@@ -10,38 +10,28 @@ document:
 timeout:
   after:
     minutes: 1
-# Validate the input schema
-input:
-  schema:
-    format: json
-    document:
-      type: object
-      required:
-        - userId
-      properties:
-        userId:
-          type: number
 do:
-  # Set some data to the state
-  - step1:
+  - set:
       export:
-        as:
-          data: ${ . }
+        as: ${ . }
       set:
-        # Set a variable from an envvar
-        envvar: ${ $env.EXAMPLE_ENVVAR }
-        # Generate a UUID at a workflow level
-        uuid: ${ uuid }
-  # Pause the workflow
-  - wait:
-      wait:
-        seconds: 5
-  # Make an HTTP call, using the userId received from the input
-  - getUser:
-      call: http
-      # Expose the response to the output
+        report_id: some-report-id
+  - pollReportStatus:
       output:
-        as: '${ $context + { user: . }}'
-      with:
-        method: get
-        endpoint: ${ "https://jsonplaceholder.typicode.com/users/" + ($input.userId | tostring) }
+        as: '${ $context + { pollResults: . } }'
+      for:
+        in: ${ 5 }
+      while: ${ $data.pollReportStatus.report_status.reportStatus != "report.status.available" }
+      do:
+        - checkStatus:
+            call: http
+            with:
+              method: get
+              endpoint: ${ "http://localhost:9998/" + $context.report_id + "/status" }
+            export:
+              as: '${ $context + { report_status: . } }'
+        - waitBetweenPolls:
+            output:
+              as: ${ $context }
+            wait:
+              seconds: 1
