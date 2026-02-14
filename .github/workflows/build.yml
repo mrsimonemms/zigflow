@@ -102,113 +102,220 @@ jobs:
       - name: Run tests
         run: go test -v -tags=e2e ./tests/e2e/...
 
-  build:
+  # Generate metadata shared across all build jobs
+  metadata:
     runs-on: ubuntu-latest
     needs:
       - commitlint
       - e2e
       - pre-commit
       - test
+    outputs:
+      is_tag: ${{ steps.branch-name.outputs.is_tag }}
+      tag: ${{ steps.branch-name.outputs.tag }}
+      current_branch: ${{ steps.branch-name.outputs.current_branch }}
+      version: ${{ steps.metadata.outputs.version }}
+      commit_id: ${{ steps.metadata.outputs.commit_id }}
+      git_repo: ${{ steps.metadata.outputs.git_repo }}
+      push: ${{ steps.metadata.outputs.push }}
+      platforms: ${{ steps.metadata.outputs.platforms }}
+      is_prerelease: ${{ steps.metadata.outputs.is_prerelease }}
     steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0 # Required for goreleaser changelog to work correctly
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Get branch names
         id: branch-name
         uses: tj-actions/branch-names@v9
         with:
           strip_tag_prefix: v
 
-      - name: Generate Docker tag
-        id: docker
+      - name: Generate metadata
+        id: metadata
         run: |
           if [ "${{ steps.branch-name.outputs.is_tag }}" = "true"  ];
           then
-            # Latest tag
-            IMG_NAME="ghcr.io/${GITHUB_REPOSITORY,,}:latest"
-            # Tag name (usually vX.Y.Z)
-            IMG_NAME="${IMG_NAME},ghcr.io/${GITHUB_REPOSITORY,,}:${{ steps.branch-name.outputs.tag }}"
-
-            echo "image_name=${IMG_NAME}" >> "$GITHUB_OUTPUT"
-            echo "platforms=linux/amd64,linux/arm64" >> "$GITHUB_OUTPUT"
-            echo "push=true" >> "$GITHUB_OUTPUT"
-          else
-            # Use branch naming convention
-            TAG="branch-${{ steps.branch-name.outputs.current_branch }}"
-            # Change "/" for "-"
-            TAG="${TAG//\//-}"
-            # Set to lowercase
-            TAG="${TAG,,}"
-
-            echo "image_name=ghcr.io/${GITHUB_REPOSITORY,,}:${TAG}" >> "$GITHUB_OUTPUT"
-            echo "platforms=linux/amd64" >> "$GITHUB_OUTPUT"
-            echo "push=${{ github.ref == 'refs/heads/main' }}" >> "$GITHUB_OUTPUT"
-          fi
-
-          if [ "${{ steps.branch-name.outputs.is_tag }}" = "true"  ];
-          then
             echo "version=${{ steps.branch-name.outputs.tag }}" >> "$GITHUB_OUTPUT"
+            echo "platforms=[\"linux/amd64\",\"linux/arm64\"]" >> "$GITHUB_OUTPUT"
+            echo "push=true" >> "$GITHUB_OUTPUT"
+
+            # Detect if tag is a pre-release (contains -rc, -beta, -alpha, etc.)
+            TAG="${{ steps.branch-name.outputs.tag }}"
+            if echo "$TAG" | grep -qE -- '-(rc|beta|alpha|pre)'; then
+              echo "is_prerelease=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "is_prerelease=false" >> "$GITHUB_OUTPUT"
+            fi
           else
             echo "version=development" >> "$GITHUB_OUTPUT"
+            echo "platforms=[\"linux/amd64\"]" >> "$GITHUB_OUTPUT"
+            echo "push=${{ github.ref == 'refs/heads/main' }}" >> "$GITHUB_OUTPUT"
+            echo "is_prerelease=false" >> "$GITHUB_OUTPUT"
           fi
 
-          echo "container_tagged_image=ghcr.io/${GITHUB_REPOSITORY,,}:${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
           echo "commit_id=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
-          echo "gitRepo=github.com/${GITHUB_REPOSITORY}" >> "$GITHUB_OUTPUT"
+          echo "git_repo=github.com/${GITHUB_REPOSITORY}" >> "$GITHUB_OUTPUT"
+
+  # Build zigflow Docker images in parallel by architecture
+  docker_zigflow:
+    runs-on: ${{ matrix.platform == 'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    needs: metadata
+    strategy:
+      matrix:
+        platform: ${{ fromJson(needs.metadata.outputs.platforms) }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        if: needs.metadata.outputs.push == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate platform-specific tag
+        id: tag
+        run: |
+          PLATFORM_TAG=$(echo "${{ matrix.platform }}" | sed 's/\//-/g')
+          echo "platform_tag=${PLATFORM_TAG}" >> "$GITHUB_OUTPUT"
+
+          # Image name with SHA-based tag for this platform
+          echo "image_ref=ghcr.io/${GITHUB_REPOSITORY,,}:${GITHUB_SHA}-${PLATFORM_TAG}" >> "$GITHUB_OUTPUT"
 
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: .
           build-args: |
-            GIT_COMMIT=${{ steps.docker.outputs.commit_id }}
-            GIT_REPO=${{ steps.docker.outputs.gitRepo }}
-            VERSION=${{ steps.docker.outputs.version }}
-          platforms: ${{ steps.docker.outputs.platforms }}
-          push: ${{ steps.docker.outputs.push }}
-          tags: ${{ steps.docker.outputs.image_name }},${{ steps.docker.outputs.container_tagged_image }}
+            GIT_COMMIT=${{ needs.metadata.outputs.commit_id }}
+            GIT_REPO=${{ needs.metadata.outputs.git_repo }}
+            VERSION=${{ needs.metadata.outputs.version }}
+          platforms: ${{ matrix.platform }}
+          push: ${{ needs.metadata.outputs.push }}
+          tags: ${{ steps.tag.outputs.image_ref }}
+          # Save as artifact for non-main branches
+          outputs: ${{ needs.metadata.outputs.push == 'false' && 'type=docker,dest=/tmp/zigflow-image.tar' || '' }}
+
+      - name: Upload image artifact
+        if: needs.metadata.outputs.push == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: zigflow-image-${{ steps.tag.outputs.platform_tag }}
+          path: /tmp/zigflow-image.tar
+          retention-days: 1
+
+  # Combine architecture-specific images into a multi-arch manifest
+  docker_zigflow_manifest:
+    runs-on: ubuntu-latest
+    needs:
+      - metadata
+      - docker_zigflow
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        if: needs.metadata.outputs.push == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate manifest tags and create manifest
+        if: needs.metadata.outputs.push == 'true'
+        run: |
+          REPO_LOWER="ghcr.io/${GITHUB_REPOSITORY,,}"
+
+          # Build list of source images based on platforms
+          SOURCE_IMAGES="${REPO_LOWER}:${GITHUB_SHA}-linux-amd64"
+
+          # Add arm64 only if it was built (tags only)
+          if [ "${{ needs.metadata.outputs.is_tag }}" = "true"  ];
+          then
+            SOURCE_IMAGES="${SOURCE_IMAGES} ${REPO_LOWER}:${GITHUB_SHA}-linux-arm64"
+          fi
+
+          # Determine target tags based on ref type
+          if [ "${{ needs.metadata.outputs.is_tag }}" = "true"  ];
+          then
+            # For tags: choose latest/prerelease + version tag + SHA based on pre-release status
+            if [ "${{ needs.metadata.outputs.is_prerelease }}" = "true" ]; then
+              TARGET_TAGS="${REPO_LOWER}:prerelease ${REPO_LOWER}:${{ needs.metadata.outputs.tag }} ${REPO_LOWER}:${GITHUB_SHA}"
+            else
+              TARGET_TAGS="${REPO_LOWER}:latest ${REPO_LOWER}:${{ needs.metadata.outputs.tag }} ${REPO_LOWER}:${GITHUB_SHA}"
+            fi
+          elif [ "${{ github.ref }}" = "refs/heads/main"  ];
+          then
+            # For main branch: branch-main + SHA
+            TARGET_TAGS="${REPO_LOWER}:branch-main ${REPO_LOWER}:${GITHUB_SHA}"
+          else
+            # For other branches: branch-<name> + SHA
+            BRANCH="${{ needs.metadata.outputs.current_branch }}"
+            BRANCH_TAG="branch-${BRANCH//\//-}"
+            BRANCH_TAG="${BRANCH_TAG,,}"
+            TARGET_TAGS="${REPO_LOWER}:${BRANCH_TAG} ${REPO_LOWER}:${GITHUB_SHA}"
+          fi
+
+          # Create manifest for each target tag
+          for TAG in ${TARGET_TAGS}; do
+            echo "Creating manifest for ${TAG} from: ${SOURCE_IMAGES}"
+            docker buildx imagetools create -t "${TAG}" ${SOURCE_IMAGES}
+          done
+
+  # Run GoReleaser in parallel
+  goreleaser:
+    runs-on: ubuntu-latest
+    needs: metadata
+    if: needs.metadata.outputs.is_tag == 'true'
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Set up Go
-        if: steps.branch-name.outputs.is_tag == 'true'
         uses: actions/setup-go@v6
         with:
           go-version: ">=1.20.0"
 
       - name: Run GoReleaser
-        if: steps.branch-name.outputs.is_tag == 'true'
         uses: goreleaser/goreleaser-action@v5
         with:
           version: latest
           args: release --clean
         env:
-          GIT_REPO: ${{ steps.docker.outputs.gitRepo }}
+          GIT_REPO: ${{ needs.metadata.outputs.git_repo }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IS_PRERELEASE: ${{ needs.metadata.outputs.is_prerelease }}
+
+      - name: Refresh Go Report Card
+        uses: creekorful/goreportcard-action@v1.0
+
+  # Build and publish Helm chart in parallel
+  helm_chart:
+    runs-on: ubuntu-latest
+    needs: metadata
+    if: needs.metadata.outputs.is_tag == 'true'
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
 
       - name: Prepare chart README
-        if: steps.branch-name.outputs.is_tag == 'true'
         run: |
           go install github.com/norwoodj/helm-docs/cmd/helm-docs@latest
           helm-docs
-          yq -i '.version = "${{ steps.branch-name.outputs.tag }}"' charts/zigflow/Chart.yaml
-          yq -i '.annotations."org.opencontainers.image.documentation" = "https://github.com/mrsimonemms/zigflow/blob/${{ steps.branch-name.outputs.tag }}/charts/zigflow/README.md"' charts/zigflow/Chart.yaml
+          yq -i '.version = "${{ needs.metadata.outputs.tag }}"' charts/zigflow/Chart.yaml
+          yq -i '.annotations."org.opencontainers.image.documentation" = "https://github.com/mrsimonemms/zigflow/blob/${{ needs.metadata.outputs.tag }}/charts/zigflow/README.md"' charts/zigflow/Chart.yaml
 
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@v6
-        if: steps.branch-name.outputs.is_tag == 'true'
         id: gpg
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
@@ -217,26 +324,20 @@ jobs:
       # Helm requires the legacy GPG format
       # @link https://helm.sh/docs/topics/provenance/#the-workflow
       - name: Convert GPG v2 key
-        if: steps.branch-name.outputs.is_tag == 'true'
         run: |
           gpg --export > ~/.gnupg/pubring.gpg
           gpg --batch --pinentry-mode loopback --yes --passphrase '${{ secrets.GPG_PASSPHRASE }}' --export-secret-key > ~/.gnupg/secring.gpg
 
       - name: Publish Helm chart
-        if: steps.branch-name.outputs.is_tag == 'true'
         uses: appany/helm-oci-chart-releaser@v0.5.0
         with:
           name: zigflow
           registry: ghcr.io
           repository: ${{ github.actor }}/charts
-          tag: ${{ steps.branch-name.outputs.tag }}
+          tag: ${{ needs.metadata.outputs.tag }}
           registry_username: ${{ github.actor }}
           registry_password: ${{ secrets.GITHUB_TOKEN }}
           sign: true
           signing_key: ${{ steps.gpg.outputs.name }}
           signing_passphrase: ${{ secrets.GPG_PASSPHRASE }}
           update_dependencies: true
-
-      - name: Refresh Go Report Card
-        if: steps.branch-name.outputs.is_tag == 'true'
-        uses: creekorful/goreportcard-action@v1.0
