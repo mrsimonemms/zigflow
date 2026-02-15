@@ -32,7 +32,7 @@ management of Temporal without requiring SDK boilerplate.
 * [Homepage](https://zigflow.dev?utm_source=github&utm_medium=readme&utm_campaign=help)
 * [Helm chart](https://github.com/mrsimonemms/zigflow/tree/main/charts/zigflow)
 * [Documentation](https://zigflow.dev/docs?utm_source=github&utm_medium=readme&utm_campaign=help)
-* [Slack Community](https://temporalio.slack.com/archives/C09UMNG4YP7)
+* [Slack Community](https://slack.zigflow.dev)
 
 ---
 

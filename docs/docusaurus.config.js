@@ -179,7 +179,7 @@ const config = {
             items: [
               {
                 label: 'Slack',
-                href: 'https://temporalio.slack.com/archives/C09UMNG4YP7',
+                href: 'https://slack.zigflow.dev',
               },
               {
                 label: 'GitHub Discussions',
