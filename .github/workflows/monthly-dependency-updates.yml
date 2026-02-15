@@ -47,6 +47,12 @@ jobs:
           npm install
           npm update
 
+      - name: Update UI npm dependencies
+        working-directory: ui
+        run: |
+          npm install
+          npm update
+
       - name: Create pull request
         uses: peter-evans/create-pull-request@v8
         with:
@@ -58,6 +64,7 @@ jobs:
             - Pre-commit dependencies update via `pre-commit autoupdate`
             - Go dependencies updated via `go get -u ./...` and `go mod tidy`
             - Docs npm dependencies updated via `npm update` in `docs`
+            - UI npm dependencies updated via `npm update` in `ui`
           branch: chore/monthly-deps
           delete-branch: true
           labels: dependencies
