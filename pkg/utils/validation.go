@@ -17,7 +17,9 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 
 	"github.com/go-playground/locales/en"
 	ut "github.com/go-playground/universal-translator"
@@ -28,9 +30,18 @@ import (
 
 var ErrUnknownValidationError = fmt.Errorf("unknown validation error")
 
+type ValidationResult struct {
+	Valid  bool               `json:"valid"`
+	File   string             `json:"file"`
+	Errors []ValidationErrors `json:"errors,omitempty"`
+}
+
 type ValidationErrors struct {
-	Key     string
-	Message string
+	Key     string               `json:"key"`
+	Message string               `json:"message"`
+	Path    string               `json:"path"`
+	Param   string               `json:"param,omitempty"`
+	Error   validator.FieldError `json:"-"`
 }
 
 type Validator struct {
@@ -51,6 +62,9 @@ func (v *Validator) ValidateStruct(data any) ([]ValidationErrors, error) {
 				vErrs = append(vErrs, ValidationErrors{
 					Key:     e.Tag(),
 					Message: e.Translate(v.trans),
+					Path:    e.StructNamespace(),
+					Param:   e.Param(),
+					Error:   e,
 				})
 			}
 		}
@@ -73,4 +87,55 @@ func NewValidator() (*Validator, error) {
 	return &Validator{
 		validate: validate,
 	}, nil
+}
+
+func RenderHuman(w io.Writer, result ValidationResult) {
+	if result.Valid {
+		_, _ = fmt.Fprintf(w, "✅ %s is valid\n", result.File)
+		return
+	}
+
+	_, _ = fmt.Fprintf(w, "❌ Validation failed for %s\n\n", result.File)
+	_, _ = fmt.Fprintf(w, "%d validation error(s):\n\n", len(result.Errors))
+
+	for i, err := range result.Errors {
+		_, _ = fmt.Fprintf(w, "%d. %s: %s\n", i+1, err.Path, humanMessage(err.Error))
+	}
+}
+
+func RenderJSON(w io.Writer, result ValidationResult) error {
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "  ")
+	return enc.Encode(result)
+}
+
+func humanMessage(fe validator.FieldError) string {
+	switch fe.Tag() {
+	case "required":
+		return "is required"
+
+	case "gt":
+		return fmt.Sprintf("must be greater than %s", fe.Param())
+
+	case "gte":
+		return fmt.Sprintf("must be greater than or equal to %s", fe.Param())
+
+	case "lt":
+		return fmt.Sprintf("must be less than %s", fe.Param())
+
+	case "lte":
+		return fmt.Sprintf("must be less than or equal to %s", fe.Param())
+
+	case "oneof":
+		return fmt.Sprintf("must be one of [%s]", fe.Param())
+
+	case "min":
+		return fmt.Sprintf("must have minimum length of %s", fe.Param())
+
+	case "max":
+		return fmt.Sprintf("must have maximum length of %s", fe.Param())
+
+	default:
+		return fmt.Sprintf("failed validation (%s)", fe.Tag())
+	}
 }

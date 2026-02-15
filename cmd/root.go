@@ -146,7 +146,21 @@ platform.`,
 					Cause: err,
 					Msg:   "Validation failed",
 					WithParams: func(l *zerolog.Event) *zerolog.Event {
-						return l.Interface("validationErrors", res)
+						f := []struct {
+							Key     string
+							Message string
+						}{}
+						for _, r := range res {
+							f = append(f, struct {
+								Key     string
+								Message string
+							}{
+								Key:     r.Key,
+								Message: r.Message,
+							})
+						}
+
+						return l.Interface("validationErrors", f)
 					},
 				}
 			}
