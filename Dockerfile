@@ -31,10 +31,11 @@ RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - \
 USER 1000
 WORKDIR /go/app
 COPY --chown=1000:1000 . .
-RUN go build \
-  -ldflags \
-  "-w -s -X $GIT_REPO/cmd.Version=$VERSION -X $GIT_REPO/cmd.GitCommit=$GIT_COMMIT" \
-  -o /go/bin/app
+RUN go generate ./... \
+  && go build \
+    -ldflags \
+    "-w -s -X $GIT_REPO/cmd.Version=$VERSION -X $GIT_REPO/cmd.GitCommit=$GIT_COMMIT" \
+    -o /go/bin/app
 COPY --from=cosmtrek/air /go/bin/air /go/bin/air
 ENTRYPOINT [ "air" ]
 

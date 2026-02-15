@@ -26,6 +26,7 @@
     }
   },
   "postCreateCommand": {
+    "go-generate": "go generate ./...",
     "install-air": "go install github.com/air-verse/air@latest"
   },
   "containerEnv": {

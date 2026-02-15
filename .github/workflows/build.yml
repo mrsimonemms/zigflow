@@ -37,6 +37,9 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Go generate
+        run: go generate ./...
+
       - uses: actions/setup-node@v6
         with:
           node-version: lts/*
@@ -60,6 +63,9 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
+
+      - name: Go generate
+        run: go generate ./...
 
       - name: Install dependencies
         run: go install ./...
@@ -91,6 +97,9 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
+
+      - name: Go generate
+        run: go generate ./...
 
       - uses: actions/setup-node@v6
         with:

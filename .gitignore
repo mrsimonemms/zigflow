@@ -17,3 +17,5 @@ wiki
 *.pb.go
 
 .claude
+
+cmd/schema.yaml
