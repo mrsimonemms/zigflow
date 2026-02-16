@@ -25,7 +25,7 @@ import (
 	"time"
 
 	sdk "github.com/cloudevents/sdk-go/v2"
-	"github.com/mrsimonemms/zigflow/internal/observability"
+	"github.com/mrsimonemms/zigflow/pkg/observability"
 	"github.com/mrsimonemms/zigflow/pkg/utils"
 	"github.com/rs/zerolog/log"
 	"github.com/serverlessworkflow/sdk-go/v3/model"
