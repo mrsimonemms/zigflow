@@ -92,7 +92,7 @@ func (t *RaiseTaskBuilder) Build() (TemporalWorkflowFunc, error) {
 		var detailResult any = ""
 
 		if definition := t.task.Raise.Error.Definition; definition != nil {
-			if detail := definition.Title; detail != nil {
+			if detail := definition.Detail; detail != nil {
 				detailResult, err = expr.TraverseAndEvaluateObj(
 					detail.AsObjectOrRuntimeExpr(),
 					state,
