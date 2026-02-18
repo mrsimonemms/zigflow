@@ -1,0 +1,14 @@
+[project]
+name = "zigflow-large-payload-codec-example"
+version = "0.1.0"
+description = "Example of using custom PayloadCodec with Zigflow"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "temporalio>=1.8.0",
+    "aiohttp>=3.10.0",
+    "protobuf>=5.29.0",
+]
+
+[tool.uv]
+package = false

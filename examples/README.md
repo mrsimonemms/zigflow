@@ -34,6 +34,7 @@ A collection of examples
 | [Money Transfer Demo](./money-transfer) | Temporal's world-famous Money Transfer Demo, in Zigflow form |
 | [Multiple Workflows](./multiple-workflows) | Configure multiple Temporal workflows from a single Zigflow definition |
 | [Python](./python) | The basic example, but in Python |
+| [Large Payload Example](./python-large-payload-codec) | Demonstrates using a custom PayloadCodec with Zigflow to handle large payloads via the claim-check pattern |
 | [Query Listeners](./query) | Listen for Temporal query events |
 | [Throw an error](./raise) | Throw an error from a Temporal workflow |
 | [Run Task](./run-task) | How to execute code in NodeJS, Python and Shell |

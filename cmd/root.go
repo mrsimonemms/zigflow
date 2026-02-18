@@ -24,6 +24,7 @@ import (
 	"github.com/mrsimonemms/golang-helpers/temporal"
 	"github.com/mrsimonemms/temporal-codec-server/packages/golang/algorithms/aes"
 	"github.com/mrsimonemms/zigflow/pkg/cloudevents"
+	"github.com/mrsimonemms/zigflow/pkg/codec"
 	"github.com/mrsimonemms/zigflow/pkg/telemetry"
 	"github.com/mrsimonemms/zigflow/pkg/utils"
 	"github.com/mrsimonemms/zigflow/pkg/zigflow"
@@ -38,6 +39,7 @@ import (
 
 var rootOpts struct {
 	CloudEventsConfig    string
+	CodecEndpoint        string
 	ConvertData          bool
 	ConvertKeyPath       string
 	DisableTelemetry     bool
@@ -177,18 +179,63 @@ platform.`,
 		}
 
 		var converter converter.DataConverter
-		if rootOpts.ConvertData {
-			keys, err := aes.ReadKeyFile(rootOpts.ConvertKeyPath)
-			if err != nil {
+		if rootOpts.ConvertData || rootOpts.CodecEndpoint != "" {
+			// Validate that codec is properly configured
+			if rootOpts.CodecEndpoint != "" && !rootOpts.ConvertData {
 				return gh.FatalError{
-					Cause: err,
-					Msg:   "Unable to get keys from file",
+					Msg: "--codec-endpoint requires --convert-data to be set",
 					WithParams: func(l *zerolog.Event) *zerolog.Event {
-						return l.Str("keypath", rootOpts.ConvertKeyPath)
+						return l.Str("codecEndpoint", rootOpts.CodecEndpoint)
 					},
 				}
 			}
-			converter = aes.DataConverter(keys)
+
+			// Determine if we're using local or remote codec
+			// Use Changed() to detect if flag was explicitly set by user
+			hasKeyPath := cmd.Flags().Changed("converter-key-path")
+			hasEndpoint := rootOpts.CodecEndpoint != ""
+
+			// XOR validation: cannot use both local and remote codec simultaneously
+			if hasKeyPath && hasEndpoint {
+				return gh.FatalError{
+					Msg: "Cannot use both --converter-key-path and --codec-endpoint. Choose one codec type.",
+					WithParams: func(l *zerolog.Event) *zerolog.Event {
+						return l.
+							Str("keyPath", rootOpts.ConvertKeyPath).
+							Str("codecEndpoint", rootOpts.CodecEndpoint)
+					},
+				}
+			}
+
+			if hasEndpoint {
+				// Remote codec server
+				log.Info().
+					Str("endpoint", rootOpts.CodecEndpoint).
+					Msg("Using remote codec server")
+				converter = codec.NewRemoteCodecDataConverter(rootOpts.CodecEndpoint, nil)
+			} else {
+				// Local AES codec (default when --convert-data is set)
+				keyPath := rootOpts.ConvertKeyPath
+				if keyPath == "" {
+					keyPath = "keys.yaml" // viper default
+				}
+
+				log.Info().
+					Str("keyPath", keyPath).
+					Msg("Using local AES codec")
+
+				keys, err := aes.ReadKeyFile(keyPath)
+				if err != nil {
+					return gh.FatalError{
+						Cause: err,
+						Msg:   "Unable to read AES keys from file",
+						WithParams: func(l *zerolog.Event) *zerolog.Event {
+							return l.Str("keypath", keyPath)
+						},
+					}
+				}
+				converter = aes.DataConverter(keys)
+			}
 		}
 
 		// The client and worker are heavyweight objects that should be created once per process.
@@ -281,15 +328,20 @@ func init() {
 		viper.GetString("cloudevents_config"), "Path to CloudEvents config file",
 	)
 
+	rootCmd.Flags().StringVar(
+		&rootOpts.CodecEndpoint, "codec-endpoint",
+		viper.GetString("codec_endpoint"), "Remote codec server URL (e.g., http://localhost:8081). Requires --convert-data",
+	)
+
 	rootCmd.Flags().BoolVar(
 		&rootOpts.ConvertData, "convert-data",
-		viper.GetBool("convert_data"), "Enable AES data conversion",
+		viper.GetBool("convert_data"), "Enable data conversion (local AES or remote codec)",
 	)
 
 	viper.SetDefault("converter_key_path", "keys.yaml")
 	rootCmd.Flags().StringVar(
 		&rootOpts.ConvertKeyPath, "converter-key-path",
-		viper.GetString("converter_key_path"), "Path to AES conversion keys",
+		viper.GetString("converter_key_path"), "Path to AES conversion keys (for local codec)",
 	)
 
 	viper.SetDefault("disable_telemetry", false)

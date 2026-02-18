@@ -3,6 +3,8 @@ tmp
 
 node_modules
 .venv
+__pycache__
+uv.lock
 
 .idea
 .DS_Store

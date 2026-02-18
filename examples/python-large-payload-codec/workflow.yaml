@@ -1,0 +1,91 @@
+document:
+  dsl: 1.0.0
+  namespace: zigflow
+  name: large-payload-example
+  version: 0.0.1
+  title: Large Payload Example
+  summary: Demonstrates using a custom PayloadCodec with Zigflow to handle large payloads via the claim-check pattern
+  metadata:
+    display: false
+
+# Input: size_kb - how many KB of data to generate
+input:
+  schema:
+    format: json
+    document:
+      type: object
+      required:
+        - size_kb
+      properties:
+        size_kb:
+          type: number
+          description: Size of data to generate in kilobytes (KB)
+
+timeout:
+  after:
+    minutes: 5
+
+do:
+  # Step 1: Capture input
+  - captureInput:
+      set:
+        requestedSize: ${ $input.size_kb }
+        workflowId: ${ uuid }
+
+  # Step 2: Generate large data via Python activity
+  # This will create data larger than 500KB threshold, triggering the codec
+  - generateData:
+      call: activity
+      export:
+        as: '${ $context + { generateData: . } }'
+      with:
+        name: generate_large_data
+        arguments:
+          - ${ $data.requestedSize }
+        taskQueue: python-activities
+
+  # Step 3: Process the large data via Python activity
+  # The large payload will be transparently decoded and re-encoded by the codec
+  - processData:
+      call: activity
+      export:
+        as: '${ $context + { processData: . } }'
+      with:
+        name: process_large_data
+        arguments:
+          - ${ $data.generateData }
+        taskQueue: python-activities
+
+  # Step 4: Generate large string data
+  - generateString:
+      call: activity
+      export:
+        as: '${ $context + { generateString: . } }'
+      with:
+        name: generate_large_string
+        arguments:
+          - ${ $data.requestedSize }
+        taskQueue: python-activities
+
+  # Step 5: Process the large string data
+  - processString:
+      call: activity
+      export:
+        as: '${ $context + { processString: . } }'
+      with:
+        name: process_large_string
+        arguments:
+          - ${ $data.generateString }
+        taskQueue: python-activities
+
+  # Step 6: Return results
+  - returnResults:
+      export:
+        as:
+          data: ${ . }
+      set:
+        workflowId: ${ $data.workflowId }
+        requestedSize: ${ $data.requestedSize }
+        processDataResult: ${ $data.processData }
+        processStringResult: ${ $data.processString }
+        success: true
