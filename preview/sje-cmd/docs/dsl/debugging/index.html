@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://www.googletagmanager.com">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-BC2274WN5W"></script>
 <script>function gtag(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","G-BC2274WN5W",{anonymize_ip:!0})</script><link rel="stylesheet" href="/preview/sje-cmd/assets/css/styles.4641f921.css">
-<script src="/preview/sje-cmd/assets/js/runtime~main.7666ba16.js" defer="defer"></script>
-<script src="/preview/sje-cmd/assets/js/main.d4c24e10.js" defer="defer"></script>
+<script src="/preview/sje-cmd/assets/js/runtime~main.f828d26c.js" defer="defer"></script>
+<script src="/preview/sje-cmd/assets/js/main.d473dbfd.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
 <svg style="display: none;"><defs>
@@ -35,7 +35,7 @@ workflows. This is particularly useful during development and debugging.</p>
 <li class=""><strong>Environment variable</strong>: <code>CLOUDEVENTS_CONFIG=/path/to/config.yaml</code></li>
 </ul>
 <p>Example:</p>
-<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain"># Using CLI flag</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">zigflow --cloudevents-config ./cloudevents.yaml</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"># Using environment variable</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">export CLOUDEVENTS_CONFIG=./cloudevents.yaml</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">zigflow</span><br></span></code></pre></div></div>
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain"># Using CLI flag</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">zigflow run --cloudevents-config ./cloudevents.yaml</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"># Using environment variable</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">export CLOUDEVENTS_CONFIG=./cloudevents.yaml</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">zigflow</span><br></span></code></pre></div></div>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="configuration-file-format">Configuration File Format<a href="#configuration-file-format" class="hash-link" aria-label="Direct link to Configuration File Format" title="Direct link to Configuration File Format" translate="no">​</a></h2>
 <p>The CloudEvents configuration file defines one or more clients that receive
 events. Each client specifies a protocol (either <code>http</code> or <code>file</code>) and a target
