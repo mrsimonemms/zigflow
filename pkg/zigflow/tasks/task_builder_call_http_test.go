@@ -37,6 +37,7 @@ func TestParseHTTPArguments(t *testing.T) {
 			Method:   "GET",
 			Endpoint: model.NewEndpoint("https://example.com"),
 			Headers: map[string]string{
+				// #nosec G101 -- DSL expression, not a hardcoded credential. Value is a JQ expression resolved at runtime from environment variables.
 				"X-Token": "${ $env.token }",
 			},
 			Query: map[string]any{
