@@ -168,7 +168,7 @@ format.
     src="https://contrib.rocks/image?repo=mrsimonemms/zigflow&v=1769433596" />
 </a>
 
-Made with [contrib.rocks](https://contrib.rocks).
+Made with [contrib.rocks](https://contrib.rocks/preview?repo=mrsimonemms%2Fzigflow).
 
 [![Star History Chart](https://api.star-history.com/svg?repos=mrsimonemms/zigflow&type=date&legend=top-left)](https://www.star-history.com/#mrsimonemms/zigflow&type=date&legend=top-left)
 
