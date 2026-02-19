@@ -22,50 +22,61 @@ import (
 	"path/filepath"
 	"strings"
 
+	gh "github.com/mrsimonemms/golang-helpers"
 	"github.com/mrsimonemms/zigflow/pkg/utils"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
 )
 
-// generateDocsCmd represents the generateDocs command
-var generateDocsCmd = &cobra.Command{
-	Use:    "generate-docs",
-	Short:  "Generate documentation",
-	Hidden: true,
-	Run: func(cmd *cobra.Command, args []string) {
-		var outDir string
-		if len(args) == 0 {
-			root, err := os.Getwd()
-			if err != nil {
-				log.Fatal().Err(err).Msg("Error getting working directory")
+func newGenerateDocsCmd(root *cobra.Command) *cobra.Command {
+	return &cobra.Command{
+		Use:    "generate-docs",
+		Short:  "Generate documentation",
+		Hidden: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			var outDir string
+			if len(args) == 0 {
+				wd, err := os.Getwd()
+				if err != nil {
+					return gh.FatalError{
+						Cause: err,
+						Msg:   "Error getting working directory",
+					}
+				}
+
+				outDir = path.Join(wd, "docs", "docs", "cli")
+			} else {
+				outDir = args[0]
 			}
 
-			outDir = path.Join(root, "docs", "docs", "cli")
-		} else {
-			outDir = args[0]
-		}
-
-		if err := os.MkdirAll(outDir, 0o755); err != nil {
-			log.Fatal().Err(err).Msg("Error creating directory")
-		}
-
-		if err := doc.GenMarkdownTreeCustom(rootCmd, outDir, utils.FilePrepender, utils.LinkHandler); err != nil {
-			log.Fatal().Err(err).Msg("Error generating documentation")
-		}
-
-		// Post-process all generated files
-		if err := filepath.Walk(outDir, func(path string, info os.FileInfo, err error) error {
-			if strings.HasSuffix(path, ".md") {
-				return utils.SanitizeForMDX(path)
+			if err := os.MkdirAll(outDir, 0o755); err != nil {
+				return gh.FatalError{
+					Cause: err,
+					Msg:   "Error creating directory",
+				}
 			}
+
+			if err := doc.GenMarkdownTreeCustom(root, outDir, utils.FilePrepender, utils.LinkHandler); err != nil {
+				return gh.FatalError{
+					Cause: err,
+					Msg:   "Error generating documentation",
+				}
+			}
+
+			// Post-process all generated files
+			if err := filepath.Walk(outDir, func(path string, info os.FileInfo, err error) error {
+				if strings.HasSuffix(path, ".md") {
+					return utils.SanitizeForMDX(path)
+				}
+				return nil
+			}); err != nil {
+				return gh.FatalError{
+					Cause: err,
+					Msg:   "Error post-processing documentation",
+				}
+			}
+
 			return nil
-		}); err != nil {
-			log.Fatal().Err(err).Msg("Error post-processing documentation")
-		}
-	},
-}
-
-func init() {
-	rootCmd.AddCommand(generateDocsCmd)
+		},
+	}
 }
