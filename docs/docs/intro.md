@@ -61,7 +61,7 @@ The DSL schema follows the Serverless Workflow specification
 Run Zigflow with a reference to the workflow file
 
 ```sh
-zigflow -f workflow.yaml
+zigflow run -f workflow.yaml
 ```
 
 ### Trigger the Workflow

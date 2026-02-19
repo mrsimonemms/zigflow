@@ -4,6 +4,7 @@ tmp_dir = "tmp"
 
 [build]
   args_bin = [
+    "run",
     "--convert-data",
     "--converter-key-path /workspaces/zigflow/keys.example.yaml",
     "--file ./workflow.yaml"

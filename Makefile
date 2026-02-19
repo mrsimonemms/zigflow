@@ -88,5 +88,5 @@ start:
 
 worker:
 	$(shell if [ -z "${NAME}" ]; then echo "NAME must be set"; exit 1; fi)
-	go run . -f ./examples/${NAME}/workflow.yaml
+	go run . run -f ./examples/${NAME}/workflow.yaml
 .PHONY: worker

@@ -29,11 +29,11 @@ Example:
 
 ```bash
 # Using CLI flag
-zigflow --cloudevents-config ./cloudevents.yaml
+zigflow run --cloudevents-config ./cloudevents.yaml
 
 # Using environment variable
 export CLOUDEVENTS_CONFIG=./cloudevents.yaml
-zigflow
+zigflow run
 ```
 
 ## Configuration File Format
@@ -105,6 +105,12 @@ Zigflow emits the following CloudEvent types:
   - Contains error details and context at time of failure
 - **`dev.zigflow.task.completed`**: Emitted when a task completes successfully
   - Contains task output and updated context
+
+### Iteration Events
+
+- **`dev.zigflow.iteration.completed`**: Emitted when a task has iterated over
+  some data
+  - Contains data relevant to the iteration
 
 ## Event Structure
 

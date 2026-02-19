@@ -33,6 +33,8 @@ services:
       WORKFLOW_FILE: ./examples/cloudevents/workflow.yaml
     volumes:
       - ../../:/go/app
+    command:
+      - run
     links:
       - temporal
     depends_on:
