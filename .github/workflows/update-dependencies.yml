@@ -1,4 +1,4 @@
-name: Monthly Dependency Updates
+name: Update Dependencies
 
 on:
   schedule:
@@ -33,6 +33,7 @@ jobs:
         run: |
           go get -u ./...
           go mod tidy
+          go generate ./...
 
       - name: Set up Node
         uses: actions/setup-node@v6
