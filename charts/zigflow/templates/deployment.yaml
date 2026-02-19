@@ -51,6 +51,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.Version }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
+            - run
           {{- if .Values.workflow.enabled }}
             - --file={{ .Values.workflow.file }}
           {{- end}}

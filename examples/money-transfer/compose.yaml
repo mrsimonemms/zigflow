@@ -31,6 +31,8 @@ services:
       WORKFLOW_FILE: ./examples/money-transfer/workflow.yaml
     volumes:
       - ../../:/go/app
+    command:
+      - run
     links:
       - server
       - temporal

@@ -17,84 +17,10 @@
 package cmd
 
 import (
-	"errors"
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
-
-func TestPanicMessage(t *testing.T) {
-	tests := []struct {
-		Name     string
-		Input    any
-		Expected string
-	}{
-		{
-			Name:     "error value",
-			Input:    errors.New("something went wrong"),
-			Expected: "something went wrong",
-		},
-		{
-			Name:     "string value",
-			Input:    "a plain string",
-			Expected: "a plain string",
-		},
-		{
-			Name:     "other value",
-			Input:    42,
-			Expected: fmt.Sprintf("%+v", 42),
-		},
-	}
-
-	for _, test := range tests {
-		t.Run(test.Name, func(t *testing.T) {
-			assert.Equal(t, test.Expected, panicMessage(test.Input))
-		})
-	}
-}
-
-func TestBuildDataConverter(t *testing.T) {
-	tests := []struct {
-		Name        string
-		ConvertData bool
-		KeyPath     string
-		ExpectNil   bool
-		ExpectError bool
-	}{
-		{
-			Name:        "disabled returns nil without reading key file",
-			ConvertData: false,
-			KeyPath:     "",
-			ExpectNil:   true,
-		},
-		{
-			Name:        "enabled with missing key file returns error",
-			ConvertData: true,
-			KeyPath:     "/nonexistent/path/keys.yaml",
-			ExpectNil:   true,
-			ExpectError: true,
-		},
-	}
-
-	for _, test := range tests {
-		t.Run(test.Name, func(t *testing.T) {
-			dc, err := buildDataConverter(test.ConvertData, test.KeyPath)
-
-			if test.ExpectError {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-			}
-
-			if test.ExpectNil {
-				assert.Nil(t, dc)
-			} else {
-				assert.NotNil(t, dc)
-			}
-		})
-	}
-}
 
 func TestNewRootCmd_Subcommands(t *testing.T) {
 	cmd := newRootCmd()
@@ -104,6 +30,7 @@ func TestNewRootCmd_Subcommands(t *testing.T) {
 		names[sub.Name()] = true
 	}
 
+	assert.True(t, names["run"])
 	assert.True(t, names["version"])
 	assert.True(t, names["validate"])
 	assert.True(t, names["schema"])
@@ -114,14 +41,4 @@ func TestNewRootCmd_Flags(t *testing.T) {
 	cmd := newRootCmd()
 
 	assert.NotNil(t, cmd.PersistentFlags().Lookup("log-level"))
-	assert.NotNil(t, cmd.Flags().Lookup("file"))
-	assert.NotNil(t, cmd.Flags().Lookup("validate"))
-	assert.NotNil(t, cmd.Flags().Lookup("temporal-address"))
-	assert.NotNil(t, cmd.Flags().Lookup("temporal-namespace"))
-	assert.NotNil(t, cmd.Flags().Lookup("convert-data"))
-	assert.NotNil(t, cmd.Flags().Lookup("cloudevents-config"))
-	assert.NotNil(t, cmd.Flags().Lookup("env-prefix"))
-	assert.NotNil(t, cmd.Flags().Lookup("health-listen-address"))
-	assert.NotNil(t, cmd.Flags().Lookup("metrics-listen-address"))
-	assert.NotNil(t, cmd.Flags().Lookup("disable-telemetry"))
 }

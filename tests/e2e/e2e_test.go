@@ -114,6 +114,7 @@ func TestE2E(t *testing.T) {
 			args := []string{
 				"run",
 				".",
+				"run",
 				"--file", test.WorkflowPath,
 				"--health-listen-address", fmt.Sprintf("localhost:%d", healthPort),
 				"--metrics-listen-address", fmt.Sprintf("localhost:%d", metricsPort),

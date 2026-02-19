@@ -27,8 +27,9 @@ as the tag (eg, `0.1.0`).
 
 ```sh
 docker run -it --rm \
-  -v /path/to/workflow.yaml:/workflow.yaml \
-  ghcr.io/mrsimonemms/zigflow
+  -v /path/to/workflow.yaml:/app/workflow.yaml \
+  ghcr.io/mrsimonemms/zigflow \
+  run
 ```
 
 ## Go Install

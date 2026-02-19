@@ -83,7 +83,7 @@ do:
 Run it through Zigflow:
 
 ```bash
-zigflow -f ./path/to/workflow.yaml
+zigflow run -f ./path/to/workflow.yaml
 ```
 
 This builds your Temporal workflow and runs the workers — no additional Go
