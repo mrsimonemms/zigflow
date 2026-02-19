@@ -203,6 +203,7 @@ func (c *CallHTTP) callHTTPAction(ctx context.Context, task *model.CallHTTP, tim
 		}
 	}
 
+	// #nosec G704 -- URL is operator-defined in workflow YAML; SSRF is a deployment concern, not a code defect
 	resp, err = client.Do(req)
 	if err != nil {
 		return resp, method, url, reqHeaders, err
