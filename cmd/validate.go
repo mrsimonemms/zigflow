@@ -27,15 +27,15 @@ import (
 	"github.com/spf13/viper"
 )
 
-var validateOpts struct {
-	OutputJSON bool
-}
+func newValidateCmd() *cobra.Command {
+	var opts struct {
+		OutputJSON bool
+	}
 
-// validateCmd represents the validate command
-var validateCmd = &cobra.Command{
-	Use:   "validate <workflow-file>",
-	Short: "Validate a Zigflow workflow file",
-	Long: `Validate a Zigflow workflow definition written in the Zigflow DSL.
+	cmd := &cobra.Command{
+		Use:   "validate <workflow-file>",
+		Short: "Validate a Zigflow workflow file",
+		Long: `Validate a Zigflow workflow definition written in the Zigflow DSL.
 
 This command parses the provided workflow file and verifies that it is
 syntactically valid and structurally correct according to the Zigflow
@@ -51,58 +51,63 @@ making it suitable for use in scripts, CI pipelines and automated tooling.
 
 Arguments:
   workflow-file   Path to the Zigflow workflow file to validate`,
-	Args: cobra.ExactArgs(1),
-	RunE: func(cmd *cobra.Command, args []string) error {
-		filePath := args[0]
-		result := utils.ValidationResult{
-			File: filePath,
-		}
-
-		workflowDefinition, err := zigflow.LoadFromFile(filePath)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Unable to load workflow file")
-		}
-
-		validator, err := utils.NewValidator()
-		if err != nil {
-			log.Fatal().Err(err).Msg("Error creating validator")
-		}
-
-		if res, err := validator.ValidateStruct(workflowDefinition); err != nil {
-			return gh.FatalError{
-				Cause: err,
-				Msg:   "Error creating validation stack",
+		Args: cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			filePath := args[0]
+			result := utils.ValidationResult{
+				File: filePath,
 			}
-		} else if res != nil {
-			result.Errors = res
-		} else {
-			result.Valid = true
-		}
 
-		if validateOpts.OutputJSON {
-			_ = utils.RenderJSON(os.Stdout, result)
-		} else {
-			utils.RenderHuman(os.Stdout, result)
-		}
-
-		if !result.Valid {
-			return gh.FatalError{
-				Msg:    "Validation failed",
-				Logger: log.Trace,
+			workflowDefinition, err := zigflow.LoadFromFile(filePath)
+			if err != nil {
+				return gh.FatalError{
+					Cause: err,
+					Msg:   "Unable to load workflow file",
+				}
 			}
-		}
 
-		return nil
-	},
-}
+			validator, err := utils.NewValidator()
+			if err != nil {
+				return gh.FatalError{
+					Cause: err,
+					Msg:   "Error creating validator",
+				}
+			}
 
-func init() {
-	rootCmd.AddCommand(validateCmd)
+			if res, err := validator.ValidateStruct(workflowDefinition); err != nil {
+				return gh.FatalError{
+					Cause: err,
+					Msg:   "Error creating validation stack",
+				}
+			} else if res != nil {
+				result.Errors = res
+			} else {
+				result.Valid = true
+			}
 
-	validateCmd.Flags().BoolVar(
-		&validateOpts.OutputJSON, "output-json",
+			if opts.OutputJSON {
+				_ = utils.RenderJSON(os.Stdout, result)
+			} else {
+				utils.RenderHuman(os.Stdout, result)
+			}
+
+			if !result.Valid {
+				return gh.FatalError{
+					Msg:    "Validation failed",
+					Logger: log.Trace,
+				}
+			}
+
+			return nil
+		},
+	}
+
+	cmd.Flags().BoolVar(
+		&opts.OutputJSON, "output-json",
 		viper.GetBool("output_json"), "Output as JSON",
 	)
+
+	return cmd
 }
 
 type Error struct {

@@ -17,26 +17,25 @@
 package cmd
 
 import (
-	"fmt"
+	"testing"
 
-	"github.com/spf13/cobra"
+	"github.com/stretchr/testify/assert"
 )
 
-var (
-	GitCommit = ""
-	Version   = "development"
-)
+func TestNewVersionCmd_Metadata(t *testing.T) {
+	cmd := newVersionCmd()
 
-func newVersionCmd() *cobra.Command {
-	return &cobra.Command{
-		Use:   "version",
-		Short: "Displays version information",
-		Long: `Print version information for the Zigflow CLI.
+	assert.Equal(t, "version", cmd.Use)
+	assert.NotEmpty(t, cmd.Short)
+	assert.NotEmpty(t, cmd.Long)
+	assert.NotNil(t, cmd.Run)
+}
 
-The output includes the version number and Git commit hash used to build the
-binary, which can be helpful for debugging and support purposes.`,
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("Version: %s\nGit commit: %s\n", Version, GitCommit)
-		},
-	}
+func TestNewVersionCmd_Execute(t *testing.T) {
+	cmd := newVersionCmd()
+	cmd.SilenceErrors = true
+	cmd.SilenceUsage = true
+
+	err := cmd.Execute()
+	assert.NoError(t, err)
 }
