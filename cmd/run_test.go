@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/mrsimonemms/zigflow/pkg/codec"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -56,30 +57,46 @@ func TestPanicMessage(t *testing.T) {
 
 func TestBuildDataConverter(t *testing.T) {
 	tests := []struct {
-		Name        string
-		ConvertData bool
-		KeyPath     string
-		ExpectNil   bool
-		ExpectError bool
+		Name         string
+		ConvertData  string
+		Endpoint     string
+		KeyPath      string
+		CodecHeaders map[string]string
+		ExpectNil    bool
+		ExpectError  bool
 	}{
 		{
 			Name:        "disabled returns nil without reading key file",
-			ConvertData: false,
+			ConvertData: "",
 			KeyPath:     "",
 			ExpectNil:   true,
 		},
 		{
-			Name:        "enabled with missing key file returns error",
-			ConvertData: true,
+			Name:        "aes with missing key file returns error",
+			ConvertData: "aes",
 			KeyPath:     "/nonexistent/path/keys.yaml",
 			ExpectNil:   true,
 			ExpectError: true,
+		},
+		{
+			Name:        "remote returns converter without error",
+			ConvertData: "remote",
+			Endpoint:    "http://localhost:8080",
+			ExpectNil:   false,
+		},
+		{
+			Name:         "remote with headers returns converter without error",
+			ConvertData:  "remote",
+			Endpoint:     "http://localhost:8080",
+			CodecHeaders: map[string]string{"Authorization": "Bearer token"},
+			ExpectNil:    false,
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			dc, err := buildDataConverter(test.ConvertData, test.KeyPath)
+			codecType, _ := codec.ParseCodecType(test.ConvertData)
+			dc, err := codec.NewDataConverter(codecType, test.Endpoint, test.KeyPath, test.CodecHeaders)
 
 			if test.ExpectError {
 				assert.Error(t, err)
@@ -103,7 +120,10 @@ func TestNewRunCmd_Flags(t *testing.T) {
 	assert.NotNil(t, cmd.Flags().Lookup("validate"))
 	assert.NotNil(t, cmd.Flags().Lookup("temporal-address"))
 	assert.NotNil(t, cmd.Flags().Lookup("temporal-namespace"))
+	assert.NotNil(t, cmd.Flags().Lookup("codec-endpoint"))
+	assert.NotNil(t, cmd.Flags().Lookup("codec-headers"))
 	assert.NotNil(t, cmd.Flags().Lookup("convert-data"))
+	assert.NotNil(t, cmd.Flags().Lookup("converter-key-path"))
 	assert.NotNil(t, cmd.Flags().Lookup("cloudevents-config"))
 	assert.NotNil(t, cmd.Flags().Lookup("env-prefix"))
 	assert.NotNil(t, cmd.Flags().Lookup("health-listen-address"))

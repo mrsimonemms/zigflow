@@ -22,8 +22,8 @@ import (
 
 	gh "github.com/mrsimonemms/golang-helpers"
 	"github.com/mrsimonemms/golang-helpers/temporal"
-	"github.com/mrsimonemms/temporal-codec-server/packages/golang/algorithms/aes"
 	"github.com/mrsimonemms/zigflow/pkg/cloudevents"
+	"github.com/mrsimonemms/zigflow/pkg/codec"
 	"github.com/mrsimonemms/zigflow/pkg/telemetry"
 	"github.com/mrsimonemms/zigflow/pkg/utils"
 	"github.com/mrsimonemms/zigflow/pkg/zigflow"
@@ -33,13 +33,14 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.temporal.io/sdk/client"
-	"go.temporal.io/sdk/converter"
 	"go.temporal.io/sdk/worker"
 )
 
 type runOptions struct {
 	CloudEventsConfig    string
-	ConvertData          bool
+	CodecEndpoint        string
+	CodecHeaders         map[string]string
+	ConvertData          string
 	ConvertKeyPath       string
 	DisableTelemetry     bool
 	EnvPrefix            string
@@ -65,23 +66,6 @@ func panicMessage(r any) string {
 	default:
 		return fmt.Sprintf("%+v", v)
 	}
-}
-
-func buildDataConverter(convertData bool, keyPath string) (converter.DataConverter, error) {
-	if !convertData {
-		return nil, nil
-	}
-	keys, err := aes.ReadKeyFile(keyPath)
-	if err != nil {
-		return nil, gh.FatalError{
-			Cause: err,
-			Msg:   "Unable to get keys from file",
-			WithParams: func(l *zerolog.Event) *zerolog.Event {
-				return l.Str("keypath", keyPath)
-			},
-		}
-	}
-	return aes.DataConverter(keys), nil
 }
 
 func runValidation(validator *utils.Validator, workflowDefinition any) error {
@@ -184,7 +168,8 @@ func runRunCmd(ctx context.Context, opts *runOptions) error {
 		}
 	}
 
-	dataConverter, err := buildDataConverter(opts.ConvertData, opts.ConvertKeyPath)
+	codecType, _ := codec.ParseCodecType(opts.ConvertData)
+	dataConverter, err := codec.NewDataConverter(codecType, opts.CodecEndpoint, opts.ConvertKeyPath, opts.CodecHeaders)
 	if err != nil {
 		return err
 	}
@@ -244,15 +229,26 @@ func registerRunFlags(cmd *cobra.Command, opts *runOptions) {
 		viper.GetString("cloudevents_config"), "Path to CloudEvents config file",
 	)
 
-	cmd.Flags().BoolVar(
+	cmd.Flags().StringVar(
+		&opts.CodecEndpoint, "codec-endpoint",
+		viper.GetString("codec_endpoint"), "Remote codec server endpoint",
+	)
+
+	cmd.Flags().StringToStringVar(
+		&opts.CodecHeaders, "codec-headers",
+		viper.GetStringMapString("codec_headers"), "Remote codec server headers",
+	)
+	gh.HideCommandOutput(cmd, "codec-headers")
+
+	cmd.Flags().StringVar(
 		&opts.ConvertData, "convert-data",
-		viper.GetBool("convert_data"), "Enable AES data conversion",
+		viper.GetString("convert_data"), fmt.Sprintf("Data conversion mode: %q, %q, or %q", codec.CodecNone, codec.CodecAES, codec.CodecRemote),
 	)
 
 	viper.SetDefault("converter_key_path", "keys.yaml")
 	cmd.Flags().StringVar(
 		&opts.ConvertKeyPath, "converter-key-path",
-		viper.GetString("converter_key_path"), "Path to AES conversion keys",
+		viper.GetString("converter_key_path"), "Path to conversion keys to encrypt Temporal data with AES",
 	)
 
 	viper.SetDefault("disable_telemetry", false)
@@ -346,7 +342,7 @@ until interrupted.
 
 Use this command to deploy and run your Zigflow workflows in any environment,
 from local development to production.`,
-		PreRun: func(cmd *cobra.Command, args []string) {
+		PreRunE: func(cmd *cobra.Command, args []string) error {
 			if !opts.DisableTelemetry {
 				// Thank you - it helps us to see usage
 				if err := telemetry.Notify(Version); err != nil {
@@ -354,6 +350,12 @@ from local development to production.`,
 					log.Trace().Err(err).Msg("Failed to send anonymous telemetry - oh well")
 				}
 			}
+
+			if _, err := codec.ParseCodecType(opts.ConvertData); err != nil {
+				return err
+			}
+
+			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runRunCmd(cmd.Context(), &opts)
