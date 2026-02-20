@@ -3,8 +3,8 @@ document:
   namespace: zigflow
   name: hello-world
   version: 0.0.1
-  title: Hello World Encrypted
-  summary: Hello world with Zigflow, but [encrypted](https://github.com/mrsimonemms/temporal-codec-server)
+  title: Hello World Encrypted Remote
+  summary: Hello world with Zigflow, but remotely encrypted
   metadata:
     display: false
 do:
