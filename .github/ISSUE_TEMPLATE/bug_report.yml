@@ -1,0 +1,58 @@
+name: Bug report
+description: Report something that isn't working correctly.
+title: "bug: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Before submitting, please search for existing issues to avoid
+        duplicates, and read
+        [CONTRIBUTING.md](https://github.com/mrsimonemms/zigflow/blob/main/CONTRIBUTING.md).
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I have read CONTRIBUTING.md
+          required: true
+        - label: I have searched for existing issues
+          required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug description
+      description: A concise summary of the issue.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: How to recreate the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+      description: What should happen instead.
+    validations:
+      required: false
+  - type: input
+    id: example
+    attributes:
+      label: Example repository
+      description: Link to a minimal reproducible example, if available.
+    validations:
+      required: false
+  - type: textarea
+    id: additional
+    attributes:
+      label: Anything else?
+      description: >
+        Theories, relevant code locations, Zigflow version, OS, or any
+        other context.
+    validations:
+      required: false
