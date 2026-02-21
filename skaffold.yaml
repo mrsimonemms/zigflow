@@ -1,0 +1,53 @@
+apiVersion: skaffold/v4beta13
+kind: Config
+metadata:
+  name: zigflow
+build:
+  local:
+    push: false
+    useBuildkit: true
+  artifacts:
+    - image: zigflow
+      docker:
+        dockerfile: Dockerfile
+        buildArgs:
+          GIT_COMMIT: "{{.GIT_COMMIT}}"
+          VERSION: "{{.VERSION}}"
+          GOFLAGS: "-buildvcs=false"
+      sync:
+        manual:
+          - src: "**/*.go"
+            dest: /go/app
+            strip: ""
+
+manifests:
+  rawYaml:
+    - dev/k8s/namespace.yaml
+    - dev/k8s/deployment.yaml
+
+deploy:
+  kubectl:
+    defaultNamespace: zigflow
+
+profiles:
+  - name: dev
+    activation:
+      - command: dev
+    build:
+      artifacts:
+        - image: zigflow
+          docker:
+            dockerfile: Dockerfile
+            target: builder
+            buildArgs:
+              GIT_COMMIT: dev
+              VERSION: dev
+              GOFLAGS: "-buildvcs=false"
+    manifests:
+      rawYaml:
+        - dev/k8s/namespace.yaml
+        - dev/k8s/deployment.yaml
+    deploy:
+      kubectl:
+        defaultNamespace: zigflow
+

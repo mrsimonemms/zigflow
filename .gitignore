@@ -19,3 +19,6 @@ wiki
 .claude
 
 cmd/schema.yaml
+
+# Temporal Cloud secrets
+dev/k8s/temporal-cloud-secret.yaml

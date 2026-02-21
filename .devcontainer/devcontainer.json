@@ -13,7 +13,8 @@
     },
     "ghcr.io/devcontainers-extra/features/protoc:1": {},
     "ghcr.io/mrsimonemms/devcontainers/buf:1": {},
-    "ghcr.io/devcontainers-extra/features/grpcurl-asdf:2": {}
+    "ghcr.io/devcontainers-extra/features/grpcurl-asdf:2": {},
+    "ghcr.io/rio/features/skaffold:2": {}
   },
   "customizations": {
     "vscode": {
@@ -32,10 +33,14 @@
   "containerEnv": {
     "CLOUDEVENTS_CONFIG": "/workspaces/zigflow/cloudevents.example.yaml",
     "CONVERTER_KEY_PATH": "/workspaces/zigflow/keys.example.yaml",
+    "DOCKER_HOST1": "tcp://192.168.49.2:2376",
+    "DOCKER_CERT_PATH1": "/home/vscode/.minikube/certs",
+    "DOCKER_TLS_VERIFY1": "1",
     "GIT_REPO": "github.com/mrsimonemms/zigflow",
     "LOG_LEVEL": "trace",
-    "ZIGGY_EXAMPLE_ENVVAR": "some-example-envvar",
-    "WORKFLOW_FILE": "./workflow.example.yaml"
+    "MINIKUBE_ACTIVE_DOCKERD": "minikube",
+    "WORKFLOW_FILE": "./workflow.example.yaml",
+    "ZIGGY_EXAMPLE_ENVVAR": "some-example-envvar"
   },
   "forwardPorts": [
     3000,
