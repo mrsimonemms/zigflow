@@ -4,6 +4,10 @@
 
 Zigflow is a domain-specific language (DSL) that allows you to define Temporal workflows declaratively rather than imperatively in application code. It compiles declarative workflow definitions into fully-featured Temporal workflows, giving you the reliability, retries, and state management of Temporal without requiring SDK boilerplate.
 
+## Naming Convention
+
+The project name is **Zigflow** — capitalised as shown, with a lowercase 'f'. Do not write `ZigFlow`, `Zig Flow`, or other variants. Lowercase `zigflow` is acceptable only in contexts where lowercase is required (CLI commands, package names, URLs).
+
 ## Key Features
 
 - **Temporal DSL**: Declarative workflow definitions that compile to Temporal workflows

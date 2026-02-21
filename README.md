@@ -49,10 +49,11 @@ management of Temporal without requiring SDK boilerplate.
 
 ---
 
-## ⚡️ ZigFlow?
+## ⚡️ Zigflow?
 
-Ziggy is a tardigrade and [Temporal's official mascot](https://temporal.io/blog/temporal-in-space).
-They're a microscopic animal that is [basically indestructible](https://en.wikipedia.org/wiki/Environmental_tolerance_in_tardigrades).
+This project is name after Ziggy, [Temporal's official mascot](https://temporal.io/blog/temporal-in-space).
+
+Ziggy is a tardigrade, which a microscopic animal that is [basically indestructible](https://en.wikipedia.org/wiki/Environmental_tolerance_in_tardigrades).
 
 Sound familiar?
 
@@ -140,24 +141,8 @@ simpler, more visual, and easier to share.
 
 ## 🤝 Contributing
 
-Contributions are welcome!
-
-### Open in a container
-
-* [Open in a container](https://code.visualstudio.com/docs/devcontainers/containers)
-
-### Commit style
-
-All commits must be done in the [Conventional Commit](https://www.conventionalcommits.org)
-format.
-
-```git
-<type>[optional scope]: <description>
-
-[optional body]
-
-[optional footer(s)]
-```
+Contributions are welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines
+on naming conventions, dev setup, and commit style.
 
 ---
 

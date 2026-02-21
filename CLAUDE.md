@@ -13,6 +13,21 @@ Claude should treat Zigflow as **infrastructure**, not an application UI.
 
 ---
 
+## Naming convention
+
+The project name is **Zigflow** — capitalised as shown, with a lowercase 'f'.
+
+Do not write:
+- `ZigFlow` (incorrect capitalisation)
+- `zigflow` (only acceptable in lowercase-only contexts such as CLI commands,
+  package names, or URLs)
+- `Zig Flow` (two words)
+
+Always use **Zigflow** in documentation, code comments, error messages, and any
+user-facing text.
+
+---
+
 ## Core intent of the project
 
 Zigflow exists to:
