@@ -1,0 +1,10 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Contributing guide
+    url: https://github.com/mrsimonemms/zigflow/blob/main/CONTRIBUTING.md
+    about: >
+      Please read the contributing guide before opening an issue or pull
+      request.
+  - name: Slack community
+    url: https://slack.zigflow.dev
+    about: Ask questions and discuss ideas with the Zigflow community.
