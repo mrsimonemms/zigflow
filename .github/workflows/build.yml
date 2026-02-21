@@ -111,12 +111,70 @@ jobs:
       - name: Run tests
         run: go test -v -tags=e2e ./tests/e2e/...
 
+  helm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: medyagh/setup-minikube@latest
+
+      - name: Install Temporal CLI
+        uses: temporalio/setup-temporal@v0
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      - name: helm lint
+        run: helm lint charts/zigflow
+
+      - name: Install Skaffold
+        run: |
+          curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64
+          chmod +x skaffold
+          sudo mv skaffold /usr/local/bin/
+
+      - name: Create Kind cluster
+        uses: helm/kind-action@v1
+
+      - name: Deploy Temporal
+        run: kubectl apply -f ./dev/k8s
+
+      - name: Deploy Zigflow
+        run: skaffold run
+
+      - name: Wait for Zigflow deployment
+        run: kubectl rollout status -n zigflow deployment/zigflow --timeout=30s
+      - name: Port forward Temporal
+        run: kubectl port-forward svc/temporal -n temporal 7233:7233 &
+
+      - name: Run known workflow
+        run: |
+          temporal workflow start \
+            --workflow-id example \
+            --type example \
+            --task-queue zigflow \
+            --input '{"userId": 3}'
+
+      - name: Get the workflow result
+        run: |
+          timeout 30s temporal workflow result -w example -o json | grep EVENT_TYPE_WORKFLOW_EXECUTION_COMPLETED || {
+            echo "Workflow result timed out or failed"
+            exit 1
+          }
+
+      - name: Dump logs on failure
+        if: failure()
+        run: |
+          kubectl get pods -A
+          kubectl logs -n zigflow deploy/zigflow --all-containers=true || true
+
   # Generate metadata shared across all build jobs
   metadata:
     runs-on: ubuntu-latest
     needs:
       - commitlint
       - e2e
+      - helm
       - pre-commit
       - test
     outputs:

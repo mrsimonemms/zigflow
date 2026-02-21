@@ -79,6 +79,7 @@ install-deps:
 
 minikube:
 	@minikube profile list | grep minikube | grep OK || minikube start
+	kubectl apply -f ./dev/k8s/
 .PHONY: minikube
 
 start:

@@ -1,0 +1,10 @@
+.git
+.github
+charts
+docs/node_modules
+examples
+tests
+tmp
+ui
+*.md
+skaffold.yaml

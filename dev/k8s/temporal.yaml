@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: temporal
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: temporal
+  namespace: temporal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: temporal
+  template:
+    metadata:
+      labels:
+        app: temporal
+    spec:
+      containers:
+        - name: temporal
+          image: temporalio/temporal
+          args:
+            - server
+            - start-dev
+            - --ip=0.0.0.0
+          ports:
+            - name: grpc
+              containerPort: 7233
+              protocol: TCP
+            - name: ui
+              containerPort: 8233
+              protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+                - temporal
+                - operator
+                - cluster
+                - health
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: temporal
+  namespace: temporal
+spec:
+  selector:
+    app: temporal
+  ports:
+    - name: grpc
+      port: 7233
+      targetPort: grpc
+      protocol: TCP
+    - name: ui
+      port: 8233
+      targetPort: ui
+      protocol: TCP

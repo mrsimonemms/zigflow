@@ -1,0 +1,53 @@
+apiVersion: skaffold/v4beta13
+kind: Config
+metadata:
+  name: zigflow
+
+build:
+  artifacts:
+    - image: zigflow
+      docker:
+        dockerfile: Dockerfile
+        target: builder
+      sync:
+        manual:
+          - src: "**/*.go"
+            dest: /go/app
+          - src: "**/*.yaml"
+            dest: /go/app
+          - src: "**/*.yml"
+            dest: /go/app
+  local:
+    push: false
+    useBuildkit: true
+
+deploy:
+  helm:
+    releases:
+      - name: zigflow
+        chartPath: charts/zigflow
+        namespace: zigflow
+        createNamespace: true
+        setValueTemplates:
+          image.repository: "{{.IMAGE_REPO_zigflow}}"
+          image.tag: "{{.IMAGE_TAG_zigflow}}"
+        setValues:
+          image:
+            pullPolicy: Never
+          config:
+            file: /go/app/workflow.example.yaml
+            temporal-address: temporal.temporal.svc.cluster.local:7233
+          workflow:
+            enabled: false
+
+portForward:
+  - resourceType: Service
+    resourceName: temporal
+    namespace: temporal
+    port: 8233
+    localPort: 8080
+
+profiles:
+  - name: minikube
+    activation:
+      - kubeContext: minikube
