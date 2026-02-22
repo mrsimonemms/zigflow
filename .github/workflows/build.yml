@@ -116,8 +116,6 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: medyagh/setup-minikube@latest
-
       - name: Install Temporal CLI
         uses: temporalio/setup-temporal@v0
 
@@ -133,14 +131,34 @@ jobs:
           chmod +x skaffold
           sudo mv skaffold /usr/local/bin/
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Create Kind cluster
         uses: helm/kind-action@v1
+        with:
+          cluster_name: kind
 
       - name: Deploy Temporal
         run: kubectl apply -f ./dev/k8s
 
+      - name: Build Zigflow image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: builder
+          tags: zigflow:latest
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Load image into Kind
+        run: kind load docker-image zigflow:latest
+
       - name: Deploy Zigflow
-        run: skaffold run
+        run: |
+          echo '{"builds":[{"imageName":"zigflow","tag":"zigflow:latest"}]}' > /tmp/artifacts.json
+          skaffold deploy --build-artifacts /tmp/artifacts.json
 
       - name: Wait for Zigflow deployment
         run: kubectl rollout status -n zigflow deployment/zigflow --timeout=30s

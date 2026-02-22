@@ -30,6 +30,8 @@ RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - \
   && python --version
 USER 1000
 WORKDIR /go/app
+COPY --chown=1000:1000 go.mod go.sum ./
+RUN go mod download
 COPY --chown=1000:1000 . .
 RUN go generate ./... \
   && go build \
