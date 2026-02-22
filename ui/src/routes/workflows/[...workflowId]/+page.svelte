@@ -29,6 +29,10 @@
     createWaitNode,
     createWorkflowFile,
     insertNode,
+    moveNode,
+    removeNode,
+    replaceNode,
+    setWorkflowRoot,
   } from '$lib/tasks/actions';
   import type {
     FlowGraph,
@@ -250,6 +254,108 @@
     workflowFile = insertNode(workflowFile, selectedWorkflowId, nodeType);
   }
 
+  // Apply a FlowGraph transform at whatever depth the navStack currently points
+  // to, threading the result back up through the IR to produce a new WorkflowFile.
+  function updateCurrentGraph(transform: (g: FlowGraph) => FlowGraph): void {
+    const stack = navStack;
+    if (stack.length === 0) return;
+    const top = stack[0];
+    if (top.kind !== 'workflow') return;
+    const wfId = top.workflowId;
+    const wf = workflowFile.workflows[wfId];
+    if (!wf) return;
+
+    function applyAt(graph: FlowGraph, depth: number): FlowGraph {
+      if (depth >= stack.length) return transform(graph);
+      const entry = stack[depth];
+      switch (entry.kind) {
+        case 'switch-branch': {
+          const node = graph.nodes[entry.nodeId];
+          if (!node || node.type !== 'switch') return graph;
+          const newNode = {
+            ...node,
+            branches: node.branches.map((b) =>
+              b.id === entry.branchId
+                ? { ...b, graph: applyAt(b.graph, depth + 1) }
+                : b,
+            ),
+          };
+          return replaceNode(graph, newNode);
+        }
+        case 'fork-branch': {
+          const node = graph.nodes[entry.nodeId];
+          if (!node || node.type !== 'fork') return graph;
+          const newNode = {
+            ...node,
+            branches: node.branches.map((b) =>
+              b.id === entry.branchId
+                ? { ...b, graph: applyAt(b.graph, depth + 1) }
+                : b,
+            ),
+          };
+          return replaceNode(graph, newNode);
+        }
+        case 'try-section': {
+          const node = graph.nodes[entry.nodeId];
+          if (!node || node.type !== 'try') return graph;
+          const sub =
+            entry.section === 'catch'
+              ? (node.catchGraph ?? node.tryGraph)
+              : node.tryGraph;
+          const updated = applyAt(sub, depth + 1);
+          const newNode =
+            entry.section === 'catch'
+              ? { ...node, catchGraph: updated }
+              : { ...node, tryGraph: updated };
+          return replaceNode(graph, newNode);
+        }
+        case 'loop-body': {
+          const node = graph.nodes[entry.nodeId];
+          if (!node || node.type !== 'loop') return graph;
+          return replaceNode(graph, {
+            ...node,
+            bodyGraph: applyAt(node.bodyGraph, depth + 1),
+          });
+        }
+        default:
+          return graph;
+      }
+    }
+
+    workflowFile = setWorkflowRoot(workflowFile, wfId, applyAt(wf.root, 1));
+  }
+
+  function handleDelete() {
+    const id = selectedNodeId;
+    if (!id) return;
+    selectedNodeId = null;
+    updateCurrentGraph((g) => removeNode(g, id));
+  }
+
+  const selectedNodeIndex = $derived(
+    selectedNodeId && currentGraph
+      ? currentGraph.order.indexOf(selectedNodeId)
+      : -1,
+  );
+  const canMoveUp = $derived(selectedNodeIndex > 0);
+  const canMoveDown = $derived(
+    selectedNodeIndex >= 0 &&
+      currentGraph !== null &&
+      selectedNodeIndex < currentGraph.order.length - 1,
+  );
+
+  function handleMoveUp() {
+    const id = selectedNodeId;
+    if (!id || !canMoveUp) return;
+    updateCurrentGraph((g) => moveNode(g, id, selectedNodeIndex - 1));
+  }
+
+  function handleMoveDown() {
+    const id = selectedNodeId;
+    if (!id || !canMoveDown) return;
+    updateCurrentGraph((g) => moveNode(g, id, selectedNodeIndex + 1));
+  }
+
   // ---------------------------------------------------------------------------
   // YAML export
   // ---------------------------------------------------------------------------
@@ -301,7 +407,14 @@
         <div class="canvas-placeholder">No graph to display.</div>
       {/if}
 
-      <Inspector node={selectedNode} />
+      <Inspector
+        node={selectedNode}
+        {canMoveUp}
+        {canMoveDown}
+        onmoveup={handleMoveUp}
+        onmovedown={handleMoveDown}
+        ondelete={handleDelete}
+      />
     </div>
   </div>
 </div>

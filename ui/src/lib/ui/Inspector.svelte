@@ -23,9 +23,21 @@
 
   interface Props {
     node: Node | null;
+    canMoveUp?: boolean;
+    canMoveDown?: boolean;
+    onmoveup?: () => void;
+    onmovedown?: () => void;
+    ondelete?: () => void;
   }
 
-  let { node }: Props = $props();
+  let {
+    node,
+    canMoveUp = false,
+    canMoveDown = false,
+    onmoveup,
+    onmovedown,
+    ondelete,
+  }: Props = $props();
 
   // ---------------------------------------------------------------------------
   // Helpers
@@ -112,6 +124,31 @@
     </section>
 
     <p class="inspector-hint">Full editing UI coming soon.</p>
+
+    <div class="move-row">
+      <button
+        class="move-btn"
+        disabled={!canMoveUp}
+        onclick={() => onmoveup?.()}
+        type="button"
+        aria-label="Move task up"
+      >
+        ↑ Move up
+      </button>
+      <button
+        class="move-btn"
+        disabled={!canMoveDown}
+        onclick={() => onmovedown?.()}
+        type="button"
+        aria-label="Move task down"
+      >
+        ↓ Move down
+      </button>
+    </div>
+
+    <button class="delete-btn" onclick={() => ondelete?.()} type="button">
+      Delete task
+    </button>
   {/if}
 </aside>
 
@@ -192,5 +229,55 @@
     font-size: 0.75rem;
     color: #999;
     font-style: italic;
+  }
+
+  .move-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .move-btn {
+    flex: 1;
+    padding: 0.375rem 0.5rem;
+    background: transparent;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    color: #444;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition:
+      background 0.1s,
+      border-color 0.1s;
+  }
+
+  .move-btn:hover:not(:disabled) {
+    background: #f5f5f5;
+    border-color: #aaa;
+  }
+
+  .move-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  .delete-btn {
+    margin-top: 0.75rem;
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    background: transparent;
+    border: 1px solid #e0a0a0;
+    border-radius: 6px;
+    color: #c0392b;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition:
+      background 0.1s,
+      border-color 0.1s;
+  }
+
+  .delete-btn:hover {
+    background: #fff0f0;
+    border-color: #c0392b;
   }
 </style>
