@@ -15,82 +15,428 @@
   -->
 
 <script lang="ts">
-  import { SvelteFlow, Controls, Background, MiniMap } from '@xyflow/svelte';
-  import '@xyflow/svelte/dist/style.css';
-  import type { PageData } from './$types';
+  import { exportToYaml } from '$lib/export/yaml';
+  import {
+    addForkBranch,
+    addNode,
+    addSwitchBranch,
+    addWorkflow,
+    createForkNode,
+    createLoopNode,
+    createSetNode,
+    createSwitchNode,
+    createTryNode,
+    createWaitNode,
+    createWorkflowFile,
+  } from '$lib/tasks/actions';
+  import type { FlowGraph, Node, WorkflowFile } from '$lib/tasks/model';
+  import Breadcrumb from '$lib/ui/Breadcrumb.svelte';
+  import Canvas from '$lib/ui/Canvas.svelte';
+  import Inspector from '$lib/ui/Inspector.svelte';
+  import Sidebar from '$lib/ui/Sidebar.svelte';
 
-  let { data }: { data: PageData } = $props();
+  // ---------------------------------------------------------------------------
+  // Workflow state (IR)
+  // ---------------------------------------------------------------------------
 
-  const workflowId = $derived(data.workflowId);
+  // Demo file: a sequential workflow with varied node types.
+  function buildDemoFile(): WorkflowFile {
+    const file = createWorkflowFile({
+      dsl: '1.0.0',
+      namespace: 'demo',
+      name: 'my-workflow',
+      version: '0.0.1',
+      title: 'Demo Workflow',
+    });
 
-  // Initial nodes
-  let nodes = $state([
-    {
-      id: '1',
-      type: 'input',
-      data: { label: 'Start' },
-      position: { x: 250, y: 0 },
-    },
-    {
-      id: '2',
-      data: { label: 'Task 1' },
-      position: { x: 100, y: 100 },
-    },
-    {
-      id: '3',
-      data: { label: 'Task 2' },
-      position: { x: 400, y: 100 },
-    },
-    {
-      id: '4',
-      type: 'output',
-      data: { label: 'End' },
-      position: { x: 250, y: 200 },
-    },
+    const rootId = file.order[0]!;
+
+    // Build a FlowGraph with representative nodes
+    let root: FlowGraph = { nodes: {}, order: [] };
+
+    const greet = createSetNode('greet', { message: 'Hello, World!' });
+    root = addNode(root, greet);
+
+    const pause = createWaitNode('pause', { duration: { seconds: 5 } });
+    root = addNode(root, pause);
+
+    let switchNode = createSwitchNode('route');
+    switchNode = addSwitchBranch(
+      switchNode,
+      'fast-path',
+      '${ $input.fast == true }',
+    );
+    switchNode = addSwitchBranch(switchNode, 'default');
+    root = addNode(root, switchNode);
+
+    let fork = createForkNode('parallel-work');
+    fork = addForkBranch(fork, 'branch-a');
+    fork = addForkBranch(fork, 'branch-b');
+    root = addNode(root, fork);
+
+    const tryNode = createTryNode('safe-call');
+    root = addNode(root, tryNode);
+
+    const loop = createLoopNode('process-items', '${ $input.items }');
+    root = addNode(root, loop);
+
+    return {
+      ...file,
+      workflows: {
+        ...file.workflows,
+        [rootId]: { ...file.workflows[rootId]!, root },
+      },
+    };
+  }
+
+  // Build the initial file outside reactive context so downstream $state
+  // initialisers can reference it without triggering Svelte's warning about
+  // capturing reactive values in non-reactive initialisers.
+  const _initialFile = buildDemoFile();
+  const _initialWorkflowId = _initialFile.order[0]!;
+
+  let workflowFile = $state<WorkflowFile>(_initialFile);
+
+  // ---------------------------------------------------------------------------
+  // Navigation state (UI-only — which FlowGraph is currently visible)
+  // ---------------------------------------------------------------------------
+
+  type NavEntry =
+    | { kind: 'workflow'; workflowId: string }
+    | { kind: 'switch-branch'; nodeId: string; branchId: string }
+    | { kind: 'fork-branch'; nodeId: string; branchId: string }
+    | { kind: 'try-section'; nodeId: string; section: 'try' | 'catch' }
+    | { kind: 'loop-body'; nodeId: string };
+
+  let selectedWorkflowId = $state<string>(_initialWorkflowId);
+  let navStack = $state<NavEntry[]>([
+    { kind: 'workflow', workflowId: _initialWorkflowId },
   ]);
+  let selectedNodeId = $state<string | null>(null);
 
-  // Initial edges
-  let edges = $state([
-    { id: 'e1-2', source: '1', target: '2' },
-    { id: 'e1-3', source: '1', target: '3' },
-    { id: 'e2-4', source: '2', target: '4' },
-    { id: 'e3-4', source: '3', target: '4' },
-  ]);
+  // ---------------------------------------------------------------------------
+  // Derive the current FlowGraph from the navigation stack
+  // ---------------------------------------------------------------------------
+
+  function resolveGraph(
+    file: WorkflowFile,
+    stack: NavEntry[],
+  ): FlowGraph | null {
+    if (stack.length === 0) return null;
+
+    const root = stack[0];
+    if (root.kind !== 'workflow') return null;
+
+    const wf = file.workflows[root.workflowId];
+    if (!wf) return null;
+
+    let graph: FlowGraph = wf.root;
+
+    for (const entry of stack.slice(1)) {
+      if (entry.kind === 'switch-branch') {
+        const node = graph.nodes[entry.nodeId];
+        if (!node || node.type !== 'switch') return null;
+        const branch = node.branches.find((b) => b.id === entry.branchId);
+        if (!branch) return null;
+        graph = branch.graph;
+      } else if (entry.kind === 'fork-branch') {
+        const node = graph.nodes[entry.nodeId];
+        if (!node || node.type !== 'fork') return null;
+        const branch = node.branches.find((b) => b.id === entry.branchId);
+        if (!branch) return null;
+        graph = branch.graph;
+      } else if (entry.kind === 'try-section') {
+        const node = graph.nodes[entry.nodeId];
+        if (!node || node.type !== 'try') return null;
+        graph =
+          entry.section === 'catch'
+            ? (node.catchGraph ?? node.tryGraph)
+            : node.tryGraph;
+      } else if (entry.kind === 'loop-body') {
+        const node = graph.nodes[entry.nodeId];
+        if (!node || node.type !== 'loop') return null;
+        graph = node.bodyGraph;
+      } else {
+        return null;
+      }
+    }
+
+    return graph;
+  }
+
+  const currentGraph = $derived(resolveGraph(workflowFile, navStack));
+
+  // ---------------------------------------------------------------------------
+  // Breadcrumb labels
+  // ---------------------------------------------------------------------------
+
+  function buildCrumbs(file: WorkflowFile, stack: NavEntry[]): string[] {
+    return stack.map((entry, i) => {
+      if (entry.kind === 'workflow') {
+        return file.workflows[entry.workflowId]?.name ?? entry.workflowId;
+      }
+      // For nested entries, look up the node name from the previous graph
+      const parentGraph = resolveGraph(file, stack.slice(0, i));
+      if (!parentGraph) return entry.kind;
+      const node = parentGraph.nodes[entry.nodeId];
+      if (!node) return entry.kind;
+      switch (entry.kind) {
+        case 'switch-branch': {
+          const branch =
+            node.type === 'switch'
+              ? node.branches.find((b) => b.id === entry.branchId)
+              : null;
+          return `${node.name} › ${branch?.label ?? entry.branchId}`;
+        }
+        case 'fork-branch': {
+          const branch =
+            node.type === 'fork'
+              ? node.branches.find((b) => b.id === entry.branchId)
+              : null;
+          return `${node.name} › ${branch?.label ?? entry.branchId}`;
+        }
+        case 'try-section':
+          return `${node.name} › ${entry.section}`;
+        case 'loop-body':
+          return `${node.name} › body`;
+      }
+    });
+  }
+
+  const breadcrumbs = $derived(buildCrumbs(workflowFile, navStack));
+
+  // ---------------------------------------------------------------------------
+  // Selected node (resolved from current graph)
+  // ---------------------------------------------------------------------------
+
+  const selectedNode = $derived<Node | null>(
+    selectedNodeId && currentGraph
+      ? (currentGraph.nodes[selectedNodeId] ?? null)
+      : null,
+  );
+
+  // ---------------------------------------------------------------------------
+  // Event handlers
+  // ---------------------------------------------------------------------------
+
+  function handleWorkflowSelect(id: string) {
+    selectedWorkflowId = id;
+    navStack = [{ kind: 'workflow', workflowId: id }];
+    selectedNodeId = null;
+  }
+
+  function handleAddWorkflow() {
+    workflowFile = addWorkflow(workflowFile, 'new-workflow');
+    const newId = workflowFile.order[workflowFile.order.length - 1]!;
+    handleWorkflowSelect(newId);
+  }
+
+  function handleNodeSelect(nodeId: string | null) {
+    selectedNodeId = nodeId;
+  }
+
+  function handleNavigate(index: number) {
+    navStack = navStack.slice(0, index + 1);
+    selectedNodeId = null;
+  }
+
+  // ---------------------------------------------------------------------------
+  // YAML export
+  // ---------------------------------------------------------------------------
+
+  let exportOutput = $state<string>('');
+  let exportError = $state<string>('');
+  let showExport = $state(false);
+
+  function handleExport() {
+    const result = exportToYaml(workflowFile);
+    if (result.ok) {
+      exportOutput = result.yaml;
+      exportError = '';
+    } else {
+      exportOutput = '';
+      exportError = result.errors.join('\n');
+    }
+    showExport = true;
+  }
 </script>
 
-<div class="workflow-container">
-  <h1>Workflow Editor</h1>
-  <p>Workflow ID: <code>{workflowId}</code></p>
+<div class="editor-root">
+  <!-- Sidebar: document + workflow list -->
+  <Sidebar
+    file={workflowFile}
+    {selectedWorkflowId}
+    onworkflowselect={handleWorkflowSelect}
+    onaddworkflow={handleAddWorkflow}
+  />
 
-  <div class="flow-wrapper">
-    <SvelteFlow {nodes} {edges} fitView>
-      <Controls />
-      <Background />
-      <MiniMap />
-    </SvelteFlow>
+  <!-- Main area: breadcrumb + canvas + inspector -->
+  <div class="editor-main">
+    <div class="editor-topbar">
+      <Breadcrumb crumbs={breadcrumbs} onnavigate={handleNavigate} />
+      <button class="export-btn" onclick={handleExport} type="button">
+        Export YAML
+      </button>
+    </div>
+
+    <div class="editor-canvas-area">
+      {#if currentGraph !== null}
+        <Canvas
+          graph={currentGraph}
+          {selectedNodeId}
+          onnodeselect={handleNodeSelect}
+        />
+      {:else}
+        <div class="canvas-placeholder">No graph to display.</div>
+      {/if}
+
+      <Inspector node={selectedNode} />
+    </div>
   </div>
 </div>
 
+<!-- YAML export overlay -->
+{#if showExport}
+  <div
+    class="export-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-label="YAML export"
+  >
+    <div class="export-dialog">
+      <div class="export-dialog-header">
+        <h2>Exported YAML</h2>
+        <button
+          class="export-close-btn"
+          onclick={() => {
+            showExport = false;
+          }}
+          type="button"
+          aria-label="Close">✕</button
+        >
+      </div>
+      {#if exportError}
+        <pre class="export-error">{exportError}</pre>
+      {:else}
+        <pre class="export-code">{exportOutput}</pre>
+      {/if}
+    </div>
+  </div>
+{/if}
+
 <style>
-  .workflow-container {
+  .editor-root {
     height: 100vh;
     display: flex;
-    flex-direction: column;
-    padding: 1rem;
+    overflow: hidden;
+    font-family: system-ui, sans-serif;
   }
 
-  .flow-wrapper {
+  .editor-main {
     flex: 1;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
   }
 
-  h1 {
-    margin: 0 0 0.5rem 0;
+  .editor-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #eee;
+    background: #fff;
+    padding-right: 1rem;
   }
 
-  p {
-    margin: 0 0 1rem 0;
+  .export-btn {
+    padding: 0.3rem 0.75rem;
+    background: #1a56cc;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .export-btn:hover {
+    background: #1344a8;
+  }
+
+  .editor-canvas-area {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+  }
+
+  .canvas-placeholder {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    font-size: 0.9rem;
+  }
+
+  /* Export overlay */
+  .export-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+
+  .export-dialog {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    width: min(720px, 90vw);
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .export-dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #eee;
+  }
+
+  .export-dialog-header h2 {
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .export-close-btn {
+    background: none;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    color: #666;
+    padding: 0.25rem;
+    line-height: 1;
+  }
+
+  .export-code,
+  .export-error {
+    flex: 1;
+    margin: 0;
+    padding: 1rem 1.25rem;
+    overflow-y: auto;
+    font-size: 0.8rem;
+    white-space: pre-wrap;
+    font-family: 'Courier New', monospace;
+  }
+
+  .export-error {
+    color: #c0392b;
+    background: #fff5f5;
   }
 </style>

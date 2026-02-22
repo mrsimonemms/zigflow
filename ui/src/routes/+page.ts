@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { redirect } from '@sveltejs/kit';
 
-// Re-exports the canonical IR types, mutation helpers, validation, and
-// YAML exporter. Import via the $lib alias in Svelte components and routes.
+import type { PageLoad } from './$types';
 
-export * from './tasks/model';
-export * from './tasks/actions';
-export * from './tasks/validation';
-export * from './export/yaml';
+export const load: PageLoad = () => {
+  redirect(307, '/workflows');
+};
