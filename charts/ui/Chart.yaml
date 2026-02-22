@@ -1,0 +1,23 @@
+apiVersion: v2
+name: ui
+description: Web UI for visualising and editing Zigflow workflows
+type: application
+version: 0.0.0
+icon: https://raw.githubusercontent.com/mrsimonemms/zigflow/refs/heads/main/designs/z-logo.png
+home: https://zigflow.dev
+maintainers:
+  - name: Simon Emms
+    email: simon@simonemms.com
+    url: https://simonemms.com
+sources:
+  - https://github.com/mrsimonemms/zigflow
+keywords:
+  - DSL
+  - Durable Execution
+  - Serverless Workflow
+  - Temporal
+  - Workflow Management System
+  - Workflows
+  - YAML
+annotations:
+  org.opencontainers.image.documentation: https://github.com/mrsimonemms/zigflow/tree/main/charts/ui
