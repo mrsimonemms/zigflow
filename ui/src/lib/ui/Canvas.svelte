@@ -15,7 +15,7 @@
 -->
 
 <script lang="ts">
-  import type { FlowGraph } from '$lib/tasks/model';
+  import type { FlowGraph, NodeType } from '$lib/tasks/model';
   import { Background, Controls, SvelteFlow } from '@xyflow/svelte';
   import '@xyflow/svelte/dist/style.css';
   import { untrack } from 'svelte';
@@ -28,9 +28,15 @@
     graph: FlowGraph;
     selectedNodeId?: string | null;
     onnodeselect?: (nodeId: string | null) => void;
+    oninsert?: (nodeType: NodeType) => void;
   }
 
-  let { graph, selectedNodeId = null, onnodeselect }: Props = $props();
+  let {
+    graph,
+    selectedNodeId = null,
+    onnodeselect,
+    oninsert,
+  }: Props = $props();
 
   // ---------------------------------------------------------------------------
   // Layout constants
@@ -120,9 +126,34 @@
     const selected = params.nodes ?? [];
     onnodeselect?.(selected.length > 0 ? (selected[0]?.id ?? null) : null);
   }
+
+  // ---------------------------------------------------------------------------
+  // Drag-and-drop: accept palette items dropped onto the canvas
+  // ---------------------------------------------------------------------------
+
+  function handleDragOver(event: DragEvent) {
+    if (event.dataTransfer?.types.includes('application/node-type')) {
+      event.preventDefault();
+      if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
+    }
+  }
+
+  function handleDrop(event: DragEvent) {
+    event.preventDefault();
+    const nodeType = event.dataTransfer?.getData('application/node-type') as
+      | NodeType
+      | undefined;
+    if (nodeType) oninsert?.(nodeType);
+  }
 </script>
 
-<div class="canvas-root">
+<div
+  class="canvas-root"
+  role="region"
+  aria-label="Workflow canvas"
+  ondragover={handleDragOver}
+  ondrop={handleDrop}
+>
   <SvelteFlow
     bind:nodes
     bind:edges

@@ -28,8 +28,14 @@
     createTryNode,
     createWaitNode,
     createWorkflowFile,
+    insertNode,
   } from '$lib/tasks/actions';
-  import type { FlowGraph, Node, WorkflowFile } from '$lib/tasks/model';
+  import type {
+    FlowGraph,
+    Node,
+    NodeType,
+    WorkflowFile,
+  } from '$lib/tasks/model';
   import Breadcrumb from '$lib/ui/Breadcrumb.svelte';
   import Canvas from '$lib/ui/Canvas.svelte';
   import Inspector from '$lib/ui/Inspector.svelte';
@@ -240,6 +246,10 @@
     selectedNodeId = null;
   }
 
+  function handleInsert(nodeType: NodeType) {
+    workflowFile = insertNode(workflowFile, selectedWorkflowId, nodeType);
+  }
+
   // ---------------------------------------------------------------------------
   // YAML export
   // ---------------------------------------------------------------------------
@@ -285,6 +295,7 @@
           graph={currentGraph}
           {selectedNodeId}
           onnodeselect={handleNodeSelect}
+          oninsert={handleInsert}
         />
       {:else}
         <div class="canvas-placeholder">No graph to display.</div>

@@ -258,3 +258,5 @@ export type TaskConfig =
   | WaitConfig
   | RaiseConfig
   | ListenConfig;
+
+export type NodeType = TaskConfig['kind'] | 'switch' | 'fork' | 'try' | 'loop';

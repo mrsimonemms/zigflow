@@ -16,6 +16,7 @@
 
 <script lang="ts">
   import type { WorkflowFile } from '$lib/tasks/model';
+  import { TASK_REGISTRY } from '$lib/tasks/registry';
 
   // ---------------------------------------------------------------------------
   // Props & events
@@ -30,6 +31,18 @@
 
   let { file, selectedWorkflowId, onworkflowselect, onaddworkflow }: Props =
     $props();
+
+  // ---------------------------------------------------------------------------
+  // Palette — split registry into two groups
+  // ---------------------------------------------------------------------------
+
+  const taskItems = TASK_REGISTRY.filter((d) => d.category === 'task');
+  const controlItems = TASK_REGISTRY.filter((d) => d.category === 'control');
+
+  function handleDragStart(event: DragEvent, nodeType: string) {
+    event.dataTransfer?.setData('application/node-type', nodeType);
+    if (event.dataTransfer) event.dataTransfer.effectAllowed = 'copy';
+  }
 </script>
 
 <nav class="sidebar">
@@ -70,6 +83,45 @@
     >
       + Add workflow
     </button>
+  </section>
+
+  <!-- Task palette -->
+  <section class="sidebar-section palette-section">
+    <p class="sidebar-label">Tasks</p>
+    <ul class="palette-list">
+      {#each taskItems as def (def.type)}
+        <li>
+          <div
+            class="palette-item"
+            draggable="true"
+            role="button"
+            tabindex="0"
+            title={def.description}
+            ondragstart={(e) => handleDragStart(e, def.type)}
+          >
+            {def.label}
+          </div>
+        </li>
+      {/each}
+    </ul>
+
+    <p class="sidebar-label palette-label-gap">Control flow</p>
+    <ul class="palette-list">
+      {#each controlItems as def (def.type)}
+        <li>
+          <div
+            class="palette-item palette-item--control"
+            draggable="true"
+            role="button"
+            tabindex="0"
+            title={def.description}
+            ondragstart={(e) => handleDragStart(e, def.type)}
+          >
+            {def.label}
+          </div>
+        </li>
+      {/each}
+    </ul>
   </section>
 </nav>
 
@@ -119,7 +171,17 @@
     gap: 0.5rem;
   }
 
-  .workflow-list {
+  .palette-section {
+    flex: none;
+    border-top: 1px solid #eee;
+  }
+
+  .palette-label-gap {
+    margin-top: 0.5rem;
+  }
+
+  .workflow-list,
+  .palette-list {
     list-style: none;
     margin: 0;
     padding: 0;
@@ -171,5 +233,39 @@
   .add-workflow-btn:hover {
     border-color: #999;
     color: #333;
+  }
+
+  .palette-item {
+    padding: 0.3rem 0.625rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fff;
+    font-size: 0.8rem;
+    color: #444;
+    cursor: grab;
+    user-select: none;
+    transition:
+      border-color 0.1s,
+      background 0.1s;
+  }
+
+  .palette-item:hover {
+    border-color: #aaa;
+    background: #f5f5f5;
+  }
+
+  .palette-item:active {
+    cursor: grabbing;
+  }
+
+  .palette-item--control {
+    border-color: #c5d8ff;
+    color: #1a56cc;
+    background: #f0f5ff;
+  }
+
+  .palette-item--control:hover {
+    border-color: #7eaaff;
+    background: #e8f0fe;
   }
 </style>

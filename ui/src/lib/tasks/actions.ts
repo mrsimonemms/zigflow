@@ -29,6 +29,7 @@ import type {
   LoopNode,
   NamedWorkflow,
   Node,
+  NodeType,
   RaiseConfig,
   RunContainerConfig,
   RunScriptConfig,
@@ -43,6 +44,7 @@ import type {
   WaitConfig,
   WorkflowFile,
 } from './model';
+import { TASK_REGISTRY } from './registry';
 
 // ---------------------------------------------------------------------------
 // Utility
@@ -367,4 +369,23 @@ export function updateLoopBodyGraph(
   graph: FlowGraph,
 ): LoopNode {
   return { ...node, bodyGraph: graph };
+}
+
+// ---------------------------------------------------------------------------
+// High-level: insert a new node by type into a workflow root graph
+// ---------------------------------------------------------------------------
+
+export function insertNode(
+  file: WorkflowFile,
+  workflowId: string,
+  nodeType: NodeType,
+  atIndex?: number,
+): WorkflowFile {
+  const def = TASK_REGISTRY.find((d) => d.type === nodeType);
+  if (!def) throw new Error(`Unknown node type: ${nodeType}`);
+  const node = def.create();
+  const workflow = file.workflows[workflowId];
+  if (!workflow) throw new Error(`Workflow ${workflowId} not found`);
+  const newRoot = addNode(workflow.root, node, atIndex);
+  return setWorkflowRoot(file, workflowId, newRoot);
 }
