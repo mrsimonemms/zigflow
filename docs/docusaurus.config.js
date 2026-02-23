@@ -108,6 +108,11 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
+      announcementBar: {
+        content: `⭐ <a href="${githubURL}" target="_blank">Star Zigflow on GitHub</a> to help more developers discover it.`,
+        backgroundColor: '#E1062C',
+        textColor: '#FAFAFA',
+      },
       image: 'img/social.png',
       colorMode: {
         respectPrefersColorScheme: true,
