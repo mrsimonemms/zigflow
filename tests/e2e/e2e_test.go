@@ -30,6 +30,7 @@ import (
 
 	"github.com/mrsimonemms/zigflow/pkg/zigflow"
 	"github.com/mrsimonemms/zigflow/tests/e2e/utils"
+	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 
 	_ "github.com/mrsimonemms/zigflow/tests/e2e/tests"
@@ -80,6 +81,20 @@ func setup() (*harness, error) {
 }
 
 func TestMain(m *testing.M) {
+	logLevel := "info"
+	if l, ok := os.LookupEnv("LOG_LEVEL"); ok {
+		logLevel = l
+	}
+
+	level, err := zerolog.ParseLevel(logLevel)
+	if err != nil {
+		log.Printf("logger setup failed: %v", err)
+		// Non-zero exit so the test run fails clearly.
+		os.Exit(1)
+	}
+
+	zerolog.SetGlobalLevel(level)
+
 	testHarness, err := setup()
 	if err != nil {
 		log.Printf("e2e setup failed: %v", err)
@@ -100,11 +115,12 @@ func TestE2E(t *testing.T) {
 	cwd, err := os.Getwd()
 	assert.NoError(t, err, "working directory")
 
-	ctx := t.Context()
-	defer ctx.Done()
-
 	for _, test := range h.Cases {
 		t.Run(test.Name, func(t *testing.T) {
+			t.Parallel()
+
+			ctx := t.Context()
+
 			healthPort, err := getFreePort()
 			assert.NoError(t, err, "health port")
 
@@ -124,6 +140,7 @@ func TestE2E(t *testing.T) {
 			go (func() {
 				//nolint
 				cmd := exec.CommandContext(ctx, "go", args...)
+				cmd.Env = os.Environ()
 				cmd.Dir = path.Join(cwd, "..", "..")
 				cmd.SysProcAttr = &syscall.SysProcAttr{
 					Setpgid: true,

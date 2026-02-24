@@ -10,4 +10,4 @@ do:
         as: '${ $context + { callHTTP: . } }'
       with:
         method: get
-        endpoint: http://localhost:8888/posts/2
+        endpoint: ${ "http://" + $env.HTTP_MOCK + "/posts/2" }

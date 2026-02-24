@@ -86,30 +86,30 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Install Temporal CLI
-        uses: temporalio/setup-temporal@v0
-
-      - name: Start a local Temporal server
-        shell: bash
-        run: temporal server start-dev --headless &
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
 
-      - name: Go generate
-        run: go generate ./...
-
       - uses: actions/setup-node@v6
         with:
           node-version: lts/*
 
-      - name: Run HTTP service
-        run: npx --yes json-server --port 8888 ./tests/e2e/testdata/data/db.json &
+      - uses: actions/setup-python@v6
+        with:
+          python-version: 3.x
+
+      - name: Install Task
+        uses: go-task/setup-task@v1
+
+      - name: Go generate
+        run: go generate ./...
 
       - name: Run tests
-        run: go test -v -tags=e2e ./tests/e2e/...
+        run: task e2e
 
   helm:
     runs-on: ubuntu-latest

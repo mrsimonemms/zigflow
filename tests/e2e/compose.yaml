@@ -1,0 +1,25 @@
+services:
+  http_mock:
+    image: node:lts-alpine
+    ports:
+      - "8888"
+    volumes:
+      - ./testdata/data:/home/node/data
+    working_dir: /home/node
+    command:
+      - npx
+      - --yes
+      - json-server
+      - --port=8888
+      - ./data/db.json
+
+  temporal:
+    image: temporalio/temporal
+    ports:
+      - "7233"
+    command: server start-dev --ip 0.0.0.0
+    healthcheck:
+      test: ["CMD-SHELL", "temporal operator cluster health"]
+      interval: 10s
+      timeout: 10s
+      retries: 3

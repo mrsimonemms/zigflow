@@ -15,7 +15,7 @@ do:
               call: http
               with:
                 method: get
-                endpoint: http://localhost:8888/posts/1
+                endpoint: ${ "http://" + $env.HTTP_MOCK + "/posts/1" }
           # Use a wait task to guarantee which one wins
           - wait:
               wait:

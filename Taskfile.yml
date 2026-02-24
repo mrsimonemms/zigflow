@@ -23,6 +23,20 @@ tasks:
           cruft check || cruft update --skip-apply-ask --refresh-private-variables
         fi
 
+  e2e:
+    cmds:
+      - go clean -testcache
+      - defer: docker compose -f {{.E2E_COMPOSE}} down
+      - docker compose -f {{.E2E_COMPOSE}} up -d --wait
+      - |
+        export TEMPORAL_ADDRESS=$(docker compose -f {{.E2E_COMPOSE}} port temporal 7233)
+        export ZIGGY_HTTP_MOCK=$(docker compose -f {{.E2E_COMPOSE}} port http_mock 8888)
+
+        echo "Temporal address: $TEMPORAL_ADDRESS"
+        echo "HTTP mock address: $ZIGGY_HTTP_MOCK"
+
+        go test -v -tags=e2e ./tests/e2e/...
+
   generate-grpc:
     desc: Regenerate gRPC examples
     cmds:
