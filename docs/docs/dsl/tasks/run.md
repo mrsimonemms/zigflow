@@ -1,6 +1,12 @@
 # Run
 
-Provides the capability to run execute external commands
+Executes external commands, scripts or containers as workflow activities.
+
+## When to use this
+
+Use Run when your workflow must execute code that cannot be
+expressed in the YAML DSL: a Docker container, a shell command,
+a JavaScript or Python script or another Zigflow workflow.
 
 ## Properties
 
@@ -241,3 +247,24 @@ do:
             wait:
               seconds: 3
 ```
+
+## Gotchas
+
+**Container execution requires the `docker` binary.** The Zigflow worker
+process must have access to Docker on the host machine. The container runtime
+is Docker only at this time; other runtimes are not yet supported.
+
+**Script execution requires the language runtime in the worker image.** The
+official Docker image includes Node.js and Python. For other languages or
+specific versions, build a custom image.
+
+**`namespace` and `version` in `run.workflow` are not used.** These fields
+exist for Serverless Workflow specification compatibility only. The target
+workflow is looked up by `name` on the same task queue.
+
+## Related pages
+
+- [Do](./do) — sequential subtask composition
+- [Fork](./fork) — parallel child execution
+- [Concepts — how Zigflow runs](../../concepts/how-zigflow-runs) — worker and
+  activity model

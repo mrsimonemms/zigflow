@@ -1,13 +1,22 @@
 # Listen
 
 Provides a mechanism for workflows to await and react to external events, enabling
-event-driven behavior within workflow systems. In Temporal, there are
+event-driven behaviour within workflow systems. In Temporal, there are
 [three methods](https://docs.temporal.io/handling-messages#writing-signal-handlers)
 that can be used:
 
 * [Query](#query)
 * [Signal](#signal)
 * [Update](#update)
+
+## When to use this
+
+Use Listen when your workflow must pause until an external event
+arrives:
+
+* `query` — read current workflow state without blocking
+* `signal` — receive a fire-and-forget notification
+* `update` — receive a message and return a response
 
 ## Properties {#listen-properties}
 
@@ -147,10 +156,8 @@ do:
         seconds: 5
 ```
 
-The `metadata.timeout` controls the length of time that the timeout waits. If
-a signal is received within the time then it's not approved and times out.
-
-### Example {#signal-example}
+The `metadata.timeout` controls how long the listen task waits. If no signal
+is received within the timeout period, the task times out.
 
 ## Update
 
@@ -195,3 +202,27 @@ do:
 As with the [signal](#signal), this has a timeout. This has to receive both a
 `temperature` update greater than `38` and a `bpm` update below `60` or above
 `100`.
+
+## Gotchas
+
+**The default timeout is 60 seconds.** If no matching event arrives within the
+timeout, the listen task times out and the workflow continues (or fails,
+depending on the flow directive). Set `metadata.timeout` explicitly for
+long-running listeners.
+
+**Queries do not block.** A query handler registers immediately and returns the
+`data` expression result whenever a client calls it. It does not pause the
+workflow.
+
+**Signal data is read via `$data.<taskName>`.** After a signal is received,
+its payload is accessible via the task name key, not `$output`.
+
+## Related pages
+
+* [Concepts — glossary](../../concepts/glossary) — signals, queries and updates
+  defined
+* [Concepts — Temporal prerequisites](../../concepts/temporal-prereqs) —
+  Temporal messaging concepts
+* [Debugging workflows](../debugging) — observing events via CloudEvents
+* [Examples — signal-driven workflow](../../examples/signal-driven)
+  — full walkthrough

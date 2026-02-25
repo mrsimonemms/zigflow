@@ -3,6 +3,12 @@
 Allows workflows to pause or delay their execution for a specified period of time.
 This converts to a Temporal [Durable Timer](https://docs.temporal.io/workflow-execution/timers-delays).
 
+## When to use this
+
+Use Wait to introduce a durable delay into your workflow. The
+timer survives worker restarts. Typical uses include cooldown
+periods, scheduled actions and pauses between retry attempts.
+
 ## Properties
 
 | Name | Type | Required | Description |
@@ -22,3 +28,18 @@ do:
       wait:
         seconds: 5
 ```
+
+## Gotchas
+
+**The timer is durable.** A wait of hours or days survives worker restarts.
+Temporal holds the timer state. This is intended behaviour.
+
+**There is no maximum duration.** Very long timers are supported by Temporal
+but increase workflow history length.
+
+## Related pages
+
+- [For](./for) — using wait inside iteration loops
+- [Listen](./listen) — waiting for external events instead of a fixed duration
+- [Concepts — temporal prerequisites](../../concepts/temporal-prereqs) —
+  durable timers explained

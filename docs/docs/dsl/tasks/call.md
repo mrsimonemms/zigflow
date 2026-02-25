@@ -2,6 +2,14 @@
 
 The Call task allows you to make calls to external services.
 
+## When to use this
+
+Use Call when your workflow needs to:
+
+- Make an HTTP request to an external API
+- Invoke a Temporal activity on another task queue
+- Call a gRPC service
+
 ## Properties
 
 | Name | Type | Required | Description |
@@ -119,3 +127,26 @@ do:
         method: get
         endpoint: https://jsonplaceholder.typicode.com/users/2
 ```
+
+## Gotchas
+
+**HTTP errors raise by default.** Any response with a status outside `200–299`
+raises an error and triggers the retry policy. Wrap the call in a `try` task
+to handle specific HTTP error codes.
+
+**Activity names are case-sensitive.** The `name` field in an activity call
+must exactly match the name the activity was registered with on the remote
+worker.
+
+**gRPC proto files must be accessible.** The `proto.endpoint` path must be
+readable by the Zigflow worker process at runtime.
+
+## Related pages
+
+- [Try](./try) — handling HTTP and activity errors
+- [Raise](./raise) — raising explicit errors
+- [Concepts — error handling and retries](../../concepts/error-handling-and-retries)
+  — retry policy configuration
+- [Examples — HTTP call](../../examples/http-call) — practical walkthrough
+- [Examples — error handling](../../examples/error-handling)
+  — catching HTTP errors

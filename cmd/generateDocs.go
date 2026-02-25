@@ -44,7 +44,7 @@ func newGenerateDocsCmd(root *cobra.Command) *cobra.Command {
 					}
 				}
 
-				outDir = path.Join(wd, "docs", "docs", "cli")
+				outDir = path.Join(wd, "docs", "docs", "cli", "commands")
 			} else {
 				outDir = args[0]
 			}

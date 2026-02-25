@@ -12,6 +12,12 @@ input and output data
 The Do task is used by many other tasks, such as in a [child workflow](https://docs.temporal.io/child-workflows).
 These will be discussed in detail in those tasks.
 
+## When to use this
+
+Use Do at the top level to define one or more named workflows.
+Use it nested inside Fork, For and Try to define a sequential
+sequence of steps within those tasks.
+
 ## Properties
 
 | Name | Type | Required | Description |
@@ -106,3 +112,19 @@ do:
 
 These workflow are basic, with a sleep and an HTTP call. These two workflows are
 independent and are named `workflow1` and `workflow2`.
+
+## Gotchas
+
+**`document.name` is ignored when multiple Do tasks are defined at the root
+level.** Workflow type names are taken from the task names (`workflow1`,
+`workflow2`) instead.
+
+**Each task in `do` must have a unique name within its scope.** Duplicate task
+names cause a validation error.
+
+## Related pages
+
+- [Fork](./fork) — run tasks in parallel rather than in sequence
+- [Try](./try) — error handling within a sequence
+- [Concepts — how Zigflow runs](../../concepts/how-zigflow-runs) — execution
+  model

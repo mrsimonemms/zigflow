@@ -2,6 +2,12 @@
 
 A task used to set data to the workflow's state.
 
+## When to use this
+
+Use Set whenever you need to write data into the workflow state.
+**Always use Set for generated values** (UUIDs, timestamps) to
+ensure determinism during Temporal replay.
+
 :::warning
 A Temporal workflow **MUST** be [deterministic](https://docs.temporal.io/workflow-definition#deterministic-constraints).
 
@@ -103,3 +109,20 @@ do:
         # Overidden from above. Everything else remains the same
         progress: 100
 ```
+
+## Gotchas
+
+**Generated values (UUID, timestamps) used outside a `set` task cause
+Non-Determinism Errors on replay.** See the warning at the top of this page.
+
+**`set` data persists for the lifetime of the workflow.** A later `set` task
+with the same key overwrites the value; all other keys remain.
+
+## Related pages
+
+- [Concepts — data and expressions](../../concepts/data-and-expressions) —
+  expression syntax and variable reference
+- [Concepts — how Zigflow runs](../../concepts/how-zigflow-runs) —
+  determinism and replay
+- [Examples — hello world](../../examples/hello-world)
+  — set task in action

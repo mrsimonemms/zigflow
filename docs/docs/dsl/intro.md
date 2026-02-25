@@ -4,6 +4,13 @@ sidebar_label: The DSL
 ---
 # Understanding the DSL
 
+## What you will learn
+
+- How Zigflow's DSL relates to the CNCF Serverless Workflow specification
+- How a workflow definition is structured
+- Available task types and their properties
+- How runtime expressions, output shaping and metadata work
+
 Zigflow is built upon the [CNCF's Serverless Workflow](https://serverlessworkflow.io)
 project. This provides a solid foundation of a comprehensive and vendor-neutral
 framework. The [specification](https://github.com/serverlessworkflow/specification/blob/main/dsl-reference.md)

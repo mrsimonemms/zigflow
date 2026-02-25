@@ -1,14 +1,143 @@
 ---
 sidebar_position: 1
 ---
-# Deploying
 
-To follow...
+# Deploying Zigflow
 
-## Bare Metal
+## What you will learn
 
-## Docker Compose
+- What Zigflow deploys and what infrastructure it requires
+- Which deployment methods are available and when to use each
+- How to connect a Zigflow worker to a Temporal server
+- How to pass configuration via CLI flags or environment variables
 
-## Kubernetes
+## What Zigflow deploys
 
-### Helm
+Zigflow is a single Go binary. When you run `zigflow run`, it starts a
+**Temporal worker** that:
+
+- Connects to a Temporal server
+- Registers the compiled workflow
+- Polls the task queue for executions
+
+There is no separate API server, no database and no persistent storage.
+All workflow state is held by Temporal.
+
+Your infrastructure requirements are:
+
+1. A running Temporal server (Cloud or self-hosted)
+2. A Zigflow worker process for each workflow definition
+
+---
+
+## Deployment options
+
+| Method | When to use |
+| --- | --- |
+| [Binary](docker#running-the-binary) | Direct binary, VMs, simple scripts |
+| [Docker](docker) | Containerised environments, Docker Compose |
+| [Kubernetes / Helm](kubernetes) | Production Kubernetes clusters |
+
+---
+
+## Assumptions
+
+**Provided by Zigflow:**
+
+- A compiled binary for Linux, macOS and Windows via the
+  [releases page](https://github.com/mrsimonemms/zigflow/releases)
+- A Docker image published on every release to
+  `ghcr.io/mrsimonemms/zigflow`
+- A Helm chart published as an OCI artifact to
+  `oci://ghcr.io/mrsimonemms/charts/zigflow`
+
+**You must provide:**
+
+- A running Temporal server — either
+  [Temporal Cloud](https://temporal.io/cloud) or self-hosted
+- Your workflow definition files
+
+**Not included:**
+
+- Container registry, ingress or other cluster infrastructure
+- A Temporal server — Zigflow is a worker, not a server
+
+---
+
+## Runtime ports
+
+A running Zigflow worker exposes two ports:
+
+| Port | Default | Purpose |
+| --- | --- | --- |
+| Health | `3000` | HTTP `/health` — liveness and readiness |
+| Metrics | `9090` | Prometheus metrics |
+
+Override with `--health-listen-address` and `--metrics-listen-address`.
+
+---
+
+## Connecting to Temporal
+
+All deployment methods share the same connection flags:
+
+| Flag | Environment variable | Default | Description |
+| --- | --- | --- | --- |
+| `--temporal-address` | `TEMPORAL_ADDRESS` | `localhost:7233` | Temporal server address |
+| `--temporal-namespace` | `TEMPORAL_NAMESPACE` | `default` | Temporal namespace |
+| `--temporal-tls` | `TEMPORAL_TLS` | `false` | Enable TLS |
+| `--temporal-api-key` | `TEMPORAL_API_KEY` | (none) | API key for Temporal Cloud |
+| `--tls-client-cert-path` | `TEMPORAL_TLS_CLIENT_CERT_PATH` | (none) | Path to mTLS client certificate |
+| `--tls-client-key-path` | `TEMPORAL_TLS_CLIENT_KEY_PATH` | (none) | Path to mTLS client key |
+
+For [Temporal Cloud](https://temporal.io/cloud), enable TLS and provide an
+API key:
+
+```sh
+zigflow run \
+  -f workflow.yaml \
+  --temporal-address your-namespace.tmprl.cloud:7233 \
+  --temporal-namespace your-namespace \
+  --temporal-tls \
+  --temporal-api-key your-api-key
+```
+
+---
+
+## Environment variables
+
+Zigflow reads its own configuration from environment variables that mirror
+the CLI flag names. The naming convention is: flag `--flag-name` becomes
+env var `FLAG_NAME` (uppercase, hyphens replaced by underscores).
+
+Workflow definitions can also read environment variables via `$env`. By
+default, environment variables prefixed with `ZIGGY_` are passed to the
+workflow. Change the prefix with `--env-prefix`.
+
+Example: the environment variable `ZIGGY_API_BASE_URL` is accessible in
+expressions as `${ $env.API_BASE_URL }`.
+
+---
+
+## Telemetry
+
+Zigflow sends anonymous usage data (a UUID and version number) to help
+the project understand adoption. No workflow data is included.
+
+Disable it:
+
+```sh
+# Environment variable
+DISABLE_TELEMETRY=true zigflow run -f workflow.yaml
+
+# CLI flag
+zigflow run -f workflow.yaml --disable-telemetry
+```
+
+---
+
+## Next steps
+
+- [Docker](docker) — running Zigflow in a container
+- [Kubernetes](kubernetes) — deploying with the official Helm chart
+- [Observability](observability) — health checks, metrics and CloudEvents

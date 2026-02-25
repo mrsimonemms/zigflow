@@ -3,6 +3,12 @@
 Serves as a mechanism within workflows to handle errors gracefully, potentially
 retrying failed tasks before proceeding with alternate ones.
 
+## When to use this
+
+Use Try when a task may fail and you want to recover without
+failing the entire workflow. Common uses include optional HTTP
+calls and handling external service errors.
+
 ## Properties {#try-properties}
 
 | Name | Type | Required | Description |
@@ -64,3 +70,22 @@ errors.
 | Name | Type | Required | Description |
 | --- | :---: | :---: | --- |
 | do | [`map[string, task]`](./intro) | `yes` | The definition of the task(s) to run when catching an error. This will be run as a [child workflow](https://docs.temporal.io/child-workflows). |
+
+## Gotchas
+
+**The `catch` block catches all errors.** There is no filtering by error type.
+To handle different error types differently, inspect the error object inside
+the `catch` block.
+
+**The `try` block runs as a child workflow.** Its history and retries are
+independent from the parent workflow. The retry policy configured on inner
+tasks still applies before the `catch` block runs.
+
+## Related pages
+
+- [Raise](./raise) — raising explicit errors
+- [Call](./call) — HTTP and activity calls that may fail
+- [Concepts — error handling and retries](../../concepts/error-handling-and-retries)
+  — error model overview
+- [Examples — error handling](../../examples/error-handling)
+  — try/catch walkthrough

@@ -20,4 +20,4 @@ yarn-debug.log*
 yarn-error.log*
 
 # This is generated from Cobra
-docs/cli
+docs/cli/commands

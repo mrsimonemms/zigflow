@@ -3,6 +3,12 @@ sidebar_position: -1
 ---
 # What is Metadata?
 
+## What you will learn
+
+- What metadata is and where it can be applied
+- The difference between document-level and task-level metadata
+- Which metadata options are available
+
 Metadata is used to provide extra configuration for workflows and tasks.
 
 ## Where can I use it?

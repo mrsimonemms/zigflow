@@ -9,7 +9,7 @@
     "docusaurus": "docusaurus",
     "format": "prettier --write \"**/*.js\"",
     "lint": "eslint \"**/*.js\"",
-    "postinstall": "go run .. generate-docs ./docs/cli",
+    "postinstall": "go run .. generate-docs ./docs/cli/commands",
     "serve": "docusaurus serve",
     "start": "docusaurus start --host 0.0.0.0 --no-open --port 9999",
     "swizzle": "docusaurus swizzle",

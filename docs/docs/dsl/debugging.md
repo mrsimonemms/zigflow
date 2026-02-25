@@ -4,6 +4,13 @@ sidebar_label: Debugging Workflows
 
 # Debugging Workflows
 
+## What you will learn
+
+- How to enable CloudEvents to observe workflow execution in real time
+- How to configure file and HTTP CloudEvent clients
+- How to interpret event types and event structure
+- Common failure scenarios and how to diagnose them
+
 Zigflow emits [CloudEvents](https://cloudevents.io) at key points during
 workflow execution to help you understand what's happening inside your
 workflows. This is particularly useful during development and debugging.
@@ -311,15 +318,72 @@ Zigflow exposes Prometheus metrics for CloudEvents:
 These metrics help you monitor the health and performance of your event
 emission pipeline.
 
-These metrics help you monitor the health and performance of your event emission
-pipeline.
-
 ## Limitations
 
 - CloudEvents are emitted on a best-effort basis
 - Failed event deliveries do not fail the workflow
 - Events are emitted from the workflow execution context and must remain deterministic
 - Event payloads are subject to Temporal's payload size limits
+
+---
+
+## Common failure scenarios
+
+### Worker exits immediately after starting
+
+The most common cause is a validation failure. Zigflow validates the workflow
+before starting the worker. Run `zigflow validate` to see the error:
+
+```text
+❌ Validation failed for workflow.yaml
+
+1 validation error(s):
+
+1. document.name: is required
+```
+
+Fix the reported field and restart the worker.
+
+### Non-Determinism Error during workflow replay
+
+Temporal replays workflows from their event history. If a workflow produces
+different results on replay — for example because a UUID or timestamp is
+generated outside a `set` task — Temporal raises a Non-Determinism Error.
+
+Check your logs for lines containing `NonDeterministicWorkflowError`. The fix
+is to move any generated value into a `set` task, which wraps the generation
+in a Temporal side-effect.
+
+See [Data and expressions](../concepts/data-and-expressions) for guidance.
+
+### HTTP activity returns an error
+
+HTTP calls (via `call: http`) fail the task when the server returns a non-2xx
+status. The error is visible in the workflow history and in task-faulted
+CloudEvents.
+
+To recover without failing the whole workflow, wrap the call in a
+[`try` task](./tasks/try).
+
+### Listen task times out
+
+A `listen` task with `type: signal` or `type: update` will time out if no
+matching event arrives within `metadata.timeout` (default 60 seconds). The
+task is then marked as failed.
+
+Increase `metadata.timeout` if the signal may take longer to arrive.
+
+### Activity exceeds its schedule-to-close timeout
+
+If an activity (HTTP call, container run, etc.) does not complete within its
+configured timeout, Temporal marks it as timed out and schedules a retry
+according to the retry policy. Check the workflow history in the Temporal UI
+for `ScheduleToClose` timeout events.
+
+Adjust `activityOptions` in the workflow or task metadata to increase the
+timeout.
+
+---
 
 ## See Also
 

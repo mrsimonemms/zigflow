@@ -3,12 +3,18 @@ sidebar_position: 2
 ---
 # Your Temporal Server
 
+## What you will learn
+
+- The three components of a Temporal-based application
+- How Zigflow fits into the Temporal architecture
+- Which Temporal server options are available
+
 Zigflow works with all Temporal server types. [Cloud](https://temporal.io/cloud)
 is best for high-performance, production workflows and [Self-Hosted](https://docs.temporal.io/self-hosted-guide)
 is great for smaller workflows and development/testing.
 
-For ease, this example uses the development server bundled with the
-[Temporal CLI](https://docs.temporal.io/cli)
+This guide uses the development server bundled with the
+[Temporal CLI](https://docs.temporal.io/cli):
 
 ```sh
 temporal server start-dev
@@ -23,17 +29,17 @@ A Temporal-enabled application can be thought of as three parts.
     This is part of the application that makes the request. It takes the request
     from your app and hands it off to Temporal to fulfil it. Its responsibilities
     are:
-      * starting the workflow
-      * querying the workflow state
-      * updating the workflow
-      * awaiting the returned data (or error) and handling it
+      - starting the workflow
+      - querying the workflow state
+      - updating the workflow
+      - awaiting the returned data (or error) and handling it
 
 1. **The Temporal server**
 
     This acts as the bridge between the client and worker. Its responsibilities
     are:
-      * persisting the workflow's state
-      * dispatching tasks to the workers
+      - persisting the workflow's state
+      - dispatching tasks to the workers
 
     This provides the strong guarantees that makes your app crash-proof.
 

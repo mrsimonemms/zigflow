@@ -1,10 +1,12 @@
 # Fork
 
-Allows workflows to execute multiple subtasks concurrently, enabling parallel
-processing and improving the overall efficiency of the workflow. By defining a
-set of subtasks to perform concurrently, the Fork task facilitates the execution
-of complex operations in parallel, ensuring that multiple tasks can be executed
-simultaneously.
+Executes multiple workflow branches concurrently.
+
+## When to use this
+
+Use Fork when multiple operations can run independently and
+simultaneously. Set `compete: true` if you only need the result
+of the fastest branch and want to cancel the rest.
 
 ## Properties
 
@@ -96,3 +98,23 @@ to `compete: true`. The data will look similar to this:
 Unlike the non-competing version, the `raiseAlarm` object will *ONLY* contain
 the data of the winning fork. All the other workflows will be cancelled and any
 data generated will be discarded.
+
+## Gotchas
+
+**In competing mode, all non-winning branches are cancelled.** Any side effects
+(HTTP calls, state changes) performed in cancelled branches are not rolled back.
+Only the winner's output is returned.
+
+**Each branch runs as a child workflow.** Errors in a branch propagate back to
+the parent fork task and trigger the retry policy unless caught by a `try` task
+wrapping the branch.
+
+## Related pages
+
+- [Do](./do) — sequential execution
+- [For](./for) — iteration over collections
+- [Try](./try) — error handling within a branch
+- [Concepts — how Zigflow runs](../../concepts/how-zigflow-runs)
+  — child workflows and execution model
+- [Examples — parallel tasks](../../examples/parallel-tasks)
+  — competing and non-competing fork in action

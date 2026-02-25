@@ -4,6 +4,12 @@ Intentionally triggers and propagates errors. By employing the "Raise" task,
 workflows can deliberately generate error conditions, allowing for explicit error
 handling and fault management strategies to be implemented.
 
+## When to use this
+
+Use Raise to fail the workflow explicitly with a structured error.
+Common cases include input validation failures, unsupported states
+and required preconditions not being met.
+
 ## Properties
 
 | Name | Type | Required | Description |
@@ -66,3 +72,17 @@ to another.
 
 <span id="footnote-1">¹</span> *Default value. The `status code` that best
 describes the error should always be used.*
+
+## Gotchas
+
+**A `raise` task always terminates the current execution path.** If it is not
+wrapped in a `try` task, the error propagates up and fails the workflow.
+
+**Using a custom `type` URI is valid.** You are not required to use the
+standard types. Custom URIs allow error-type filtering in external systems.
+
+## Related pages
+
+- [Try](./try) — catching errors raised by this task
+- [Concepts — error handling and retries](../../concepts/error-handling-and-retries)
+  — error model overview

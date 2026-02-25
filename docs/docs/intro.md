@@ -3,13 +3,22 @@ sidebar_position: 1
 ---
 # Introduction
 
-⚡️ Zigflow provides a **simple and declarative way** to define and manage Temporal
-workflows
+Zigflow runs workflows defined in YAML on [Temporal](https://temporal.io).
+You write a workflow definition file; Zigflow compiles it, validates it and
+registers it as a Temporal worker.
 
-✨ Powered by Temporal – battle-tested **reliability, retries, and state management**
+**Zigflow is for teams that want to:**
 
-💨 **Speed up your deployments** by focusing on what you want to achieve, without
-having to learn Temporal
+- Define workflow logic in YAML rather than in SDK code
+- Separate orchestration structure from application implementation
+- Reduce boilerplate when building Temporal workers
+
+**Zigflow is not for:**
+
+- Teams who prefer writing workflow code directly in a Temporal SDK
+- Users seeking an official Temporal product — Zigflow is an independent project
+
+---
 
 ## Quick Start
 
@@ -34,8 +43,7 @@ temporal server start-dev
 
 ### Create a Workflow
 
-This is a simple workflow that outputs some data. It doesn't really do anything,
-but it demonstrates the principles of running a Zigflow workflow.
+This workflow sets a single value and returns it as output.
 
 ```yaml title="workflow.yaml"
 document:
@@ -58,7 +66,7 @@ The DSL schema follows the Serverless Workflow specification
 
 ### Run
 
-Run Zigflow with a reference to the workflow file
+Start the worker with a reference to the workflow file:
 
 ```sh
 zigflow run -f workflow.yaml
@@ -71,15 +79,15 @@ If you want to trigger this through your application, refer to these docs to cre
 your script.
 
 To run through the UI:
-* Go to your [Temporal UI](http://localhost:8233)
-* Select "Start Workflow"
-* Enter these parameters:
-  * **Workflow ID**: generate a random UUID
-  * **Task Queue**: enter `zigflow`
-  * **Workflow Type**: enter `simple-workflow`
-* Click "Start Workflow" and then go to the running workflow
+- Go to your [Temporal UI](http://localhost:8233)
+- Select "Start Workflow"
+- Enter these parameters:
+  - **Workflow ID**: generate a random UUID
+  - **Task Queue**: enter `zigflow`
+  - **Workflow Type**: enter `simple-workflow`
+- Click "Start Workflow" and then go to the running workflow
 
-You you should see a workflow with the result:
+You should see the workflow result:
 
 ```json
 {
@@ -89,4 +97,8 @@ You you should see a workflow with the result:
 }
 ```
 
-🎉🎉🎉 Congratulations. You've just run your first Zigflow workflow 🎉🎉🎉
+Your first workflow is running. See the [Quickstart](./getting-started/quickstart)
+for a full walkthrough with validation and troubleshooting.
+
+If Zigflow is valuable to you, consider
+[supporting its development](./support).

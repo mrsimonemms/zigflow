@@ -1,9 +1,12 @@
 # For
 
-Allows workflows to iterate over a collection of items, executing a defined set
-of subtasks for each item in the collection. This task type is instrumental in
-handling scenarios such as batch processing, data transformation, and repetitive
-operations across datasets.
+Iterates over a collection and executes a set of tasks for each item.
+
+## When to use this
+
+Use For when you need to run the same set of tasks for every item
+in a collection. The collection can be an array, a map or an
+integer count.
 
 ## Properties
 
@@ -82,3 +85,24 @@ do:
             wait:
               seconds: 1
 ```
+
+## Gotchas
+
+**Each iteration runs as a child workflow.** A loop over a large collection
+creates many child workflow executions. Temporal's history limits apply.
+
+**The `while` condition is evaluated after each iteration.** It cannot prevent
+the first iteration from running.
+
+**Iteration results are stored under `$data.<taskName>`.** The `while`
+expression can access this key to implement early termination.
+
+## Related pages
+
+- [Fork](./fork) — parallel execution of multiple branches
+- [Do](./do) — sequential subtasks
+- [Set](./set) — storing iteration data
+- [Concepts — data and expressions](../../concepts/data-and-expressions)
+  — runtime expressions and `$data` variables
+- [Examples — parallel tasks](../../examples/parallel-tasks)
+  — running branches concurrently

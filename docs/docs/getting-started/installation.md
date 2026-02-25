@@ -5,6 +5,12 @@ sidebar_position: 1
 
 Zigflow is a single Go binary with prebuilt options.
 
+## What you will learn
+
+- How to install the Zigflow binary on your platform
+- How to run Zigflow from a Docker image
+- How to install from source
+
 ## Binary Releases
 
 Every [release](https://github.com/mrsimonemms/zigflow/releases) of Zigflow provides
@@ -50,8 +56,7 @@ You can specify a version by changing `@latest` to the desired version.
 You will need to install [Go](https://go.dev/doc/install)
 :::
 
-Building from source is a little more work, but is the best way of testing the
-latest version.
+Building from source is useful for testing unreleased versions.
 
 ```sh
 git clone https://github.com/mrsimonemms/zigflow.git

@@ -4,6 +4,12 @@ sidebar_label: Introduction
 ---
 # What Are Tasks?
 
+## What you will learn
+
+- What a task is and how tasks relate to Temporal activities and workflows
+- Which task types are available
+- Common properties shared by all tasks
+
 A task within a workflow represents a discrete unit of work that contributes to
 achieving the overall objectives defined by the workflow.
 
@@ -18,9 +24,9 @@ coordinate and track progress, enabling efficient collaboration and ensuring tha
 work is completed in a structured and organized manner.
 
 In Temporal, a task may add logic to:
-* **the workflow**: this is a deterministic piece of logic which helps progress
+-**the workflow**: this is a deterministic piece of logic which helps progress
   the flow of data.
-* **an [activity](https://docs.temporal.io/activities)**: this executes a single,
+-**an [activity](https://docs.temporal.io/activities)**: this executes a single,
   well-defined action, such as making an HTTP call, and may be non-deterministic.
 
 ## Available Tasks
@@ -61,7 +67,7 @@ Variables able to be referenced within runtime expressions.
 | :--- | :--- | :--- |
 | `$context` | Anything set to the output in previous steps. Typically used within [output](../intro#output) and [export](../intro#export) | `${ $context }` |
 | `$data` | Data set to the workflow's state - see [data](#data) | `${ $data.someData }` |
-| `$env` | Any environment variable prefixed with `ZIGGY_`. The prefix is _NOT_ used in this object. This can be set with the [`--env-prefix` flag](../../cli/zigflow#options) | `${ $env.EXAMPLE_ENVVAR }` |
+| `$env` | Any environment variable prefixed with `ZIGGY_`. The prefix is _NOT_ used in this object. This can be set with the [`--env-prefix` flag](../../cli/commands/zigflow#options) | `${ $env.EXAMPLE_ENVVAR }` |
 | `$input` | Any input received when the workflow was triggered | `${ $input.val1 }` |
 | `$output` | Any output exported from a task - see [output](../intro#output) | `${ $output }` |
 
@@ -85,43 +91,43 @@ The `$data` object also receives the workflow and activity info.
 
 This can be accessed from `${ $data.workflow }`.
 
-* attempt
-* binary_checksum
-* continued_execution_run_id
-* cron_schedule
-* first_run_id
-* namespace
-* original_run_id
-* parent_workflow_namespace
-* priority_key
-* task_queue_name
-* workflow_execution_id
-* workflow_execution_run_id
-* workflow_execution_timeout
-* workflow_start_time
-* workflow_type_name
+-attempt
+-binary_checksum
+-continued_execution_run_id
+-cron_schedule
+-first_run_id
+-namespace
+-original_run_id
+-parent_workflow_namespace
+-priority_key
+-task_queue_name
+-workflow_execution_id
+-workflow_execution_run_id
+-workflow_execution_timeout
+-workflow_start_time
+-workflow_type_name
 
 #### Activity
 
 This can be accessed from `${ $data.activity }`. Ideally, this should be avoided
 as Zigflow does not allow specific targeting of an activity.
 
-* activity_id
-* activity_type_name
-* attempt
-* deadline
-* heartbeat_token
-* is_local_activity
-* priority_key
-* schedule_to_close_timeout
-* scheduled_time
-* start_to_close_timeout
-* started_time
-* task_queue
-* task_token
-* workflow_namespace
-* workflow_execution_id
-* workflow_execution_run_id
+-activity_id
+-activity_type_name
+-attempt
+-deadline
+-heartbeat_token
+-is_local_activity
+-priority_key
+-schedule_to_close_timeout
+-scheduled_time
+-start_to_close_timeout
+-started_time
+-task_queue
+-task_token
+-workflow_namespace
+-workflow_execution_id
+-workflow_execution_run_id
 
 ## Flow Directive
 
