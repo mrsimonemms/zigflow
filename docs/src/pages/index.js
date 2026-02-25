@@ -40,14 +40,6 @@ function HomepageHeader() {
           <Link className="button button--primary button--lg" to="/docs/intro">
             Getting Started - 5min ⏱️
           </Link>
-
-          <Link
-            className="button button--info button--lg"
-            to={siteConfig.customFields.githubURL + '/stargazers'}
-            rel="noopener noreferrer"
-          >
-            Star on GitHub ⭐
-          </Link>
         </div>
       </div>
 
