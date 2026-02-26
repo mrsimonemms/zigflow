@@ -130,16 +130,16 @@ Zigflow handles orchestration. Your services handle the work.
 Zigflow is an opinionated, declarative layer on top of Temporal. It trades some
 SDK-level flexibility for faster development and structural guardrails.
 
-| Capability | Temporal SDK directly | Custom YAML engine | **Zigflow** |
+| Capability | Temporal SDKs | Custom DSL | <img src="./designs/zigflow.png " alt="Zigflow" height="50px" /> |
 | --- | --- | --- | --- |
-| Workflow definition model | Imperative code | Declarative | Declarative |
-| Control and flexibility | Maximum | Depends on implementation | Opinionated and constrained |
-| Retries and durability | ✅ Native Temporal | ⚠️ You build it | ✅ Native Temporal |
-| CNCF spec alignment | ❌ | ❌ Usually bespoke | ✅ Serverless Workflow v1.0+ |
-| Validation before execution | Manual or custom | Depends on implementation | ✅ Built-in validation |
-| Boilerplate and worker setup | Required | Depends on implementation | Minimal |
-| Kubernetes deployment | Manual | Manual | ✅ Helm chart included |
-| Multi-language activities | ✅ | Depends on implementation | ✅ Any Temporal SDK |
+| **Workflow definition model** | Imperative code | Declarative | Declarative |
+| **Control and flexibility** | Maximum | Depends on implementation | Opinionated and constrained |
+| **Retries and durability** | ✅ Native Temporal | ⚠️ You build it | ✅ Native Temporal |
+| **CNCF spec alignment** | ❌ | ❌ Usually bespoke | ✅ Serverless Workflow v1.0+ |
+| **Validation before execution** | Manual or custom | Depends on implementation | ✅ Built-in validation |
+| **Boilerplate and worker setup** | Required | Depends on implementation | Minimal |
+| **Kubernetes deployment** | Manual | Manual | ✅ Helm chart included |
+| **Multi-language activities** | ✅ | Depends on implementation | ✅ Any Temporal SDK |
 
 Use the SDK when you need maximum flexibility. Use Zigflow when you want
 consistent, declarative orchestration with less boilerplate.
