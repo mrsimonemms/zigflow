@@ -5,7 +5,7 @@ A flow chart to authorise change requests
 <!-- toc -->
 
 * [Getting started](#getting-started)
-* [Flow](#flow)
+* [Diagram](#diagram)
 
 <!-- Regenerate with "pre-commit run -a markdown-toc" -->
 
@@ -25,28 +25,66 @@ There are two prompts at runtime:
 1. Should we approve or reject the change? Approve by default.
 1. After how long should the response be sent? 15 seconds by default.
 
-## Flow
+## Diagram
 
+<!-- ZIGFLOW_GRAPH_START -->
 ```mermaid
 flowchart TD
-    Start --> B{ Branch }
-    B --> C[Notify reviewer]
-    C --> D{ Decision }
-    REMIND2 --> |Change auto-applied| F
-    D --> |Change accepted| F[Apply changes]
-    F --> G[Notify of result]
-    G --> END
-    D --> |Change rejected| G
-    B --> REMIND1((30 seconds passed)) --> C
-    B --> REMIND2((1 minute passed))
+    authoriseChangeRequest__start([Start])
+    authoriseChangeRequest__end([End])
+    authoriseChangeRequest_queryState["LISTEN (queryState)"]
+    authoriseChangeRequest__start --> authoriseChangeRequest_queryState
+    authoriseChangeRequest_stateSetup["SET (stateSetup)"]
+    authoriseChangeRequest_queryState --> authoriseChangeRequest_stateSetup
+    authoriseChangeRequest_startReview["FORK (startReview) 🏁"]
+    authoriseChangeRequest_startReview__join((" "))
+    subgraph fork_authoriseChangeRequest_autoApproval["autoApproval"]
+        direction TB
+        authoriseChangeRequest_autoApproval__start([ ])
+        authoriseChangeRequest_autoApproval__end([ ])
+        authoriseChangeRequest_autoApproval_timeout["WAIT (timeout)"]
+        authoriseChangeRequest_autoApproval__start --> authoriseChangeRequest_autoApproval_timeout
+        authoriseChangeRequest_autoApproval_autoApprove["SET (autoApprove)"]
+        authoriseChangeRequest_autoApproval_timeout --> authoriseChangeRequest_autoApproval_autoApprove
+        authoriseChangeRequest_autoApproval_autoApprove --> authoriseChangeRequest_autoApproval__end
+    end
+    authoriseChangeRequest_startReview --> authoriseChangeRequest_autoApproval__start
+    authoriseChangeRequest_autoApproval__end --> authoriseChangeRequest_startReview__join
+    subgraph fork_authoriseChangeRequest_remindReviewer["remindReviewer"]
+        direction TB
+        authoriseChangeRequest_remindReviewer__start([ ])
+        authoriseChangeRequest_remindReviewer__end([ ])
+        authoriseChangeRequest_remindReviewer_timeout["WAIT (timeout)"]
+        authoriseChangeRequest_remindReviewer__start --> authoriseChangeRequest_remindReviewer_timeout
+        authoriseChangeRequest_remindReviewer_notifyReviewer["CALL_HTTP (notifyReviewer)"]
+        authoriseChangeRequest_remindReviewer_timeout --> authoriseChangeRequest_remindReviewer_notifyReviewer
+        authoriseChangeRequest_remindReviewer_timeout_2["WAIT (timeout)"]
+        authoriseChangeRequest_remindReviewer_notifyReviewer --> authoriseChangeRequest_remindReviewer_timeout_2
+        authoriseChangeRequest_remindReviewer_timeout_2 --> authoriseChangeRequest_remindReviewer__end
+    end
+    authoriseChangeRequest_startReview --> authoriseChangeRequest_remindReviewer__start
+    authoriseChangeRequest_remindReviewer__end --> authoriseChangeRequest_startReview__join
+    subgraph fork_authoriseChangeRequest_waitForApproval["waitForApproval"]
+        direction TB
+        authoriseChangeRequest_waitForApproval__start([ ])
+        authoriseChangeRequest_waitForApproval__end([ ])
+        authoriseChangeRequest_waitForApproval_notifyReviewer["CALL_HTTP (notifyReviewer)"]
+        authoriseChangeRequest_waitForApproval__start --> authoriseChangeRequest_waitForApproval_notifyReviewer
+        authoriseChangeRequest_waitForApproval_review["LISTEN (review)"]
+        authoriseChangeRequest_waitForApproval_notifyReviewer --> authoriseChangeRequest_waitForApproval_review
+        authoriseChangeRequest_waitForApproval_set["SET (set)"]
+        authoriseChangeRequest_waitForApproval_review --> authoriseChangeRequest_waitForApproval_set
+        authoriseChangeRequest_waitForApproval_set --> authoriseChangeRequest_waitForApproval__end
+    end
+    authoriseChangeRequest_startReview --> authoriseChangeRequest_waitForApproval__start
+    authoriseChangeRequest_waitForApproval__end --> authoriseChangeRequest_startReview__join
+    authoriseChangeRequest_stateSetup --> authoriseChangeRequest_startReview
+    authoriseChangeRequest_updateState["SET (updateState)"]
+    authoriseChangeRequest_startReview__join --> authoriseChangeRequest_updateState
+    authoriseChangeRequest_applyChange["CALL_HTTP (applyChange) [?]"]
+    authoriseChangeRequest_updateState --> authoriseChangeRequest_applyChange
+    authoriseChangeRequest_notifyResult["CALL_HTTP (notifyResult)"]
+    authoriseChangeRequest_applyChange --> authoriseChangeRequest_notifyResult
+    authoriseChangeRequest_notifyResult --> authoriseChangeRequest__end
 ```
-
-1. Start the workflow
-1. Notify the review (reminds after 30 seconds)
-1. Reviewer approves (auto-approves after 1 minute):
-   1. Applies change
-   1. Notifies user
-   1. End
-1. Review rejects:
-   1. Notifies user
-   1. End
+<!-- ZIGFLOW_GRAPH_END -->
