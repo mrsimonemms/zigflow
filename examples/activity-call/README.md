@@ -35,3 +35,22 @@ go run .
 
 You should see structured profile data and the generated welcome message in the
 output payload.
+
+## Diagram
+
+<!-- ZIGFLOW_GRAPH_START -->
+```mermaid
+flowchart TD
+    activity_call__start([Start])
+    activity_call__end([End])
+    activity_call_captureInput["SET (captureInput)"]
+    activity_call__start --> activity_call_captureInput
+    activity_call_fetchProfile["CALL_ACTIVITY (fetchProfile)"]
+    activity_call_captureInput --> activity_call_fetchProfile
+    activity_call_generateWelcome["CALL_ACTIVITY (generateWelcome)"]
+    activity_call_fetchProfile --> activity_call_generateWelcome
+    activity_call_finalize["SET (finalize)"]
+    activity_call_generateWelcome --> activity_call_finalize
+    activity_call_finalize --> activity_call__end
+```
+<!-- ZIGFLOW_GRAPH_END -->
