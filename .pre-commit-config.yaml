@@ -56,6 +56,18 @@ repos:
     rev: v0.1.30
     hooks:
       - id: helmlint
+  - repo: https://github.com/mrsimonemms/zigflow
+    rev: sje/graph
+    hooks:
+      - id: zigflow-graph-inject
+  # - repo: local
+  #   hooks:
+  #     - id: zigflow-graph-inject
+  #       name: Inject workflow graphs into example READMEs
+  #       # entry: go run . graph inject
+  #       # language: system
+  #       # pass_filenames: true
+  #       # files: ^examples/[^/]+/README\.md$
   - repo: local
     hooks:
       - id: generate-table
