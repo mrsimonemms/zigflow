@@ -109,7 +109,7 @@ the Temporal CLI or the Temporal UI.
 
 ## Related pages
 
-- [Temporal prerequisites](temporal-prereqs) — what you need to know about
-  Temporal before using Zigflow
-- [How Zigflow runs](how-zigflow-runs) — the execution model in detail
-- [Quickstart](../getting-started/quickstart) — install and run a workflow
+- [Temporal prerequisites](/docs/concepts/temporal-prereqs) — what you need
+  to know about Temporal before using Zigflow
+- [How Zigflow runs](/docs/concepts/how-zigflow-runs) — the execution model in detail
+- [Quickstart](/docs/getting-started/quickstart) — install and run a workflow

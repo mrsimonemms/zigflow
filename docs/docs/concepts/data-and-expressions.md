@@ -198,7 +198,7 @@ how you accumulate data across multiple tasks.
 ## Workflow metadata in expressions
 
 :::tip
-For the full list of metadata fields, see the [DSL reference](../dsl/intro).
+For the full list of metadata fields, see the [DSL reference](/docs/dsl/intro).
 :::
 
 Inside workflow execution, metadata is accessible via `$data.workflow` and
@@ -231,6 +231,6 @@ run. Access them in a later task.
 
 ## Related pages
 
-- [Set task](../dsl/tasks/set) — storing data
-- [DSL reference](../dsl/intro) — full expression context
-- [How Zigflow runs](how-zigflow-runs) — determinism and replay
+- [Set task](/docs/dsl/tasks/set) — storing data
+- [DSL reference](/docs/dsl/intro) — full expression context
+- [How Zigflow runs](/docs/concepts/how-zigflow-runs) — determinism and replay

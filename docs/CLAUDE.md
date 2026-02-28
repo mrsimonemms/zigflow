@@ -196,6 +196,23 @@ Main section content follows here.
 - Link examples to relevant DSL tasks.
 - Avoid dead ends.
 
+### Link format
+
+All internal links between documentation pages must use **absolute paths**
+starting with `/docs/`.
+
+Do not use:
+- Relative paths (`./other-page`, `../concepts/foo`, `other-page`)
+- Paths with `.md` extensions
+
+Use:
+- `/docs/concepts/foo`
+- `/docs/dsl/tasks/call`
+- `/docs/deployment/kubernetes#helm-chart`
+
+This applies to all prose links, table links, and "Related pages" sections.
+Links inside code blocks are exempt.
+
 ---
 
 ## Sidebar Structure

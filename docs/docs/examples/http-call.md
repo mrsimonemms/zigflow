@@ -40,7 +40,7 @@ request, then returns the response body as the task output.
 
 **Retry behaviour.** Failed HTTP calls (non-2xx responses) are
 retried using the workflow's retry policy. Wrap the call in a
-[`try` task](../dsl/tasks/try) to intercept specific errors.
+[`try` task](/docs/dsl/tasks/try) to intercept specific errors.
 
 ## Passing dynamic values to the endpoint
 
@@ -105,13 +105,13 @@ target endpoint.
 
 **Non-2xx responses fail the workflow.**
 HTTP errors raise by default. To recover, wrap the call in a
-`try` task. See [Error Handling](./error-handling).
+`try` task. See [Error Handling](/docs/examples/error-handling).
 
 ---
 
 ## Related pages
 
-- [Call](../dsl/tasks/call) — full `call: http` reference
-- [Error Handling](./error-handling) — handling HTTP errors
-- [Concepts — error handling](../concepts/error-handling-and-retries)
+- [Call](/docs/dsl/tasks/call) — full `call: http` reference
+- [Error Handling](/docs/examples/error-handling) — handling HTTP errors
+- [Concepts — error handling](/docs/concepts/error-handling-and-retries)
   — retry policy configuration

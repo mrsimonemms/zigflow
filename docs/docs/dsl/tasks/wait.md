@@ -13,7 +13,7 @@ periods, scheduled actions and pauses between retry attempts.
 
 | Name | Type | Required | Description |
 | --- | :---: | :---: | --- |
-| wait | [`duration`](../intro#duration) | `yes` | The amount of time to wait. |
+| wait | [`duration`](/docs/dsl/intro#duration) | `yes` | The amount of time to wait. |
 
 ## Example
 
@@ -39,7 +39,8 @@ but increase workflow history length.
 
 ## Related pages
 
-- [For](./for) — using wait inside iteration loops
-- [Listen](./listen) — waiting for external events instead of a fixed duration
-- [Concepts — temporal prerequisites](../../concepts/temporal-prereqs) —
+- [For](/docs/dsl/tasks/for) — using wait inside iteration loops
+- [Listen](/docs/dsl/tasks/listen) — waiting for external events instead of
+  a fixed duration
+- [Concepts — temporal prerequisites](/docs/concepts/temporal-prereqs) —
   durable timers explained

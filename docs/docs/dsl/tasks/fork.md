@@ -12,8 +12,8 @@ of the fastest branch and want to cancel the rest.
 
 | Name | Type | Required | Description |
 | --- | :---: | :---: | --- |
-| fork.branches | [`map[string, task]`](./intro) | `no` | The tasks to perform concurrently. These will be run as [child workflows](https://docs.temporal.io/child-workflows). |
-| fork.compete | `boolean` | `no` | Indicates whether or not the concurrent [`tasks`](./intro) are racing against each other, with a single possible winner, which sets the composite task's output.<br />*If set to `false`, the task returns an array that includes the outputs from each branch, preserving the order in which the branches are declared.*<br />*If to `true`, the task returns only the output of the winning branch.*<br />*Defaults to `false`.* |
+| fork.branches | [`map[string, task]`](/docs/dsl/tasks/intro) | `no` | The tasks to perform concurrently. These will be run as [child workflows](https://docs.temporal.io/child-workflows). |
+| fork.compete | `boolean` | `no` | Indicates whether or not the concurrent [`tasks`](/docs/dsl/tasks/intro) are racing against each other, with a single possible winner, which sets the composite task's output.<br />*If set to `false`, the task returns an array that includes the outputs from each branch, preserving the order in which the branches are declared.*<br />*If to `true`, the task returns only the output of the winning branch.*<br />*Defaults to `false`.* |
 
 ## Example
 
@@ -111,10 +111,10 @@ wrapping the branch.
 
 ## Related pages
 
-- [Do](./do) — sequential execution
-- [For](./for) — iteration over collections
-- [Try](./try) — error handling within a branch
-- [Concepts — how Zigflow runs](../../concepts/how-zigflow-runs)
+- [Do](/docs/dsl/tasks/do) — sequential execution
+- [For](/docs/dsl/tasks/for) — iteration over collections
+- [Try](/docs/dsl/tasks/try) — error handling within a branch
+- [Concepts — how Zigflow runs](/docs/concepts/how-zigflow-runs)
   — child workflows and execution model
-- [Examples — parallel tasks](../../examples/parallel-tasks)
+- [Examples — parallel tasks](/docs/examples/parallel-tasks)
   — competing and non-competing fork in action

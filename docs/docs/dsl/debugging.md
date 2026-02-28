@@ -354,7 +354,7 @@ Check your logs for lines containing `NonDeterministicWorkflowError`. The fix
 is to move any generated value into a `set` task, which wraps the generation
 in a Temporal side-effect.
 
-See [Data and expressions](../concepts/data-and-expressions) for guidance.
+See [Data and expressions](/docs/concepts/data-and-expressions) for guidance.
 
 ### HTTP activity returns an error
 
@@ -363,7 +363,7 @@ status. The error is visible in the workflow history and in task-faulted
 CloudEvents.
 
 To recover without failing the whole workflow, wrap the call in a
-[`try` task](./tasks/try).
+[`try` task](/docs/dsl/tasks/try).
 
 ### Listen task times out
 

@@ -199,8 +199,9 @@ zigflow run -f workflow.yaml --log-level debug
 
 ## Next steps
 
-- [Concepts — Overview](../concepts/overview) — the mental model behind Zigflow
-- [Your first workflow](your-first-workflow) — triggering from application code
-- [Examples](../examples/) — more patterns with step-by-step walkthroughs
-- [DSL reference](../dsl/intro) — full workflow YAML reference
-- [CLI reference](../cli/commands/zigflow_run) — all `run` flags
+- [Concepts — Overview](/docs/concepts/overview) — the mental model behind Zigflow
+- [Your first workflow](/docs/getting-started/your-first-workflow) — triggering
+  from application code
+- [Examples](/docs/examples/) — more patterns with step-by-step walkthroughs
+- [DSL reference](/docs/dsl/intro) — full workflow YAML reference
+- [CLI reference](/docs/cli/commands/zigflow_run) — all `run` flags

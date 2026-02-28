@@ -13,7 +13,8 @@ A Temporal workflow **MUST** be [deterministic](https://docs.temporal.io/workflo
 
 You are strongly advised to use the Set task when setting data, especially generated
 data (such as `${ uuid }`), rather than invoking it in a task. For example, the
-following [CallHTTP](./call#http) task would return a Non-Determinism Error (NDE)
+following [CallHTTP](/docs/dsl/tasks/call#http) task would return a
+Non-Determinism Error (NDE)
 if it was replayed:
 
 ```yaml
@@ -120,9 +121,9 @@ with the same key overwrites the value; all other keys remain.
 
 ## Related pages
 
-- [Concepts — data and expressions](../../concepts/data-and-expressions) —
+- [Concepts — data and expressions](/docs/concepts/data-and-expressions) —
   expression syntax and variable reference
-- [Concepts — how Zigflow runs](../../concepts/how-zigflow-runs) —
+- [Concepts — how Zigflow runs](/docs/concepts/how-zigflow-runs) —
   determinism and replay
-- [Examples — hello world](../../examples/hello-world)
+- [Examples — hello world](/docs/examples/hello-world)
   — set task in action

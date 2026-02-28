@@ -35,7 +35,7 @@ using containerised applications, scripts, or commands.
 | Name | Type | Required | Description |
 | --- | :---: | :---: | --- |
 | image | `string` | `yes` | The name of the container image to run |
-| name | `string` | `no` | A [runtime expression](./intro.md#runtime-expressions), if any, used to give specific name to the container. Uses a UUID if not set. |
+| name | `string` | `no` | A [runtime expression](/docs/dsl/tasks/intro#runtime-expressions), if any, used to give specific name to the container. Uses a UUID if not set. |
 | command | `string` | `no` | The command, if any, to execute on the container |
 | ports | `map` | `no` | The container's port mappings, if any |
 | volumes | `map` | `no` | The container's volume mappings, if any |
@@ -264,7 +264,7 @@ workflow is looked up by `name` on the same task queue.
 
 ## Related pages
 
-- [Do](./do) — sequential subtask composition
-- [Fork](./fork) — parallel child execution
-- [Concepts — how Zigflow runs](../../concepts/how-zigflow-runs) — worker and
+- [Do](/docs/dsl/tasks/do) — sequential subtask composition
+- [Fork](/docs/dsl/tasks/fork) — parallel child execution
+- [Concepts — how Zigflow runs](/docs/concepts/how-zigflow-runs) — worker and
   activity model

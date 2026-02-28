@@ -10,16 +10,16 @@ A curated set of examples that demonstrate common Zigflow patterns.
 
 | Example | Description | Key concepts |
 | --- | --- | --- |
-| [Hello World](./hello-world) | Minimal single-task workflow | `set`, `output.as` |
-| [HTTP Call](./http-call) | External HTTP request | `call: http`, retries |
+| [Hello World](/docs/examples/hello-world) | Minimal single-task workflow | `set`, `output.as` |
+| [HTTP Call](/docs/examples/http-call) | External HTTP request | `call: http`, retries |
 
 ## Intermediate
 
 | Example | Description | Key concepts |
 | --- | --- | --- |
-| [Error Handling](./error-handling) | Catch errors and recover | `try`, `catch`, `raise` |
-| [Parallel Tasks](./parallel-tasks) | Run branches concurrently | `fork`, `compete` |
-| [Signal-Driven Workflow](./signal-driven) | Pause for an external signal | `listen`, `signal` |
+| [Error Handling](/docs/examples/error-handling) | Catch errors and recover | `try`, `catch`, `raise` |
+| [Parallel Tasks](/docs/examples/parallel-tasks) | Run branches concurrently | `fork`, `compete` |
+| [Signal-Driven Workflow](/docs/examples/signal-driven) | Pause for an external signal | `listen`, `signal` |
 
 ---
 
@@ -42,6 +42,6 @@ in the repository contains additional patterns:
 
 ## Related pages
 
-- [Quickstart](../getting-started/quickstart) — your first workflow
-- [DSL reference](../dsl/intro) — full workflow YAML reference
-- [Concepts — overview](../concepts/overview) — mental model
+- [Quickstart](/docs/getting-started/quickstart) — your first workflow
+- [DSL reference](/docs/dsl/intro) — full workflow YAML reference
+- [Concepts — overview](/docs/concepts/overview) — mental model

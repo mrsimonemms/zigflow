@@ -33,17 +33,17 @@ In Temporal, a task may add logic to:
 
 | Name | Description |
 | :--- | :--- |
-| [Call](./call) | Enables the execution of a specified function within a workflow, allowing seamless integration with custom business logic or external services. |
-| [Do](./do) | Serves as a fundamental building block within workflows, enabling the sequential execution of multiple subtasks. By defining a series of subtasks to perform in sequence, the Do task facilitates the efficient execution of complex operations, ensuring that each subtask is completed before the next one begins. |
-| [For](./for) | Allows workflows to iterate over a collection of items, executing a defined set of subtasks for each item in the collection. This task type is instrumental in handling scenarios such as batch processing, data transformation, and repetitive operations across datasets. |
-| [Fork](./fork) | Allows workflows to execute multiple subtasks concurrently, enabling parallel processing and improving the overall efficiency of the workflow. By defining a set of subtasks to perform concurrently, the Fork task facilitates the execution of complex operations in parallel, ensuring that multiple tasks can be executed simultaneously. |
-| [Listen](./listen) | Provides a mechanism for workflows to await and react to external events, enabling event-driven behavior within workflow systems. |
-| [Raise](./raise) | Intentionally triggers and propagates errors. By employing the "Raise" task, workflows can deliberately generate error conditions, allowing for explicit error handling and fault management strategies to be implemented. |
-| [Run](./run) | Provides the capability to execute external containers, shell commands, scripts, or workflows. |
-| [Set](./set) | A task used to set data. |
-| [Switch](./switch) | Enables conditional branching within workflows, allowing them to dynamically select different paths based on specified conditions or criteria |
-| [Try](./try) | Serves as a mechanism within workflows to handle errors gracefully, potentially retrying failed tasks before proceeding with alternate ones. |
-| [Wait](./wait) | Allows workflows to pause or delay their execution for a specified period of time. |
+| [Call](/docs/dsl/tasks/call) | Enables the execution of a specified function within a workflow, allowing seamless integration with custom business logic or external services. |
+| [Do](/docs/dsl/tasks/do) | Serves as a fundamental building block within workflows, enabling the sequential execution of multiple subtasks. By defining a series of subtasks to perform in sequence, the Do task facilitates the efficient execution of complex operations, ensuring that each subtask is completed before the next one begins. |
+| [For](/docs/dsl/tasks/for) | Allows workflows to iterate over a collection of items, executing a defined set of subtasks for each item in the collection. This task type is instrumental in handling scenarios such as batch processing, data transformation, and repetitive operations across datasets. |
+| [Fork](/docs/dsl/tasks/fork) | Allows workflows to execute multiple subtasks concurrently, enabling parallel processing and improving the overall efficiency of the workflow. By defining a set of subtasks to perform concurrently, the Fork task facilitates the execution of complex operations in parallel, ensuring that multiple tasks can be executed simultaneously. |
+| [Listen](/docs/dsl/tasks/listen) | Provides a mechanism for workflows to await and react to external events, enabling event-driven behavior within workflow systems. |
+| [Raise](/docs/dsl/tasks/raise) | Intentionally triggers and propagates errors. By employing the "Raise" task, workflows can deliberately generate error conditions, allowing for explicit error handling and fault management strategies to be implemented. |
+| [Run](/docs/dsl/tasks/run) | Provides the capability to execute external containers, shell commands, scripts, or workflows. |
+| [Set](/docs/dsl/tasks/set) | A task used to set data. |
+| [Switch](/docs/dsl/tasks/switch) | Enables conditional branching within workflows, allowing them to dynamically select different paths based on specified conditions or criteria |
+| [Try](/docs/dsl/tasks/try) | Serves as a mechanism within workflows to handle errors gracefully, potentially retrying failed tasks before proceeding with alternate ones. |
+| [Wait](/docs/dsl/tasks/wait) | Allows workflows to pause or delay their execution for a specified period of time. |
 
 ## Runtime Expressions
 
@@ -65,11 +65,11 @@ Variables able to be referenced within runtime expressions.
 
 | Name | Description | Example |
 | :--- | :--- | :--- |
-| `$context` | Anything set to the output in previous steps. Typically used within [output](../intro#output) and [export](../intro#export) | `${ $context }` |
+| `$context` | Anything set to the output in previous steps. Typically used within [output](/docs/dsl/intro#output) and [export](/docs/dsl/intro#export) | `${ $context }` |
 | `$data` | Data set to the workflow's state - see [data](#data) | `${ $data.someData }` |
-| `$env` | Any environment variable prefixed with `ZIGGY_`. The prefix is _NOT_ used in this object. This can be set with the [`--env-prefix` flag](../../cli/commands/zigflow#options) | `${ $env.EXAMPLE_ENVVAR }` |
+| `$env` | Any environment variable prefixed with `ZIGGY_`. The prefix is _NOT_ used in this object. This can be set with the [`--env-prefix` flag](/docs/cli/commands/zigflow#options) | `${ $env.EXAMPLE_ENVVAR }` |
 | `$input` | Any input received when the workflow was triggered | `${ $input.val1 }` |
-| `$output` | Any output exported from a task - see [output](../intro#output) | `${ $output }` |
+| `$output` | Any output exported from a task - see [output](/docs/dsl/intro#output) | `${ $output }` |
 
 ### Functions
 

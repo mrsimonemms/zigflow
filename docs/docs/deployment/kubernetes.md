@@ -214,6 +214,6 @@ upgrade`, the pod must be restarted to pick up the new workflow.
 
 ## Related pages
 
-- [Deploying overview](intro) — connection flags and telemetry
-- [Docker](docker) — Docker and Docker Compose
-- [Observability](observability) — health, metrics and CloudEvents
+- [Deploying overview](/docs/deployment/intro) — connection flags and telemetry
+- [Docker](/docs/deployment/docker) — Docker and Docker Compose
+- [Observability](/docs/deployment/observability) — health, metrics and CloudEvents

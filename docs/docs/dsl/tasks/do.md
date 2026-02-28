@@ -22,7 +22,7 @@ sequence of steps within those tasks.
 
 | Name | Type | Required | Description |
 | --- | :---: | :---: | --- |
-| do | [`map[string, task]`](./intro) | `no` | The tasks to perform sequentially. |
+| do | [`map[string, task]`](/docs/dsl/tasks/intro) | `no` | The tasks to perform sequentially. |
 
 ## Examples
 
@@ -64,8 +64,8 @@ do:
 
 This workflow is very basic, but explain the steps in details:
 1. **setData**: this sets some data, which is randomly generated UUID key. This
-   is available on `${ $data.key }`. See [Set](./set) for a detailed explanation
-   of why generated data should be used sparingly.
+   is available on `${ $data.key }`. See [Set](/docs/dsl/tasks/set) for a
+   detailed explanation of why generated data should be used sparingly.
 2. **wait**: pause the workflow, using a [Durable Timer](https://docs.temporal.io/workflow-execution/timers-delays)
 3. **getUser**: call an HTTP endpoint, using the previously generated UUID as a
    header.
@@ -124,7 +124,7 @@ names cause a validation error.
 
 ## Related pages
 
-- [Fork](./fork) — run tasks in parallel rather than in sequence
-- [Try](./try) — error handling within a sequence
-- [Concepts — how Zigflow runs](../../concepts/how-zigflow-runs) — execution
+- [Fork](/docs/dsl/tasks/fork) — run tasks in parallel rather than in sequence
+- [Try](/docs/dsl/tasks/try) — error handling within a sequence
+- [Concepts — how Zigflow runs](/docs/concepts/how-zigflow-runs) — execution
   model

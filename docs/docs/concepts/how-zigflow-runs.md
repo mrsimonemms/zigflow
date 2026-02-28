@@ -119,7 +119,7 @@ These ports can be changed with `--health-listen-address` and
 
 :::tip
 For runtime expression syntax and built-in variable reference, see
-[Data and expressions](data-and-expressions).
+[Data and expressions](/docs/concepts/data-and-expressions).
 :::
 
 Temporal replays workflows by replaying their event history. This means every
@@ -156,7 +156,7 @@ starts have no effect until the worker is restarted.
 
 ## Related pages
 
-- [Overview](overview) — mental model summary
-- [Temporal prerequisites](temporal-prereqs) — core Temporal concepts
-- [Set task](../dsl/tasks/set) — deterministic data generation
-- [zigflow run](../cli/commands/zigflow_run) — full CLI reference
+- [Overview](/docs/concepts/overview) — mental model summary
+- [Temporal prerequisites](/docs/concepts/temporal-prereqs) — core Temporal concepts
+- [Set task](/docs/dsl/tasks/set) — deterministic data generation
+- [zigflow run](/docs/cli/commands/zigflow_run) — full CLI reference

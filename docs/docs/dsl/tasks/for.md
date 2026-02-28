@@ -13,10 +13,10 @@ integer count.
 | Name | Type | Required | Description |
 | --- | :---: | :---: | --- |
 | for.each | `string` | `no` | The name of the variable used to store the current item being enumerated.<br />Defaults to `item`. |
-| for.in | `string` | `yes` | A [runtime expression](intro#runtime-expressions) used to get the collection to enumerate. |
+| for.in | `string` | `yes` | A [runtime expression](/docs/dsl/tasks/intro#runtime-expressions) used to get the collection to enumerate. |
 | for.at | `string` | `no` | The name of the variable used to store the index of the current item being enumerated.<br />Defaults to `index`. |
-| while | `string` | `no` | A [runtime expression](intro#runtime-expressions) that represents the condition, if any, that must be met for the iteration to continue.<br />The result of each iteration is stored in `$data.<taskName>`, allowing the while expression to conditionally stop the loop. |
-| do | [`map[string, task]`](intro) | `yes` | The [task(s)](intro) to perform for each item in the collection. These will be run as a [child workflow](https://docs.temporal.io/child-workflows) |
+| while | `string` | `no` | A [runtime expression](/docs/dsl/tasks/intro#runtime-expressions) that represents the condition, if any, that must be met for the iteration to continue.<br />The result of each iteration is stored in `$data.<taskName>`, allowing the while expression to conditionally stop the loop. |
+| do | [`map[string, task]`](/docs/dsl/tasks/intro) | `yes` | The [task(s)](/docs/dsl/tasks/intro) to perform for each item in the collection. These will be run as a [child workflow](https://docs.temporal.io/child-workflows) |
 
 ## Example
 
@@ -99,10 +99,10 @@ expression can access this key to implement early termination.
 
 ## Related pages
 
-- [Fork](./fork) — parallel execution of multiple branches
-- [Do](./do) — sequential subtasks
-- [Set](./set) — storing iteration data
-- [Concepts — data and expressions](../../concepts/data-and-expressions)
+- [Fork](/docs/dsl/tasks/fork) — parallel execution of multiple branches
+- [Do](/docs/dsl/tasks/do) — sequential subtasks
+- [Set](/docs/dsl/tasks/set) — storing iteration data
+- [Concepts — data and expressions](/docs/concepts/data-and-expressions)
   — runtime expressions and `$data` variables
-- [Examples — parallel tasks](../../examples/parallel-tasks)
+- [Examples — parallel tasks](/docs/examples/parallel-tasks)
   — running branches concurrently

@@ -19,7 +19,7 @@ value of workflow state or input data.
 | Name | Type | Required | Description |
 | --- | :---: | :---: | --- |
 | when | `string` | `no` | A runtime expression that evaluates to a boolean. If the expression is truthy, this case matches.<br />*If not set, this case is the default and matches when no other case matches.*<br />*Only one default case is allowed.* |
-| then | [`flowDirective`](./intro#flow-directive) | `yes` | The flow directive to execute when the case matches. |
+| then | [`flowDirective`](/docs/dsl/tasks/intro#flow-directive) | `yes` | The flow directive to execute when the case matches. |
 
 ## How it works
 
@@ -88,7 +88,7 @@ When triggered with `{ "orderType": "electronic" }`, the workflow runs
 
 ## Using flow directives
 
-The `then` property accepts any [flow directive](./intro#flow-directive):
+The `then` property accepts any [flow directive](/docs/dsl/tasks/intro#flow-directive):
 
 ```yaml
 - classify:
@@ -117,8 +117,8 @@ in the same `do` list. Referencing a non-existent task fails at validation.
 
 ## Related tasks
 
-- [Do](./do) — sequential subtasks, commonly used as branch targets
-- [Raise](./raise) — raise an explicit error in a branch
-- [For](./for) — iteration over collections
-- [Concepts — data and expressions](../../concepts/data-and-expressions)
+- [Do](/docs/dsl/tasks/do) — sequential subtasks, commonly used as branch targets
+- [Raise](/docs/dsl/tasks/raise) — raise an explicit error in a branch
+- [For](/docs/dsl/tasks/for) — iteration over collections
+- [Concepts — data and expressions](/docs/concepts/data-and-expressions)
   — runtime expression syntax

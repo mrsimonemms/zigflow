@@ -113,6 +113,6 @@ workflows that need to wait longer.
 
 ## Related pages
 
-- [Listen](../dsl/tasks/listen) — full listen reference
-- [Concepts — Temporal prerequisites](../concepts/temporal-prereqs)
+- [Listen](/docs/dsl/tasks/listen) — full listen reference
+- [Concepts — Temporal prerequisites](/docs/concepts/temporal-prereqs)
   — signals, queries and updates explained

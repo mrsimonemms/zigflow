@@ -13,7 +13,7 @@ calls and handling external service errors.
 
 | Name | Type | Required | Description |
 | --- | :---: | :---: | --- |
-| try | [`map[string, task]`](./intro) | `yes` | The task(s) to perform. This will be run as a [child workflow](https://docs.temporal.io/child-workflows). |
+| try | [`map[string, task]`](/docs/dsl/tasks/intro) | `yes` | The task(s) to perform. This will be run as a [child workflow](https://docs.temporal.io/child-workflows). |
 | catch | [`catch`](#catch) | `yes` | Configures the errors to catch and how to handle them. |
 
 ## Example
@@ -69,7 +69,7 @@ errors.
 
 | Name | Type | Required | Description |
 | --- | :---: | :---: | --- |
-| do | [`map[string, task]`](./intro) | `yes` | The definition of the task(s) to run when catching an error. This will be run as a [child workflow](https://docs.temporal.io/child-workflows). |
+| do | [`map[string, task]`](/docs/dsl/tasks/intro) | `yes` | The definition of the task(s) to run when catching an error. This will be run as a [child workflow](https://docs.temporal.io/child-workflows). |
 
 ## Gotchas
 
@@ -83,9 +83,9 @@ tasks still applies before the `catch` block runs.
 
 ## Related pages
 
-- [Raise](./raise) — raising explicit errors
-- [Call](./call) — HTTP and activity calls that may fail
-- [Concepts — error handling and retries](../../concepts/error-handling-and-retries)
+- [Raise](/docs/dsl/tasks/raise) — raising explicit errors
+- [Call](/docs/dsl/tasks/call) — HTTP and activity calls that may fail
+- [Concepts — error handling and retries](/docs/concepts/error-handling-and-retries)
   — error model overview
-- [Examples — error handling](../../examples/error-handling)
+- [Examples — error handling](/docs/examples/error-handling)
   — try/catch walkthrough

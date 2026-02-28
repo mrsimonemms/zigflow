@@ -117,7 +117,7 @@ only runs after all retries are exhausted.
 
 ## Related pages
 
-- [Try](../dsl/tasks/try) — `try`/`catch` reference
-- [Raise](../dsl/tasks/raise) — raising explicit errors
-- [Concepts — error handling](../concepts/error-handling-and-retries)
+- [Try](/docs/dsl/tasks/try) — `try`/`catch` reference
+- [Raise](/docs/dsl/tasks/raise) — raising explicit errors
+- [Concepts — error handling](/docs/concepts/error-handling-and-retries)
   — retry policy and error model

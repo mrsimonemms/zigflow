@@ -42,7 +42,7 @@ zigflow run -f workflow.yaml
 ```
 
 Pass any flag or set the equivalent environment variable. See
-[Deploying overview](intro#connecting-to-temporal) for the full
+[Deploying overview](/docs/deployment/intro#connecting-to-temporal) for the full
 connection flag reference.
 
 ---
@@ -180,6 +180,6 @@ Verify the volume mount path matches the path passed to `-f`.
 
 ## Related pages
 
-- [Deploying overview](intro) — connection flags and telemetry
-- [Kubernetes](kubernetes) — Helm chart deployment
-- [Observability](observability) — health and metrics
+- [Deploying overview](/docs/deployment/intro) — connection flags and telemetry
+- [Kubernetes](/docs/deployment/kubernetes) — Helm chart deployment
+- [Observability](/docs/deployment/observability) — health and metrics

@@ -34,9 +34,9 @@ Your infrastructure requirements are:
 
 | Method | When to use |
 | --- | --- |
-| [Binary](docker#running-the-binary) | Direct binary, VMs, simple scripts |
-| [Docker](docker) | Containerised environments, Docker Compose |
-| [Kubernetes / Helm](kubernetes) | Production Kubernetes clusters |
+| [Binary](/docs/deployment/docker#running-the-binary) | Direct binary, VMs, simple scripts |
+| [Docker](/docs/deployment/docker) | Containerised environments, Docker Compose |
+| [Kubernetes / Helm](/docs/deployment/kubernetes) | Production Kubernetes clusters |
 
 ---
 
@@ -138,6 +138,6 @@ zigflow run -f workflow.yaml --disable-telemetry
 
 ## Next steps
 
-- [Docker](docker) — running Zigflow in a container
-- [Kubernetes](kubernetes) — deploying with the official Helm chart
-- [Observability](observability) — health checks, metrics and CloudEvents
+- [Docker](/docs/deployment/docker) — running Zigflow in a container
+- [Kubernetes](/docs/deployment/kubernetes) — deploying with the official Helm chart
+- [Observability](/docs/deployment/observability) — health checks, metrics and CloudEvents

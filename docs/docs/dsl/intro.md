@@ -24,10 +24,11 @@ These will be documented.
 
 ## Workflow
 
-A [workflow](#workflow) serves as a blueprint outlining the series of [tasks](./tasks/intro)
+A [workflow](#workflow) serves as a blueprint outlining the series of [tasks](/docs/dsl/tasks/intro)
 required to execute a specific business operation. It details the sequence in
-which [tasks](./tasks/intro) must be completed, guiding users through the process
-from start to finish, and helps streamline operations, ensure consistency, and
+which [tasks](/docs/dsl/tasks/intro) must be completed, guiding users through
+the process from start to finish, and helps streamline operations, ensure
+consistency, and
 optimise efficiency within an organisation.
 
 ### Properties {#workflow-properties}
@@ -35,7 +36,7 @@ optimise efficiency within an organisation.
 | Name | Type | Required | Description |
 | --- | :---: | :---: | --- |
 | document | [`document`](#document) | `yes` | Documents the defined workflow. |
-| do | [`map[string, task]`](./tasks/intro) | `yes` | The [task(s)](./tasks/intro) that must be performed by the [workflow](#workflow). |
+| do | [`map[string, task]`](/docs/dsl/tasks/intro) | `yes` | The [task(s)](/docs/dsl/tasks/intro) that must be performed by the [workflow](#workflow). |
 | input | [`input`](#input) | `no` | Configures the workflow's input. |
 | timeout | [`timeout`](#timeout) | `no` | The configuration of the workflow's activity [Start-To-Close timeout](https://docs.temporal.io/encyclopedia/detecting-activity-failures#start-to-close-timeout). Defaults to 5 minutes |
 | schedule | [`schedule`](#schedule) | `no` | Configures the workflow's schedule, if any. |
@@ -48,7 +49,7 @@ Documents the workflow definition.
 | --- | :---: | :---: | --- |
 | dsl | `string` | `yes` | The version of the DSL used to define the workflow. |
 | namespace | `string` | `yes` | The Temporal [Task Queue](https://docs.temporal.io/task-queue).<br /><br />**IMPORTANT**: this does **not** map to the [Temporal namespace](https://docs.temporal.io/namespaces), which is part of the connection information set at runtime. |
-| name | `string` | `yes` | The Temporal workflow's name. This will be ignored if multiple [`do`](./tasks/do) are set and the workflow names will be taken from the step name |
+| name | `string` | `yes` | The Temporal workflow's name. This will be ignored if multiple [`do`](/docs/dsl/tasks/do) are set and the workflow names will be taken from the step name |
 | version | `string` | `yes` | The workflow's [semantic version](https://semver.org/) |
 | title | `string` | `no` | The workflow's title. |
 | summary | `string` | `no` | The workflow's Markdown summary. |
@@ -112,7 +113,7 @@ applying transformations, unless defined otherwise.
 | Property | Type | Required | Description |
 | --- | :---: | :---: | --- |
 | schema | [`schema`](#schema) | `no` | The [`schema`](#schema) used to describe and validate raw input data.<br />*Even though the schema is not required, it is strongly encouraged to document it, whenever feasible.* |
-| as | `string`<br />`object` | `no` | A [runtime expression](./tasks/intro#runtime-expressions), if any, used to filter and/or mutate the workflow/task output. |
+| as | `string`<br />`object` | `no` | A [runtime expression](/docs/dsl/tasks/intro#runtime-expressions), if any, used to filter and/or mutate the workflow/task output. |
 
 ### Examples {#output-examples}
 

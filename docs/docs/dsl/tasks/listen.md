@@ -219,10 +219,10 @@ its payload is accessible via the task name key, not `$output`.
 
 ## Related pages
 
-* [Concepts — glossary](../../concepts/glossary) — signals, queries and updates
+* [Concepts — glossary](/docs/concepts/glossary) — signals, queries and updates
   defined
-* [Concepts — Temporal prerequisites](../../concepts/temporal-prereqs) —
+* [Concepts — Temporal prerequisites](/docs/concepts/temporal-prereqs) —
   Temporal messaging concepts
-* [Debugging workflows](../debugging) — observing events via CloudEvents
-* [Examples — signal-driven workflow](../../examples/signal-driven)
+* [Debugging workflows](/docs/dsl/debugging) — observing events via CloudEvents
+* [Examples — signal-driven workflow](/docs/examples/signal-driven)
   — full walkthrough

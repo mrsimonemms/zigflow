@@ -162,6 +162,7 @@ the task queue.
 
 ## Related pages
 
-- [Overview](overview) — Zigflow in one page
-- [How Zigflow runs](how-zigflow-runs) — what happens when you run a workflow
-- [Listen task](../dsl/tasks/listen) — signals, queries and updates in Zigflow
+- [Overview](/docs/concepts/overview) — Zigflow in one page
+- [How Zigflow runs](/docs/concepts/how-zigflow-runs) — what happens when you
+  run a workflow
+- [Listen task](/docs/dsl/tasks/listen) — signals, queries and updates in Zigflow

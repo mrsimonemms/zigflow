@@ -22,7 +22,7 @@ can be detected sooner, allowing the Workflow to retry or recover more quickly.
 Typically, you should only use a heartbeat for activities that last longer
 than a minute. Remember to set your timeout for a time longer than your heartbeat.
 
-Remember to set the [heartbeatTimeout](activity-options/#types-activity-options)
+Remember to set the [heartbeatTimeout](/docs/dsl/metadata/activity-options/#types-activity-options)
 in the Activity Options. If this is not set, heartbeats will be sent, but the
 activity will not timeout.
 
@@ -34,4 +34,4 @@ activity will not timeout.
 
 | Name | Type | Required | Description |
 | --- | :---: | :---: | --- |
-| `heartbeat` | [`duration`](../intro/#duration) | `no` | Heartbeats will be triggered after this time period. |
+| `heartbeat` | [`duration`](/docs/dsl/intro/#duration) | `no` | Heartbeats will be triggered after this time period. |

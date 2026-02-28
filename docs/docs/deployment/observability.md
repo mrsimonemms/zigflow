@@ -80,7 +80,7 @@ podAnnotations:
 
 :::tip
 For full configuration options, event structure, file output examples
-and debugging guidance, see [Debugging workflows](../dsl/debugging).
+and debugging guidance, see [Debugging workflows](/docs/dsl/debugging).
 :::
 
 Zigflow can emit [CloudEvents v1.0](https://cloudevents.io) at key points
@@ -160,7 +160,7 @@ Logs are structured JSON, written to stderr.
 
 ## Related pages
 
-- [Deploying overview](intro) — runtime ports and configuration
-- [Docker](docker) — Docker and Compose configuration
-- [Kubernetes](kubernetes) — Helm chart deployment
-- [Debugging workflows](../dsl/debugging) — CloudEvents in detail
+- [Deploying overview](/docs/deployment/intro) — runtime ports and configuration
+- [Docker](/docs/deployment/docker) — Docker and Compose configuration
+- [Kubernetes](/docs/deployment/kubernetes) — Helm chart deployment
+- [Debugging workflows](/docs/dsl/debugging) — CloudEvents in detail

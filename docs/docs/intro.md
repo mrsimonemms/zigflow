@@ -97,8 +97,8 @@ You should see the workflow result:
 }
 ```
 
-Your first workflow is running. See the [Quickstart](./getting-started/quickstart)
+Your first workflow is running. See the [Quickstart](/docs/getting-started/quickstart)
 for a full walkthrough with validation and troubleshooting.
 
 If Zigflow is valuable to you, consider
-[supporting its development](./support).
+[supporting its development](/docs/support).

@@ -94,6 +94,6 @@ The `--type` value must match `document.name` in the YAML file.
 
 ## Related pages
 
-- [Set](../dsl/tasks/set) — the task used here
-- [Quickstart](../getting-started/quickstart) — guided walkthrough
-- [HTTP Call](./http-call) — next example
+- [Set](/docs/dsl/tasks/set) — the task used here
+- [Quickstart](/docs/getting-started/quickstart) — guided walkthrough
+- [HTTP Call](/docs/examples/http-call) — next example

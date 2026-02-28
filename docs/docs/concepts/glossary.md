@@ -43,7 +43,7 @@ Zigflow's DSL is based on the [CNCF Serverless Workflow v1.0 specification](http
 ## Durable timer
 
 A timer that survives worker restarts. When the timer fires, the workflow
-resumes. Implemented in Zigflow via the [`wait`](../dsl/tasks/wait) task.
+resumes. Implemented in Zigflow via the [`wait`](/docs/dsl/tasks/wait) task.
 
 ---
 
@@ -56,7 +56,7 @@ A value that controls workflow execution flow. Valid values:
 - `"end"` — end the workflow
 - A task name — jump to that named task
 
-Used in the [`switch`](../dsl/tasks/switch) task.
+Used in the [`switch`](/docs/dsl/tasks/switch) task.
 
 ---
 
@@ -82,7 +82,7 @@ Do not confuse with `document.namespace`.
 A read-only operation on a running workflow. The caller receives an
 immediate response. Queries cannot modify workflow state.
 
-In Zigflow, handled by the [`listen`](../dsl/tasks/listen) task with
+In Zigflow, handled by the [`listen`](/docs/dsl/tasks/listen) task with
 `type: query`.
 
 ---
@@ -92,7 +92,7 @@ In Zigflow, handled by the [`listen`](../dsl/tasks/listen) task with
 An expression inside `${ }` that is evaluated at execution time. Uses jq
 syntax.
 
-See [Data and expressions](data-and-expressions).
+See [Data and expressions](/docs/concepts/data-and-expressions).
 
 ---
 
@@ -101,7 +101,7 @@ See [Data and expressions](data-and-expressions).
 A one-way message sent to a running workflow. The sender receives no
 response. The workflow can react to the signal.
 
-In Zigflow, handled by the [`listen`](../dsl/tasks/listen) task with
+In Zigflow, handled by the [`listen`](/docs/dsl/tasks/listen) task with
 `type: signal`.
 
 ---
@@ -120,7 +120,7 @@ In Zigflow, `document.namespace` sets the task queue name.
 A durable execution platform. Persists workflow state, handles retries and
 coordinates workers. Zigflow requires a running Temporal server.
 
-See [Temporal prerequisites](temporal-prereqs).
+See [Temporal prerequisites](/docs/concepts/temporal-prereqs).
 
 ---
 
@@ -129,7 +129,7 @@ See [Temporal prerequisites](temporal-prereqs).
 A validated read/write operation on a running workflow. Unlike a signal,
 the caller receives a response. Unlike a query, an update can modify state.
 
-In Zigflow, handled by the [`listen`](../dsl/tasks/listen) task with
+In Zigflow, handled by the [`listen`](/docs/dsl/tasks/listen) task with
 `type: update`.
 
 ---
@@ -150,6 +150,7 @@ The name Temporal uses to identify a workflow. In Zigflow, this is
 
 ## Related pages
 
-- [Overview](overview) — mental model
-- [Temporal prerequisites](temporal-prereqs) — Temporal concepts in detail
-- [DSL reference](../dsl/intro) — full YAML specification
+- [Overview](/docs/concepts/overview) — mental model
+- [Temporal prerequisites](/docs/concepts/temporal-prereqs) — Temporal
+  concepts in detail
+- [DSL reference](/docs/dsl/intro) — full YAML specification
