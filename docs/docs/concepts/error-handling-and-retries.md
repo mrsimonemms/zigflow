@@ -170,7 +170,7 @@ this via `metadata.activityOptions.startToCloseTimeout`.
 
 ## Related pages
 
-- [Try task](/docs/dsl/tasks/try) — full reference
-- [Raise task](/docs/dsl/tasks/raise) — full reference
-- [Activity options](/docs/dsl/metadata/activity-options) — retry policy reference
-- [How Zigflow runs](/docs/concepts/how-zigflow-runs) — execution model
+- [Try task](/docs/dsl/tasks/try): full reference
+- [Raise task](/docs/dsl/tasks/raise): full reference
+- [Activity options](/docs/dsl/metadata/activity-options): retry policy reference
+- [How Zigflow runs](/docs/concepts/how-zigflow-runs): execution model

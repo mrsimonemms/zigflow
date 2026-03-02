@@ -57,14 +57,14 @@ baked in at build time rather than mounted at runtime.
 
 **You must provide:**
 
-- A running Temporal server — either
+- A running Temporal server, either
   [Temporal Cloud](https://temporal.io/cloud) or self-hosted
 - Your workflow definition files
 
 **Not included:**
 
 - Container registry, ingress or other cluster infrastructure
-- A Temporal server — Zigflow is a worker, not a server
+- A Temporal server. Zigflow is a worker, not a server.
 
 ---
 
@@ -74,7 +74,7 @@ A running Zigflow worker exposes two ports:
 
 | Port | Default | Purpose |
 | --- | --- | --- |
-| Health | `3000` | HTTP `/health` — liveness and readiness |
+| Health | `3000` | HTTP `/health`: liveness and readiness |
 | Metrics | `9090` | Prometheus metrics |
 
 Override with `--health-listen-address` and `--metrics-listen-address`.
@@ -165,7 +165,7 @@ zigflow run -f workflow.yaml --disable-telemetry
 
 ## Next steps
 
-- [Docker](/docs/deployment/docker) — running Zigflow in a container
-- [Kubernetes](/docs/deployment/kubernetes) — deploying with the official Helm chart
-- [Dedicated image](/docs/deployment/dedicated-image) — workflow at build time
-- [Observability](/docs/deployment/observability) — health checks, metrics and CloudEvents
+- [Docker](/docs/deployment/docker): running Zigflow in a container
+- [Kubernetes](/docs/deployment/kubernetes): deploying with the official Helm chart
+- [Dedicated image](/docs/deployment/dedicated-image): workflow at build time
+- [Observability](/docs/deployment/observability): health checks, metrics and CloudEvents

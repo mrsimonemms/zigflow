@@ -15,7 +15,7 @@ Claude should treat Zigflow as **infrastructure**, not an application UI.
 
 ## Naming convention
 
-The project name is **Zigflow** — capitalised as shown, with a lowercase 'f'.
+The project name is **Zigflow**, capitalised as shown, with a lowercase 'f'.
 
 Do not write:
 - `ZigFlow` (incorrect capitalisation)
@@ -176,6 +176,16 @@ Docs should explain:
 - What Zigflow does
 - What Zigflow explicitly does not do
 - How it maps to Temporal concepts
+
+---
+
+## Writing Style Rules
+
+- Do not use em dashes (—).
+- Use full stops, commas or sentence restructuring instead.
+- Prefer clear, direct sentences over stylistic punctuation.
+- Avoid dramatic or marketing-style prose.
+- Maintain a clean, technical documentation tone.
 
 ---
 

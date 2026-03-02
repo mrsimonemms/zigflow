@@ -121,9 +121,9 @@ with the same key overwrites the value; all other keys remain.
 
 ## Related pages
 
-- [Concepts — data and expressions](/docs/concepts/data-and-expressions) —
+- [Concepts: data and expressions](/docs/concepts/data-and-expressions):
   expression syntax and variable reference
-- [Concepts — how Zigflow runs](/docs/concepts/how-zigflow-runs) —
+- [Concepts: how Zigflow runs](/docs/concepts/how-zigflow-runs):
   determinism and replay
-- [Examples — hello world](/docs/examples/hello-world)
-  — set task in action
+- [Examples: hello world](/docs/examples/hello-world):
+  set task in action

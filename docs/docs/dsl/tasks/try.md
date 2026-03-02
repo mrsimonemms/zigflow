@@ -83,9 +83,9 @@ tasks still applies before the `catch` block runs.
 
 ## Related pages
 
-- [Raise](/docs/dsl/tasks/raise) — raising explicit errors
-- [Call](/docs/dsl/tasks/call) — HTTP and activity calls that may fail
-- [Concepts — error handling and retries](/docs/concepts/error-handling-and-retries)
-  — error model overview
-- [Examples — error handling](/docs/examples/error-handling)
-  — try/catch walkthrough
+- [Raise](/docs/dsl/tasks/raise): raising explicit errors
+- [Call](/docs/dsl/tasks/call): HTTP and activity calls that may fail
+- [Concepts: error handling and retries](/docs/concepts/error-handling-and-retries):
+  error model overview
+- [Examples: error handling](/docs/examples/error-handling):
+  try/catch walkthrough

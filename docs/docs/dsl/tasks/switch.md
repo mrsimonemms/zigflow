@@ -117,8 +117,8 @@ in the same `do` list. Referencing a non-existent task fails at validation.
 
 ## Related tasks
 
-- [Do](/docs/dsl/tasks/do) — sequential subtasks, commonly used as branch targets
-- [Raise](/docs/dsl/tasks/raise) — raise an explicit error in a branch
-- [For](/docs/dsl/tasks/for) — iteration over collections
-- [Concepts — data and expressions](/docs/concepts/data-and-expressions)
-  — runtime expression syntax
+- [Do](/docs/dsl/tasks/do): sequential subtasks, commonly used as branch targets
+- [Raise](/docs/dsl/tasks/raise): raise an explicit error in a branch
+- [For](/docs/dsl/tasks/for): iteration over collections
+- [Concepts: data and expressions](/docs/concepts/data-and-expressions):
+  runtime expression syntax

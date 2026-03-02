@@ -31,7 +31,7 @@ WORKFLOW_FILE=/app/workflow.yaml
 When Zigflow starts, it reads the workflow file from the path specified by
 `WORKFLOW_FILE`. Because this variable is already set in the base image, a
 container that provides a file at `/app/workflow.yaml` will start the worker
-immediately — no `-f` flag required and no `WORKFLOW_FILE` override needed.
+immediately. No `-f` flag is required and no `WORKFLOW_FILE` override is needed.
 
 Copying your workflow file into the image at that path is sufficient.
 
@@ -58,10 +58,10 @@ entrypoint and the `WORKFLOW_FILE` path.
 ## Running the image
 
 The workflow file is already present inside the image. Deploy it as you would
-any other Zigflow container — no `-f` flag and no volume mount are required.
+any other Zigflow container. No `-f` flag and no volume mount are required.
 
-- [Docker](/docs/deployment/docker) — run with `docker run` or Docker Compose
-- [Kubernetes](/docs/deployment/kubernetes#option-3--dedicated-image) — use
+- [Docker](/docs/deployment/docker): run with `docker run` or Docker Compose
+- [Kubernetes](/docs/deployment/kubernetes#option-3--dedicated-image): use
   Option 3 in the Helm chart workflow delivery options
 
 ---
@@ -90,6 +90,6 @@ consists of updating the image reference. There is nothing to synchronise.
 
 ## Related pages
 
-- [Deploying overview](/docs/deployment/intro) — connection flags and telemetry
-- [Docker](/docs/deployment/docker) — runtime file mounts and Docker Compose
-- [Kubernetes](/docs/deployment/kubernetes) — Helm chart deployment
+- [Deploying overview](/docs/deployment/intro): connection flags and telemetry
+- [Docker](/docs/deployment/docker): runtime file mounts and Docker Compose
+- [Kubernetes](/docs/deployment/kubernetes): Helm chart deployment

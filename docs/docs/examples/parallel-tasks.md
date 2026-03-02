@@ -139,7 +139,7 @@ branch data is discarded.
 
 ## Related pages
 
-- [Fork](/docs/dsl/tasks/fork) — `fork` reference
-- [Do](/docs/dsl/tasks/do) — sequential execution within a branch
-- [Concepts — how Zigflow runs](/docs/concepts/how-zigflow-runs)
-  — child workflows and execution model
+- [Fork](/docs/dsl/tasks/fork): `fork` reference
+- [Do](/docs/dsl/tasks/do): sequential execution within a branch
+- [Concepts: how Zigflow runs](/docs/concepts/how-zigflow-runs):
+  child workflows and execution model

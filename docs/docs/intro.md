@@ -16,7 +16,7 @@ registers it as a Temporal worker.
 **Zigflow is not for:**
 
 - Teams who prefer writing workflow code directly in a Temporal SDK
-- Users seeking an official Temporal product — Zigflow is an independent project
+- Users seeking an official Temporal product. Zigflow is an independent project.
 
 ---
 

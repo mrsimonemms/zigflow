@@ -143,10 +143,10 @@ readable by the Zigflow worker process at runtime.
 
 ## Related pages
 
-- [Try](/docs/dsl/tasks/try) — handling HTTP and activity errors
-- [Raise](/docs/dsl/tasks/raise) — raising explicit errors
-- [Concepts — error handling and retries](/docs/concepts/error-handling-and-retries)
-  — retry policy configuration
-- [Examples — HTTP call](/docs/examples/http-call) — practical walkthrough
-- [Examples — error handling](/docs/examples/error-handling)
-  — catching HTTP errors
+- [Try](/docs/dsl/tasks/try): handling HTTP and activity errors
+- [Raise](/docs/dsl/tasks/raise): raising explicit errors
+- [Concepts: error handling and retries](/docs/concepts/error-handling-and-retries):
+  retry policy configuration
+- [Examples: HTTP call](/docs/examples/http-call): practical walkthrough
+- [Examples: error handling](/docs/examples/error-handling):
+  catching HTTP errors

@@ -156,7 +156,7 @@ starts have no effect until the worker is restarted.
 
 ## Related pages
 
-- [Overview](/docs/concepts/overview) — mental model summary
-- [Temporal prerequisites](/docs/concepts/temporal-prereqs) — core Temporal concepts
-- [Set task](/docs/dsl/tasks/set) — deterministic data generation
-- [zigflow run](/docs/cli/commands/zigflow_run) — full CLI reference
+- [Overview](/docs/concepts/overview): mental model summary
+- [Temporal prerequisites](/docs/concepts/temporal-prereqs): core Temporal concepts
+- [Set task](/docs/dsl/tasks/set): deterministic data generation
+- [zigflow run](/docs/cli/commands/zigflow_run): full CLI reference

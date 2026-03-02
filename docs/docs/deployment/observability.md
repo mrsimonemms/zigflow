@@ -160,7 +160,7 @@ Logs are structured JSON, written to stderr.
 
 ## Related pages
 
-- [Deploying overview](/docs/deployment/intro) — runtime ports and configuration
-- [Docker](/docs/deployment/docker) — Docker and Compose configuration
-- [Kubernetes](/docs/deployment/kubernetes) — Helm chart deployment
-- [Debugging workflows](/docs/dsl/debugging) — CloudEvents in detail
+- [Deploying overview](/docs/deployment/intro): runtime ports and configuration
+- [Docker](/docs/deployment/docker): Docker and Compose configuration
+- [Kubernetes](/docs/deployment/kubernetes): Helm chart deployment
+- [Debugging workflows](/docs/dsl/debugging): CloudEvents in detail

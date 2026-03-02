@@ -111,10 +111,10 @@ wrapping the branch.
 
 ## Related pages
 
-- [Do](/docs/dsl/tasks/do) — sequential execution
-- [For](/docs/dsl/tasks/for) — iteration over collections
-- [Try](/docs/dsl/tasks/try) — error handling within a branch
-- [Concepts — how Zigflow runs](/docs/concepts/how-zigflow-runs)
-  — child workflows and execution model
-- [Examples — parallel tasks](/docs/examples/parallel-tasks)
-  — competing and non-competing fork in action
+- [Do](/docs/dsl/tasks/do): sequential execution
+- [For](/docs/dsl/tasks/for): iteration over collections
+- [Try](/docs/dsl/tasks/try): error handling within a branch
+- [Concepts: how Zigflow runs](/docs/concepts/how-zigflow-runs):
+  child workflows and execution model
+- [Examples: parallel tasks](/docs/examples/parallel-tasks):
+  competing and non-competing fork in action

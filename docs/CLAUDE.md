@@ -1,4 +1,4 @@
-# CLAUDE.md — Zigflow Documentation Standards
+# CLAUDE.md: Zigflow Documentation Standards
 
 This file defines the documentation standards for Zigflow.
 
@@ -156,9 +156,9 @@ Deployment guidance must:
 
 After every documentation change:
 
-1. Run `pre-commit run --all-files` — linting and formatting must pass.
-2. Run `npm run lint` — ESLint must pass with no errors.
-3. Run `npm run build` — the Docusaurus build must succeed with no errors.
+1. Run `pre-commit run --all-files`. Linting and formatting must pass.
+2. Run `npm run lint`. ESLint must pass with no errors.
+3. Run `npm run build`. The Docusaurus build must succeed with no errors.
 
 Do not consider a documentation change complete until both pass.
 

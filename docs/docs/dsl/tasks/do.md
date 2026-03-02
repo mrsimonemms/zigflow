@@ -124,7 +124,7 @@ names cause a validation error.
 
 ## Related pages
 
-- [Fork](/docs/dsl/tasks/fork) — run tasks in parallel rather than in sequence
-- [Try](/docs/dsl/tasks/try) — error handling within a sequence
-- [Concepts — how Zigflow runs](/docs/concepts/how-zigflow-runs) — execution
+- [Fork](/docs/dsl/tasks/fork): run tasks in parallel rather than in sequence
+- [Try](/docs/dsl/tasks/try): error handling within a sequence
+- [Concepts: how Zigflow runs](/docs/concepts/how-zigflow-runs): execution
   model

@@ -83,6 +83,6 @@ standard types. Custom URIs allow error-type filtering in external systems.
 
 ## Related pages
 
-- [Try](/docs/dsl/tasks/try) — catching errors raised by this task
-- [Concepts — error handling and retries](/docs/concepts/error-handling-and-retries)
-  — error model overview
+- [Try](/docs/dsl/tasks/try): catching errors raised by this task
+- [Concepts: error handling and retries](/docs/concepts/error-handling-and-retries):
+  error model overview

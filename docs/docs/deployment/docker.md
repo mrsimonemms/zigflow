@@ -22,8 +22,8 @@ ghcr.io/mrsimonemms/zigflow
 
 Tags:
 
-- `latest` — most recent release
-- `0.1.0` (or any version) — specific release
+- `latest`: most recent release
+- `0.1.0` (or any version): specific release
 
 The binary is set as the container entrypoint. Pass `run` and any flags as
 the command.
@@ -201,7 +201,7 @@ baked in rather than mounting it at runtime. See
 
 ## Related pages
 
-- [Deploying overview](/docs/deployment/intro) — connection flags and telemetry
-- [Dedicated image](/docs/deployment/dedicated-image) — workflow in the image
-- [Kubernetes](/docs/deployment/kubernetes) — Helm chart deployment
-- [Observability](/docs/deployment/observability) — health and metrics
+- [Deploying overview](/docs/deployment/intro): connection flags and telemetry
+- [Dedicated image](/docs/deployment/dedicated-image): workflow in the image
+- [Kubernetes](/docs/deployment/kubernetes): Helm chart deployment
+- [Observability](/docs/deployment/observability): health and metrics

@@ -17,7 +17,7 @@ and are retried automatically on failure.
 In Zigflow, tasks such as `call: http`, `call: activity` and `run` execute
 as Temporal activities.
 
-See also: [Temporal docs — activities](https://docs.temporal.io/activities)
+See also: [Temporal docs: activities](https://docs.temporal.io/activities)
 
 ---
 
@@ -27,7 +27,7 @@ A workflow started by a parent workflow. It runs with its own history and
 can be awaited by the parent. Used internally by `fork`, `try` and certain
 `run` modes.
 
-See also: [Temporal docs — child workflows](https://docs.temporal.io/child-workflows)
+See also: [Temporal docs: child workflows](https://docs.temporal.io/child-workflows)
 
 ---
 
@@ -51,10 +51,10 @@ resumes. Implemented in Zigflow via the [`wait`](/docs/dsl/tasks/wait) task.
 
 A value that controls workflow execution flow. Valid values:
 
-- `"continue"` — proceed to the next task (default)
-- `"exit"` — exit the current scope
-- `"end"` — end the workflow
-- A task name — jump to that named task
+- `"continue"`: proceed to the next task (default)
+- `"exit"`: exit the current scope
+- `"end"`: end the workflow
+- A task name: jump to that named task
 
 Used in the [`switch`](/docs/dsl/tasks/switch) task.
 
@@ -150,7 +150,7 @@ The name Temporal uses to identify a workflow. In Zigflow, this is
 
 ## Related pages
 
-- [Overview](/docs/concepts/overview) — mental model
-- [Temporal prerequisites](/docs/concepts/temporal-prereqs) — Temporal
+- [Overview](/docs/concepts/overview): mental model
+- [Temporal prerequisites](/docs/concepts/temporal-prereqs): Temporal
   concepts in detail
-- [DSL reference](/docs/dsl/intro) — full YAML specification
+- [DSL reference](/docs/dsl/intro): full YAML specification

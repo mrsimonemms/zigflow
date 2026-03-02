@@ -347,8 +347,8 @@ Fix the reported field and restart the worker.
 ### Non-Determinism Error during workflow replay
 
 Temporal replays workflows from their event history. If a workflow produces
-different results on replay — for example because a UUID or timestamp is
-generated outside a `set` task — Temporal raises a Non-Determinism Error.
+different results on replay. For example, if a UUID or timestamp is
+generated outside a `set` task, Temporal raises a Non-Determinism Error.
 
 Check your logs for lines containing `NonDeterministicWorkflowError`. The fix
 is to move any generated value into a `set` task, which wraps the generation

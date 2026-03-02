@@ -237,11 +237,11 @@ do:
         message: ${ $data.generateWelcome.message }
 ```
 
-Activity workers can be written in any language with a Temporal SDK — Go,
+Activity workers can be written in any language with a Temporal SDK: Go,
 Python, TypeScript, Java and more. Zigflow handles the workflow orchestration;
 your existing services handle the work.
 
-> If you find these examples useful, consider giving the repo a ⭐ — it helps
+> If you find these examples useful, consider giving the repo a ⭐. It helps
 > the project grow.
 
 </details>
@@ -255,15 +255,15 @@ schedules and more) are in [examples/](./examples).
 
 ## Features
 
-- **Temporal DSL** — declarative YAML definitions that compile to Temporal workflows
-- **CNCF standard** — aligned with Serverless Workflow v1.0+
-- **Validation first** — definitions are validated before execution; invalid or
+- **Temporal DSL**: declarative YAML definitions that compile to Temporal workflows
+- **CNCF standard**: aligned with Serverless Workflow v1.0+
+- **Validation first**: definitions are validated before execution; invalid or
   unsupported constructs are rejected with actionable errors
-- **Multi-language activities** — activity workers can use any Temporal SDK
-- **Low-code and visual-ready** — suitable for UI workflow builders and
+- **Multi-language activities**: activity workers can use any Temporal SDK
+- **Low-code and visual-ready**: suitable for UI workflow builders and
   orchestration tools
-- **Kubernetes-native** — Helm chart included for cluster deployments
-- **Open source** — Apache 2.0 licence, contributions welcome
+- **Kubernetes-native**: Helm chart included for cluster deployments
+- **Open source**: Apache 2.0 licence, contributions welcome
 
 ---
 

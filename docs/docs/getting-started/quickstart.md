@@ -20,7 +20,7 @@ Get Zigflow installed and run your first workflow in under five minutes.
 
 ---
 
-## Step 1 — Install Zigflow
+## Step 1: Install Zigflow
 
 Download the binary for your platform from the
 [releases page](https://github.com/mrsimonemms/zigflow/releases).
@@ -43,7 +43,7 @@ You should see the version number and commit hash.
 
 ---
 
-## Step 2 — Start a Temporal server
+## Step 2: Start a Temporal server
 
 Zigflow requires a Temporal server. For local development, use the development
 server bundled with the Temporal CLI:
@@ -57,7 +57,7 @@ at [http://localhost:8233](http://localhost:8233).
 
 ---
 
-## Step 3 — Create a workflow file
+## Step 3: Create a workflow file
 
 Create a file named `workflow.yaml`:
 
@@ -78,16 +78,16 @@ do:
 
 What this does:
 
-- `document.namespace` — sets the task queue to `zigflow`
-- `document.name` — sets the workflow type to `hello-world`
-- `do` — a list of tasks to run in order; each key (`greet`) is an arbitrary
-  step name you choose — it is not a reserved keyword
-- `set` — stores `message` into the workflow state
-- `output.as` — transforms the task output before returning it
+- `document.namespace`: sets the task queue to `zigflow`
+- `document.name`: sets the workflow type to `hello-world`
+- `do`: a list of tasks to run in order; each key (`greet`) is an arbitrary
+  step name you choose. It is not a reserved keyword.
+- `set`: stores `message` into the workflow state
+- `output.as`: transforms the task output before returning it
 
 ---
 
-## Step 4 — Validate
+## Step 4: Validate
 
 Check the workflow is valid before running it:
 
@@ -111,7 +111,7 @@ Fix the field, then re-validate.
 
 ---
 
-## Step 5 — Start the worker
+## Step 5: Start the worker
 
 ```sh
 zigflow run -f workflow.yaml
@@ -122,7 +122,7 @@ to Temporal.
 
 ---
 
-## Step 6 — Trigger the workflow
+## Step 6: Trigger the workflow
 
 Leave the worker running and open a new terminal. Trigger the workflow using
 the Temporal CLI:
@@ -136,15 +136,15 @@ temporal workflow start \
 
 ---
 
-## Step 7 — View the result
+## Step 7: View the result
 
-Option 1 — Temporal CLI:
+Option 1: Temporal CLI:
 
 ```sh
 temporal workflow show --workflow-id my-first-workflow
 ```
 
-Option 2 — Temporal UI:
+Option 2: Temporal UI:
 
 1. Open [http://localhost:8233](http://localhost:8233)
 2. Click on the `hello-world` workflow execution
@@ -199,9 +199,9 @@ zigflow run -f workflow.yaml --log-level debug
 
 ## Next steps
 
-- [Concepts — Overview](/docs/concepts/overview) — the mental model behind Zigflow
-- [Your first workflow](/docs/getting-started/your-first-workflow) — triggering
+- [Concepts: Overview](/docs/concepts/overview): the mental model behind Zigflow
+- [Your first workflow](/docs/getting-started/your-first-workflow): triggering
   from application code
-- [Examples](/docs/examples/) — more patterns with step-by-step walkthroughs
-- [DSL reference](/docs/dsl/intro) — full workflow YAML reference
-- [CLI reference](/docs/cli/commands/zigflow_run) — all `run` flags
+- [Examples](/docs/examples/): more patterns with step-by-step walkthroughs
+- [DSL reference](/docs/dsl/intro): full workflow YAML reference
+- [CLI reference](/docs/cli/commands/zigflow_run): all `run` flags

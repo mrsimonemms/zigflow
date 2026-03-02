@@ -60,14 +60,14 @@ on a case-by-case basis.
 If financial contribution is not appropriate, the following are equally
 valuable:
 
-- **Bug reports** — detailed, reproducible reports in the
+- **Bug reports**: detailed, reproducible reports in the
   [issue tracker](https://github.com/mrsimonemms/zigflow/issues)
-- **Pull requests** — fixes, documentation improvements and example additions
-- **GitHub stars** — starring the
+- **Pull requests**: fixes, documentation improvements and example additions
+- **GitHub stars**: starring the
   [repository](https://github.com/mrsimonemms/zigflow) increases discoverability
   and signals active use to the broader community
-- **Visibility** — sharing Zigflow with teams who may benefit
-- **Feedback** — opening
+- **Visibility**: sharing Zigflow with teams who may benefit
+- **Feedback**: opening
   [GitHub Discussions](https://github.com/mrsimonemms/zigflow/discussions)
   to report real-world usage patterns
 

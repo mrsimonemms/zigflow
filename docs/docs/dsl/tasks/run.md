@@ -264,7 +264,7 @@ workflow is looked up by `name` on the same task queue.
 
 ## Related pages
 
-- [Do](/docs/dsl/tasks/do) — sequential subtask composition
-- [Fork](/docs/dsl/tasks/fork) — parallel child execution
-- [Concepts — how Zigflow runs](/docs/concepts/how-zigflow-runs) — worker and
+- [Do](/docs/dsl/tasks/do): sequential subtask composition
+- [Fork](/docs/dsl/tasks/fork): parallel child execution
+- [Concepts: how Zigflow runs](/docs/concepts/how-zigflow-runs): worker and
   activity model

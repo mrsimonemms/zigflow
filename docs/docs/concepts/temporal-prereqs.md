@@ -140,10 +140,10 @@ workflows internally.
 
 ## Where to learn more
 
-- [Temporal 101 course](https://learn.temporal.io/courses/temporal_101/) — a
+- [Temporal 101 course](https://learn.temporal.io/courses/temporal_101/): a
   practical introduction to Temporal concepts
-- [Temporal documentation](https://docs.temporal.io) — full reference
-- [Temporal encyclopedia](https://docs.temporal.io/encyclopedia) — deep dives
+- [Temporal documentation](https://docs.temporal.io): full reference
+- [Temporal encyclopedia](https://docs.temporal.io/encyclopedia): deep dives
   into specific topics
 
 ---
@@ -162,7 +162,7 @@ the task queue.
 
 ## Related pages
 
-- [Overview](/docs/concepts/overview) — Zigflow in one page
-- [How Zigflow runs](/docs/concepts/how-zigflow-runs) — what happens when you
+- [Overview](/docs/concepts/overview): Zigflow in one page
+- [How Zigflow runs](/docs/concepts/how-zigflow-runs): what happens when you
   run a workflow
-- [Listen task](/docs/dsl/tasks/listen) — signals, queries and updates in Zigflow
+- [Listen task](/docs/dsl/tasks/listen): signals, queries and updates in Zigflow

@@ -39,8 +39,8 @@ but increase workflow history length.
 
 ## Related pages
 
-- [For](/docs/dsl/tasks/for) — using wait inside iteration loops
-- [Listen](/docs/dsl/tasks/listen) — waiting for external events instead of
+- [For](/docs/dsl/tasks/for): using wait inside iteration loops
+- [Listen](/docs/dsl/tasks/listen): waiting for external events instead of
   a fixed duration
-- [Concepts — temporal prerequisites](/docs/concepts/temporal-prereqs) —
+- [Concepts: temporal prerequisites](/docs/concepts/temporal-prereqs):
   durable timers explained

@@ -231,6 +231,6 @@ run. Access them in a later task.
 
 ## Related pages
 
-- [Set task](/docs/dsl/tasks/set) — storing data
-- [DSL reference](/docs/dsl/intro) — full expression context
-- [How Zigflow runs](/docs/concepts/how-zigflow-runs) — determinism and replay
+- [Set task](/docs/dsl/tasks/set): storing data
+- [DSL reference](/docs/dsl/intro): full expression context
+- [How Zigflow runs](/docs/concepts/how-zigflow-runs): determinism and replay

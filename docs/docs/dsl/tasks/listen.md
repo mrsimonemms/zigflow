@@ -14,9 +14,9 @@ that can be used:
 Use Listen when your workflow must pause until an external event
 arrives:
 
-* `query` — read current workflow state without blocking
-* `signal` — receive a fire-and-forget notification
-* `update` — receive a message and return a response
+* `query`: read current workflow state without blocking
+* `signal`: receive a fire-and-forget notification
+* `update`: receive a message and return a response
 
 ## Properties {#listen-properties}
 
@@ -219,10 +219,10 @@ its payload is accessible via the task name key, not `$output`.
 
 ## Related pages
 
-* [Concepts — glossary](/docs/concepts/glossary) — signals, queries and updates
+* [Concepts: glossary](/docs/concepts/glossary): signals, queries and updates
   defined
-* [Concepts — Temporal prerequisites](/docs/concepts/temporal-prereqs) —
+* [Concepts: Temporal prerequisites](/docs/concepts/temporal-prereqs):
   Temporal messaging concepts
-* [Debugging workflows](/docs/dsl/debugging) — observing events via CloudEvents
-* [Examples — signal-driven workflow](/docs/examples/signal-driven)
-  — full walkthrough
+* [Debugging workflows](/docs/dsl/debugging): observing events via CloudEvents
+* [Examples: signal-driven workflow](/docs/examples/signal-driven):
+  full walkthrough

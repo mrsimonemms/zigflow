@@ -111,7 +111,7 @@ HTTP errors raise by default. To recover, wrap the call in a
 
 ## Related pages
 
-- [Call](/docs/dsl/tasks/call) — full `call: http` reference
-- [Error Handling](/docs/examples/error-handling) — handling HTTP errors
-- [Concepts — error handling](/docs/concepts/error-handling-and-retries)
-  — retry policy configuration
+- [Call](/docs/dsl/tasks/call): full `call: http` reference
+- [Error Handling](/docs/examples/error-handling): handling HTTP errors
+- [Concepts: error handling](/docs/concepts/error-handling-and-retries):
+  retry policy configuration

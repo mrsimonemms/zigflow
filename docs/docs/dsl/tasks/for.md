@@ -99,10 +99,10 @@ expression can access this key to implement early termination.
 
 ## Related pages
 
-- [Fork](/docs/dsl/tasks/fork) — parallel execution of multiple branches
-- [Do](/docs/dsl/tasks/do) — sequential subtasks
-- [Set](/docs/dsl/tasks/set) — storing iteration data
-- [Concepts — data and expressions](/docs/concepts/data-and-expressions)
-  — runtime expressions and `$data` variables
-- [Examples — parallel tasks](/docs/examples/parallel-tasks)
-  — running branches concurrently
+- [Fork](/docs/dsl/tasks/fork): parallel execution of multiple branches
+- [Do](/docs/dsl/tasks/do): sequential subtasks
+- [Set](/docs/dsl/tasks/set): storing iteration data
+- [Concepts: data and expressions](/docs/concepts/data-and-expressions):
+  runtime expressions and `$data` variables
+- [Examples: parallel tasks](/docs/examples/parallel-tasks):
+  running branches concurrently

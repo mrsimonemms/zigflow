@@ -198,6 +198,6 @@ Run with `--log-level debug` to see what failed on startup.
 
 ## Related pages
 
-- [CLI reference](/docs/cli/commands/zigflow) — full flag documentation
-- [Quickstart](/docs/getting-started/quickstart) — first workflow guide
-- [Deployment overview](/docs/deployment/intro) — production flags
+- [CLI reference](/docs/cli/commands/zigflow): full flag documentation
+- [Quickstart](/docs/getting-started/quickstart): first workflow guide
+- [Deployment overview](/docs/deployment/intro): production flags
