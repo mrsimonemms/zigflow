@@ -19,3 +19,4 @@ wiki
 .claude
 
 cmd/schema.yaml
+*.zip
