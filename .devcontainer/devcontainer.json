@@ -30,13 +30,15 @@
   },
   "postCreateCommand": {
     "go-generate": "go generate ./...",
-    "install-air": "go install github.com/air-verse/air@latest"
+    "install-air": "go install github.com/air-verse/air@latest",
+    "playwright": "npx --yes playwright install --with-deps"
   },
   "containerEnv": {
     "CLOUDEVENTS_CONFIG": "/workspaces/zigflow/cloudevents.example.yaml",
     "CONVERTER_KEY_PATH": "/workspaces/zigflow/keys.example.yaml",
     "GIT_REPO": "github.com/mrsimonemms/zigflow",
     "LOG_LEVEL": "trace",
+    "PLAYWRIGHT_HTML_HOST": "0.0.0.0",
     "ZIGGY_EXAMPLE_ENVVAR": "some-example-envvar",
     "WORKFLOW_FILE": "./workflow.example.yaml"
   },
