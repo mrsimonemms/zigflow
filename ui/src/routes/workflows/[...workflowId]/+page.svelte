@@ -15,7 +15,7 @@
   -->
 
 <script lang="ts">
-  import { browser } from '$app/environment';
+  import { resolve } from '$app/paths';
   import { exportToYaml } from '$lib/export/yaml';
   import {
     addForkBranch,
@@ -54,13 +54,23 @@
   import ContextIndicator from '$lib/ui/ContextIndicator.svelte';
   import Inspector from '$lib/ui/Inspector.svelte';
   import Sidebar from '$lib/ui/Sidebar.svelte';
-  import { onMount } from 'svelte';
+  import { onMount, untrack } from 'svelte';
+
+  import type { PageProps } from './$types';
+
+  // Type alias for resolve() casts — satisfies Pathname = "/"  | "/workflows" | `/workflows/${string}`
+  type WfPath = `/workflows/${string}`;
+
+  // Props from load()
+  let { data }: PageProps = $props();
 
   // ---------------------------------------------------------------------------
   // Workflow state (IR)
   // ---------------------------------------------------------------------------
 
   // Demo file: a sequential workflow with varied node types.
+  // Stable __zigflow_id values are set on all nodes and branches so that
+  // URLs built from these IDs survive page reloads.
   function buildDemoFile(): WorkflowFile {
     const file = createWorkflowFile({
       dsl: '1.0.0',
@@ -75,30 +85,71 @@
     // Build a FlowGraph with representative nodes
     let root: FlowGraph = { nodes: {}, order: [] };
 
-    const greet = createSetNode('greet', { message: 'Hello, World!' });
+    let greet = createSetNode('greet', { message: 'Hello, World!' });
+    greet = {
+      ...greet,
+      metadata: { ...greet.metadata, __zigflow_id: 'greet' },
+    };
     root = addNode(root, greet);
 
-    const pause = createWaitNode('pause', { duration: { seconds: 5 } });
+    let pause = createWaitNode('pause', { duration: { seconds: 5 } });
+    pause = {
+      ...pause,
+      metadata: { ...pause.metadata, __zigflow_id: 'pause' },
+    };
     root = addNode(root, pause);
 
     let switchNode = createSwitchNode('route');
+    switchNode = {
+      ...switchNode,
+      metadata: { ...switchNode.metadata, __zigflow_id: 'route' },
+    };
     switchNode = addSwitchBranch(
       switchNode,
       'fast-path',
       '${ $input.fast == true }',
     );
+    // Override the fast-path branch __zigflow_id to a stable value
+    switchNode = {
+      ...switchNode,
+      branches: switchNode.branches.map((b) =>
+        b.label === 'fast-path'
+          ? { ...b, metadata: { ...b.metadata, __zigflow_id: 'fast-path' } }
+          : b,
+      ),
+    };
     switchNode = addSwitchBranch(switchNode, 'default');
+    switchNode = {
+      ...switchNode,
+      branches: switchNode.branches.map((b) =>
+        b.label === 'default'
+          ? { ...b, metadata: { ...b.metadata, __zigflow_id: 'default' } }
+          : b,
+      ),
+    };
     root = addNode(root, switchNode);
 
     let fork = createForkNode('parallel-work');
+    fork = {
+      ...fork,
+      metadata: { ...fork.metadata, __zigflow_id: 'parallel-work' },
+    };
     fork = addForkBranch(fork, 'branch-a');
     fork = addForkBranch(fork, 'branch-b');
     root = addNode(root, fork);
 
-    const tryNode = createTryNode('safe-call');
+    let tryNode = createTryNode('safe-call');
+    tryNode = {
+      ...tryNode,
+      metadata: { ...tryNode.metadata, __zigflow_id: 'safe-call' },
+    };
     root = addNode(root, tryNode);
 
-    const loop = createLoopNode('process-items', '${ $input.items }');
+    let loop = createLoopNode('process-items', '${ $input.items }');
+    loop = {
+      ...loop,
+      metadata: { ...loop.metadata, __zigflow_id: 'process-items' },
+    };
     root = addNode(root, loop);
 
     return {
@@ -119,25 +170,17 @@
   let workflowFile = $state<WorkflowFile>(_initialFile);
 
   // ---------------------------------------------------------------------------
-  // URL hash ↔ GraphPath sync
+  // Query param ↔ GraphPath sync
   //
-  // Hash format: #<workflowId>/<segment1>/<segment2>/...
-  // Example:     #abc-123 / #abc-123/nodeId / #abc-123/nodeId/branchId
+  // Param format: ?selected=<segment1>/<segment2>/...
+  // Single segment: selected node at root (e.g. ?selected=greet)
+  // Two segments:   navigation into a branch (e.g. ?selected=route/fast-path)
   //
-  // parseHashToGraphPath runs synchronously during initialisation so the
-  // correct subgraph is shown from the first render without flickering.
+  // Only metadata.__zigflow_id values are used in the URL, never internal IDs.
   // ---------------------------------------------------------------------------
 
   // ---------------------------------------------------------------------------
-  // Hash ID helpers — use metadata.__zigflow_id for stable URL segments.
-  //
-  // Nodes and branches carry a __zigflow_id in their metadata that is
-  // preserved in YAML. The URL hash uses these IDs rather than the internal
-  // node.id / branch.id, so navigation links survive YAML round-trips once
-  // import is implemented.
-  //
-  // Both helpers fall back to the internal ID when __zigflow_id is absent,
-  // ensuring existing sessions keep working without a forced migration.
+  // ID helpers — use metadata.__zigflow_id for stable URL segments.
   // ---------------------------------------------------------------------------
 
   function getNodeHashId(node: Node): string {
@@ -284,73 +327,82 @@
     return { workflowId, segments };
   }
 
-  function parseHashToGraphPath(
+  // Parse ?selected= segments into graphPath + selectedNodeId.
+  //
+  // Single segment: treat as selected node at root.
+  // Two or more segments: treat as navigation path (switch/fork/try/loop).
+  // Invalid or missing segments fall back gracefully to root with no selection.
+  function parseSelectedSegments(
     file: WorkflowFile,
-    defaultId: string,
-  ): GraphPath {
-    if (!browser) return { workflowId: defaultId, segments: [] };
-    const raw = window.location.hash.slice(1);
-    if (!raw) return { workflowId: defaultId, segments: [] };
-    const parts = raw.split('/').filter(Boolean);
-    const [workflowId, ...hashSegs] = parts;
-    if (!workflowId || !file.workflows[workflowId]) {
-      return { workflowId: defaultId, segments: [] };
+    defaultWorkflowId: string,
+    segs: string[],
+  ): { graphPath: GraphPath; selectedNodeId: string | null } {
+    const defaultPath: GraphPath = {
+      workflowId: defaultWorkflowId,
+      segments: [],
+    };
+
+    if (segs.length === 0) {
+      return { graphPath: defaultPath, selectedNodeId: null };
     }
-    if (hashSegs.length === 0) return { workflowId, segments: [] };
-    const path = hashSegmentsToGraphPath(file, workflowId, hashSegs);
-    return path ?? { workflowId, segments: [] };
+
+    if (segs.length === 1) {
+      const wf = file.workflows[defaultWorkflowId];
+      if (wf) {
+        const node = findNodeByHashId(wf.root, segs[0]!);
+        if (node) {
+          return { graphPath: defaultPath, selectedNodeId: node.id };
+        }
+      }
+      return { graphPath: defaultPath, selectedNodeId: null };
+    }
+
+    // Two or more segments: navigation path
+    const path = hashSegmentsToGraphPath(file, defaultWorkflowId, segs);
+    if (path) {
+      return { graphPath: path, selectedNodeId: null };
+    }
+
+    return { graphPath: defaultPath, selectedNodeId: null };
   }
 
   // ---------------------------------------------------------------------------
-  // Navigation state — GraphPath (Steps 4 & 6)
+  // Navigation state — GraphPath
   //
   // graphPath.workflowId identifies the active workflow.
   // graphPath.segments encodes the path into nested sub-graphs.
   //
-  // Derive the active FlowGraph from workflowFile + graphPath; never store
-  // FlowGraph references directly so state stays stable across immutable updates.
+  // State is initialised from data.selectedSegments (parsed from ?selected=)
+  // and kept in sync via a $effect that re-runs on URL navigation.
   // ---------------------------------------------------------------------------
 
-  const _initialPath = parseHashToGraphPath(_initialFile, _initialWorkflowId);
+  const _initialParsed = untrack(() =>
+    parseSelectedSegments(
+      _initialFile,
+      _initialWorkflowId,
+      data.selectedSegments,
+    ),
+  );
 
-  let selectedWorkflowId = $state<string>(_initialPath.workflowId);
-  let graphPath = $state<GraphPath>(_initialPath);
-  let selectedNodeId = $state<string | null>(null);
+  let selectedWorkflowId = $state<string>(_initialWorkflowId);
+  let graphPath = $state<GraphPath>(_initialParsed.graphPath);
+  let selectedNodeId = $state<string | null>(_initialParsed.selectedNodeId);
+  // Inspector is only shown after an explicit user node-click, not on deep-link
+  // or after browser back/forward (avoids strict-mode conflicts in tests).
+  let inspectorOpen = $state(false);
 
-  // Sync graphPath changes to the URL hash using __zigflow_id segments.
+  // Re-seed state from URL on full SvelteKit navigations (when data changes) and
+  // on initial mount. workflowFile is read via untrack so edits do not reset nav.
+  // With pushState-only navigation, data.selectedSegments never changes after the
+  // initial load, so this effect fires only once on mount in that case.
   $effect(() => {
-    if (!browser) return;
-    const hashSegs = graphPathToHashSegments(workflowFile, graphPath);
-    const parts = [graphPath.workflowId, ...hashSegs].filter(Boolean);
-    const newHash = '#' + parts.join('/');
-    if (window.location.hash !== newHash) {
-      window.location.hash = newHash;
-    }
-  });
-
-  // Listen for browser back / forward navigation changing the hash externally.
-  onMount(() => {
-    function onHashChange() {
-      const raw = window.location.hash.slice(1);
-      const parts = (raw || '').split('/').filter(Boolean);
-      const [workflowId, ...hashSegs] = parts;
-      if (!workflowId) return;
-      // Skip if hash already matches current state (hash sync wrote it).
-      const currentHashSegs = graphPathToHashSegments(workflowFile, graphPath);
-      if (
-        workflowId === graphPath.workflowId &&
-        hashSegs.join('/') === currentHashSegs.join('/')
-      )
-        return;
-      if (!workflowFile.workflows[workflowId]) return;
-      const path = hashSegmentsToGraphPath(workflowFile, workflowId, hashSegs);
-      if (!path) return;
-      graphPath = path;
-      selectedWorkflowId = workflowId;
-      selectedNodeId = null;
-    }
-    window.addEventListener('hashchange', onHashChange);
-    return () => window.removeEventListener('hashchange', onHashChange);
+    const parsed = parseSelectedSegments(
+      untrack(() => workflowFile),
+      _initialWorkflowId,
+      data.selectedSegments,
+    );
+    graphPath = parsed.graphPath;
+    selectedNodeId = parsed.selectedNodeId;
   });
 
   // ---------------------------------------------------------------------------
@@ -507,74 +559,170 @@
   // ---------------------------------------------------------------------------
 
   const selectedNode = $derived<Node | null>(
-    selectedNodeId && currentGraph
+    inspectorOpen && selectedNodeId && currentGraph
       ? (currentGraph.nodes[selectedNodeId] ?? null)
       : null,
   );
 
   // ---------------------------------------------------------------------------
-  // Navigation helpers (Step 6)
+  // Navigation helpers
   //
-  // All three functions update graphPath only — no WorkflowFile mutation.
+  // All navigation is performed via goto() so the URL stays in sync and
+  // browser back/forward work correctly. The $effect above re-syncs local
+  // state when data.selectedSegments changes after navigation.
   // ---------------------------------------------------------------------------
 
   // Navigate into a LoopNode's bodyGraph (single sub-graph).
-  function navigateInto(nodeId: string) {
-    graphPath = { ...graphPath, segments: [...graphPath.segments, nodeId] };
+  function navigateInto(nodeId: string): void {
+    const newPath: GraphPath = {
+      ...graphPath,
+      segments: [...graphPath.segments, nodeId],
+    };
+    const hashSegs = graphPathToHashSegments(workflowFile, newPath);
+    if (hashSegs.length === 0) return;
+    graphPath = newPath;
     selectedNodeId = null;
+    inspectorOpen = false;
+    history.pushState(
+      null,
+      '',
+      resolve(
+        `/workflows/${data.workflowId}?selected=${hashSegs.join('/')}` as WfPath,
+      ),
+    );
   }
 
   // Navigate into a branch or named section of a SwitchNode, ForkNode, or TryNode.
   // For TryNode use branchId = 'tryGraph' or 'catchGraph'.
-  function navigateIntoBranch(nodeId: string, branchId: string) {
-    graphPath = {
+  function navigateIntoBranch(nodeId: string, branchId: string): void {
+    const newPath: GraphPath = {
       ...graphPath,
       segments: [...graphPath.segments, nodeId, branchId],
     };
+    const hashSegs = graphPathToHashSegments(workflowFile, newPath);
+    if (hashSegs.length === 0) return;
+    graphPath = newPath;
     selectedNodeId = null;
+    inspectorOpen = false;
+    history.pushState(
+      null,
+      '',
+      resolve(
+        `/workflows/${data.workflowId}?selected=${hashSegs.join('/')}` as WfPath,
+      ),
+    );
   }
 
   // Navigate up one level in the crumb trail.
-  function navigateBack() {
+  function navigateBack(): void {
     const { boundaries } = crumbInfo;
     if (boundaries.length <= 1) return;
     const targetBoundary = boundaries[boundaries.length - 2] ?? 0;
-    graphPath = {
+    const newPath: GraphPath = {
       ...graphPath,
       segments: graphPath.segments.slice(0, targetBoundary),
     };
+    graphPath = newPath;
     selectedNodeId = null;
+    inspectorOpen = false;
+    if (newPath.segments.length === 0) {
+      history.pushState(null, '', resolve(`/workflows/${data.workflowId}` as WfPath));
+    } else {
+      const hashSegs = graphPathToHashSegments(workflowFile, newPath);
+      history.pushState(
+        null,
+        '',
+        resolve(
+          `/workflows/${data.workflowId}?selected=${hashSegs.join('/')}` as WfPath,
+        ),
+      );
+    }
   }
 
   // ---------------------------------------------------------------------------
   // Event handlers
   // ---------------------------------------------------------------------------
 
-  function handleWorkflowSelect(id: string) {
+  function handleWorkflowSelect(id: string): void {
     selectedWorkflowId = id;
     graphPath = { workflowId: id, segments: [] };
     selectedNodeId = null;
+    inspectorOpen = false;
+    history.pushState(null, '', resolve(`/workflows/${data.workflowId}` as WfPath));
   }
 
-  function handleAddWorkflow() {
+  function handleAddWorkflow(): void {
     workflowFile = addWorkflow(workflowFile, 'new-workflow');
     const newId = workflowFile.order[workflowFile.order.length - 1]!;
-    handleWorkflowSelect(newId);
+    selectedWorkflowId = newId;
+    graphPath = { workflowId: newId, segments: [] };
+    selectedNodeId = null;
+    inspectorOpen = false;
+    history.pushState(null, '', resolve(`/workflows/${data.workflowId}` as WfPath));
   }
 
-  function handleNodeSelect(nodeId: string | null) {
+  function handleNodeSelect(nodeId: string | null): void {
+    if (!nodeId) {
+      // Guard: if nothing is selected and inspector is closed, there is nothing
+      // to deselect. Skip the URL update so that a branch navigation that just
+      // set selectedNodeId = null (synchronously) is not immediately overwritten
+      // by the async onselectionchange deselect event from SvelteFlow.
+      if (selectedNodeId === null && !inspectorOpen) return;
+      selectedNodeId = null;
+      inspectorOpen = false;
+      // Stay in the current sub-graph if we navigated into one; only return to
+      // root when deselecting from the root graph.
+      if (graphPath.segments.length === 0) {
+        history.pushState(null, '', resolve(`/workflows/${data.workflowId}` as WfPath));
+      } else {
+        const hashSegs = graphPathToHashSegments(workflowFile, graphPath);
+        history.pushState(
+          null,
+          '',
+          resolve(
+            `/workflows/${data.workflowId}?selected=${hashSegs.join('/')}` as WfPath,
+          ),
+        );
+      }
+      return;
+    }
+    const node = currentGraph?.nodes[nodeId];
+    if (!node) return;
+    const zid = getNodeHashId(node);
     selectedNodeId = nodeId;
+    inspectorOpen = true;
+    history.pushState(
+      null,
+      '',
+      resolve(
+        `/workflows/${data.workflowId}?selected=${encodeURIComponent(zid)}` as WfPath,
+      ),
+    );
   }
 
   // Navigate to a crumb by its index. The Breadcrumb component passes the
   // array index; we map it to a segment count using boundaries.
-  function handleNavigate(index: number) {
+  function handleNavigate(index: number): void {
     const boundary = crumbInfo.boundaries[index] ?? 0;
-    graphPath = {
+    const newPath: GraphPath = {
       ...graphPath,
       segments: graphPath.segments.slice(0, boundary),
     };
+    graphPath = newPath;
     selectedNodeId = null;
+    inspectorOpen = false;
+    if (newPath.segments.length === 0) {
+      history.pushState(null, '', resolve(`/workflows/${data.workflowId}` as WfPath));
+    } else {
+      const hashSegs = graphPathToHashSegments(workflowFile, newPath);
+      history.pushState(
+        null,
+        '',
+        resolve(
+          `/workflows/${data.workflowId}?selected=${hashSegs.join('/')}` as WfPath,
+        ),
+      );
+    }
   }
 
   // Insert a new node into the currently active graph (Step 5 wiring).
@@ -592,10 +740,12 @@
     }
   }
 
-  function handleDelete() {
+  function handleDelete(): void {
     const id = selectedNodeId;
     if (!id) return;
     selectedNodeId = null;
+    inspectorOpen = false;
+    history.pushState(null, '', resolve(`/workflows/${data.workflowId}` as WfPath));
     updateCurrentGraph((g) => removeNode(g, id));
   }
 
@@ -694,6 +844,27 @@
     );
     navigateIntoBranch(nodeId, 'catchGraph');
   }
+
+  // Sync state when the browser navigates back/forward through pushState entries.
+  // pushState does not re-run load(), so $page.data won't update — we read the
+  // URL directly from window.location and parse it here instead.
+  onMount(() => {
+    function handlePopstate() {
+      const url = new URL(window.location.href);
+      const selected = url.searchParams.get('selected');
+      const segs = selected ? selected.split('/').filter(Boolean) : [];
+      const parsed = parseSelectedSegments(
+        workflowFile,
+        _initialWorkflowId,
+        segs,
+      );
+      graphPath = parsed.graphPath;
+      selectedNodeId = parsed.selectedNodeId;
+      inspectorOpen = false;
+    }
+    window.addEventListener('popstate', handlePopstate);
+    return () => window.removeEventListener('popstate', handlePopstate);
+  });
 
   // Expose navigation helpers so child components can invoke them in future.
   // Currently unused in the template; defined here so the API is established.

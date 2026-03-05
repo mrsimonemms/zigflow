@@ -15,8 +15,11 @@
  */
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = ({ params }) => {
+export const load: PageLoad = ({ params, url }) => {
+  const selected = url.searchParams.get('selected');
+  const selectedSegments = selected ? selected.split('/').filter(Boolean) : [];
   return {
     workflowId: params.workflowId,
+    selectedSegments,
   };
 };

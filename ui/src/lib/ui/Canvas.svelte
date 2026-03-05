@@ -111,6 +111,8 @@
     nodeType: string;
     typeLabel: string;
     navRows?: NavRow[];
+    // Passed through to FlowNode for synchronous onclick URL update.
+    onselect?: (id: string) => void;
   };
 
   type SFNode = {
@@ -120,6 +122,8 @@
     position: { x: number; y: number };
     style: string;
     selected: boolean;
+    width?: number;
+    height?: number;
   };
 
   type SFEdge = {
@@ -168,17 +172,19 @@
   }
 
   function buildNodeData(node: Node): SFNodeData {
-    const base: SFNodeData = {
+    return {
       label: node.name,
       nodeType: node.type,
       typeLabel: nodeTypeLabel(node.type),
+      navRows: node.type !== 'task' ? buildNavRows(node) : undefined,
+      onselect: onnodeselect ?? undefined,
     };
-    if (node.type !== 'task') {
-      base.navRows = buildNavRows(node);
-    }
-    return base;
   }
 
+  // deriveNodes builds node specs without explicit width/height so SvelteFlow
+  // keeps nodes hidden (visibility:hidden) until the client-side $effect below
+  // calls deriveNodesWithDimensions. This ensures Playwright's click() waits
+  // until after hydration (when event handlers are attached) before proceeding.
   function deriveNodes(g: FlowGraph): SFNode[] {
     let y = 0;
     return g.order.map((id) => {
@@ -197,6 +203,29 @@
     });
   }
 
+  // Called only from the client-side $effect — adds width/height so
+  // nodeHasDimensions returns true and SvelteFlow shows nodes immediately
+  // without waiting for ResizeObserver.
+  function deriveNodesWithDimensions(g: FlowGraph): SFNode[] {
+    let y = 0;
+    return g.order.map((id) => {
+      const node = g.nodes[id]!;
+      const h = nodeHeight(node);
+      const sfNode: SFNode = {
+        id: node.id,
+        type: 'flow' as const,
+        data: buildNodeData(node),
+        position: { x: 0, y },
+        style: `width: ${NODE_WIDTH}px; height: ${h}px;`,
+        selected: id === selectedNodeId,
+        width: NODE_WIDTH,
+        height: h,
+      };
+      y += h + VERTICAL_GAP;
+      return sfNode;
+    });
+  }
+
   function deriveEdges(g: FlowGraph): SFEdge[] {
     return g.order.slice(0, -1).map((id, index) => ({
       id: `seq-${id}-${g.order[index + 1]}`,
@@ -205,14 +234,19 @@
     }));
   }
 
-  // Use untrack() so the initial $state value reads the prop without creating
-  // a reactive dependency. The $effect below handles all subsequent updates.
-  let nodes = $state(untrack(() => deriveNodes(graph)));
-  let edges = $state(untrack(() => deriveEdges(graph)));
+  // Use $state.raw so SvelteFlow's internal property updates (positionAbsolute,
+  // handleBounds, etc.) do not trigger Svelte re-renders — only our explicit
+  // assignments in the $effect below should drive updates.
+  // Use untrack() so the initial value reads the prop without creating a
+  // reactive dependency.
+  let nodes = $state.raw(untrack(() => deriveNodes(graph)));
+  let edges = $state.raw(untrack(() => deriveEdges(graph)));
 
   // Resync when graph, selection, or navigation callbacks change.
+  // Use deriveNodesWithDimensions so nodes become visible (and clickable)
+  // immediately after client-side hydration, without waiting for ResizeObserver.
   $effect(() => {
-    nodes = deriveNodes(graph);
+    nodes = deriveNodesWithDimensions(graph);
     edges = deriveEdges(graph);
   });
 
@@ -224,7 +258,12 @@
 
   function handleSelectionChange(params: SelectionParams) {
     const selected = params.nodes ?? [];
-    onnodeselect?.(selected.length > 0 ? (selected[0]?.id ?? null) : null);
+    // Only propagate deselection (empty selection) — node selection is handled
+    // synchronously via the direct onclick in FlowNode to avoid timing issues
+    // with Playwright (onselectionchange fires from a Svelte $effect, async).
+    if (selected.length === 0) {
+      onnodeselect?.(null);
+    }
   }
 
   // ---------------------------------------------------------------------------

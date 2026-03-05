@@ -48,14 +48,18 @@
     typeLabel: string;
     // Structural nodes provide nav rows; task nodes do not.
     navRows?: NavRow[];
+    // Synchronous click callback for URL updates — called during the DOM
+    // click event so Playwright detects the history change immediately.
+    onselect?: (id: string) => void;
   };
 
   interface Props {
+    id: string;
     data: NodeData;
     selected?: boolean;
   }
 
-  let { data, selected = false }: Props = $props();
+  let { id, data, selected = false }: Props = $props();
 
   // ---------------------------------------------------------------------------
   // Helpers
@@ -84,6 +88,12 @@
   class:flow-node--structural={isStructural}
   class:flow-node--selected={selected}
   style="--accent: {accentColor(data.nodeType)}"
+  onclick={() => data.onselect?.(id)}
+  onkeydown={(e) => {
+    if (e.key === 'Enter' || e.key === ' ') data.onselect?.(id);
+  }}
+  role="button"
+  tabindex="0"
 >
   <Handle type="target" position={Position.Top} />
 
@@ -117,7 +127,9 @@
     <!-- Task layout: horizontal, centered -->
     <div class="flow-node-body">
       <span class="flow-node-type">{data.typeLabel}</span>
-      <span class="flow-node-name">{data.label}</span>
+      <span class="flow-node-name" data-selected={selected ? 'true' : null}
+        >{data.label}</span
+      >
     </div>
   {/if}
 
