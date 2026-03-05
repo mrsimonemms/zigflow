@@ -20,3 +20,4 @@ wiki
 
 cmd/schema.yaml
 *.zip
+test-results

@@ -19,16 +19,8 @@
   import { exportToYaml } from '$lib/export/yaml';
   import {
     addForkBranch,
-    addNode,
     addSwitchBranch,
     addWorkflow,
-    createForkNode,
-    createLoopNode,
-    createSetNode,
-    createSwitchNode,
-    createTryNode,
-    createWaitNode,
-    createWorkflowFile,
     emptyFlowGraph,
     getGraphAtPath,
     insertNodeAtPath,
@@ -68,130 +60,33 @@
   // Workflow state (IR)
   // ---------------------------------------------------------------------------
 
-  // Demo file: a sequential workflow with varied node types.
-  // Stable __zigflow_id values are set on all nodes and branches so that
-  // URLs built from these IDs survive page reloads.
-  function buildDemoFile(): WorkflowFile {
-    const file = createWorkflowFile({
-      dsl: '1.0.0',
-      namespace: 'demo',
-      name: 'my-workflow',
-      version: '0.0.1',
-      title: 'Demo Workflow',
-    });
+  // The demo workflow file is provided by the server load (stable singleton).
+  // _initialWorkflowId captures the root workflow ID once; it never changes.
+  // workflowFile is mutable state — untrack intentionally captures initial value.
+  const _initialWorkflowId = untrack(() => data.demoFile.order[0]!);
 
-    const rootId = file.order[0]!;
-
-    // Build a FlowGraph with representative nodes
-    let root: FlowGraph = { nodes: {}, order: [] };
-
-    let greet = createSetNode('greet', { message: 'Hello, World!' });
-    greet = {
-      ...greet,
-      metadata: { ...greet.metadata, __zigflow_id: 'greet' },
-    };
-    root = addNode(root, greet);
-
-    let pause = createWaitNode('pause', { duration: { seconds: 5 } });
-    pause = {
-      ...pause,
-      metadata: { ...pause.metadata, __zigflow_id: 'pause' },
-    };
-    root = addNode(root, pause);
-
-    let switchNode = createSwitchNode('route');
-    switchNode = {
-      ...switchNode,
-      metadata: { ...switchNode.metadata, __zigflow_id: 'route' },
-    };
-    switchNode = addSwitchBranch(
-      switchNode,
-      'fast-path',
-      '${ $input.fast == true }',
-    );
-    // Override the fast-path branch __zigflow_id to a stable value
-    switchNode = {
-      ...switchNode,
-      branches: switchNode.branches.map((b) =>
-        b.label === 'fast-path'
-          ? { ...b, metadata: { ...b.metadata, __zigflow_id: 'fast-path' } }
-          : b,
-      ),
-    };
-    switchNode = addSwitchBranch(switchNode, 'default');
-    switchNode = {
-      ...switchNode,
-      branches: switchNode.branches.map((b) =>
-        b.label === 'default'
-          ? { ...b, metadata: { ...b.metadata, __zigflow_id: 'default' } }
-          : b,
-      ),
-    };
-    root = addNode(root, switchNode);
-
-    let fork = createForkNode('parallel-work');
-    fork = {
-      ...fork,
-      metadata: { ...fork.metadata, __zigflow_id: 'parallel-work' },
-    };
-    fork = addForkBranch(fork, 'branch-a');
-    fork = addForkBranch(fork, 'branch-b');
-    root = addNode(root, fork);
-
-    let tryNode = createTryNode('safe-call');
-    tryNode = {
-      ...tryNode,
-      metadata: { ...tryNode.metadata, __zigflow_id: 'safe-call' },
-    };
-    root = addNode(root, tryNode);
-
-    let loop = createLoopNode('process-items', '${ $input.items }');
-    loop = {
-      ...loop,
-      metadata: { ...loop.metadata, __zigflow_id: 'process-items' },
-    };
-    root = addNode(root, loop);
-
-    return {
-      ...file,
-      workflows: {
-        ...file.workflows,
-        [rootId]: { ...file.workflows[rootId]!, root },
-      },
-    };
-  }
-
-  // Build the initial file outside reactive context so downstream $state
-  // initialisers can reference it without triggering Svelte's warning about
-  // capturing reactive values in non-reactive initialisers.
-  const _initialFile = buildDemoFile();
-  const _initialWorkflowId = _initialFile.order[0]!;
-
-  let workflowFile = $state<WorkflowFile>(_initialFile);
+  let workflowFile = $state<WorkflowFile>(untrack(() => data.demoFile));
 
   // ---------------------------------------------------------------------------
   // Query param ↔ GraphPath sync
   //
   // Param format: ?selected=<segment1>/<segment2>/...
-  // Single segment: selected node at root (e.g. ?selected=greet)
-  // Two segments:   navigation into a branch (e.g. ?selected=route/fast-path)
+  // Single segment: selected node at root (e.g. ?selected=<uuid>)
+  // Two segments:   navigation into a branch (e.g. ?selected=<uuid>/<uuid>)
   //
-  // Only metadata.__zigflow_id values are used in the URL, never internal IDs.
+  // URL segments are node/branch IDs (which equal metadata.__zigflow_id).
   // ---------------------------------------------------------------------------
 
   // ---------------------------------------------------------------------------
-  // ID helpers — use metadata.__zigflow_id for stable URL segments.
+  // ID helpers — node.id === metadata.__zigflow_id (invariant from factories).
   // ---------------------------------------------------------------------------
 
   function getNodeHashId(node: Node): string {
-    return (node.metadata?.__zigflow_id as string | undefined) ?? node.id;
+    return node.id;
   }
 
-  function getBranchHashId(branch: {
-    id: string;
-    metadata?: Record<string, unknown>;
-  }): string {
-    return (branch.metadata?.__zigflow_id as string | undefined) ?? branch.id;
+  function getBranchHashId(branch: { id: string }): string {
+    return branch.id;
   }
 
   // Convert internal GraphPath segments (node.id / branch.id) to URL-safe
@@ -251,17 +146,12 @@
     return hashSegs;
   }
 
-  // Find a node in graph whose __zigflow_id (or node.id fallback) matches hashId.
+  // Since node.id === metadata.__zigflow_id, hash segments ARE the node IDs.
   function findNodeByHashId(
     graph: FlowGraph,
     hashId: string,
   ): Node | undefined {
-    for (const nodeId of graph.order) {
-      const node = graph.nodes[nodeId];
-      if (!node) continue;
-      if (getNodeHashId(node) === hashId) return node;
-    }
-    return undefined;
+    return graph.nodes[hashId];
   }
 
   // Convert URL hash segments (__zigflow_id) back to internal GraphPath
@@ -376,9 +266,12 @@
   // and kept in sync via a $effect that re-runs on URL navigation.
   // ---------------------------------------------------------------------------
 
+  // Parse URL params synchronously so both SSR and hydration start with the
+  // correct graphPath and selectedNodeId. untrack suppresses the reactivity
+  // warning for data.selectedSegments since the initial capture is intentional.
   const _initialParsed = untrack(() =>
     parseSelectedSegments(
-      _initialFile,
+      data.demoFile,
       _initialWorkflowId,
       data.selectedSegments,
     ),
@@ -387,19 +280,23 @@
   let selectedWorkflowId = $state<string>(_initialWorkflowId);
   let graphPath = $state<GraphPath>(_initialParsed.graphPath);
   let selectedNodeId = $state<string | null>(_initialParsed.selectedNodeId);
-  // Inspector is only shown after an explicit user node-click, not on deep-link
-  // or after browser back/forward (avoids strict-mode conflicts in tests).
+  // Controls whether the Inspector panel is open. Remains false on deep-link
+  // and refresh so the test locator `getByText(nodeName)` stays unambiguous
+  // (Inspector would add a second element with the same name text).
   let inspectorOpen = $state(false);
 
-  // Re-seed state from URL on full SvelteKit navigations (when data changes) and
-  // on initial mount. workflowFile is read via untrack so edits do not reset nav.
-  // With pushState-only navigation, data.selectedSegments never changes after the
-  // initial load, so this effect fires only once on mount in that case.
+  // Re-seed state from URL on any SvelteKit navigation that changes
+  // data.selectedSegments. workflowFile is read via untrack so user edits do
+  // not reset navigation state. With pushState-only navigation,
+  // data.selectedSegments never changes after the initial load, so this
+  // effect fires only once on mount in that case.
+  const selectedSegments = $derived(data.selectedSegments ?? []);
+
   $effect(() => {
     const parsed = parseSelectedSegments(
       untrack(() => workflowFile),
       _initialWorkflowId,
-      data.selectedSegments,
+      selectedSegments,
     );
     graphPath = parsed.graphPath;
     selectedNodeId = parsed.selectedNodeId;
@@ -559,7 +456,7 @@
   // ---------------------------------------------------------------------------
 
   const selectedNode = $derived<Node | null>(
-    inspectorOpen && selectedNodeId && currentGraph
+    selectedNodeId && currentGraph
       ? (currentGraph.nodes[selectedNodeId] ?? null)
       : null,
   );
@@ -663,11 +560,11 @@
 
   function handleNodeSelect(nodeId: string | null): void {
     if (!nodeId) {
-      // Guard: if nothing is selected and inspector is closed, there is nothing
-      // to deselect. Skip the URL update so that a branch navigation that just
-      // set selectedNodeId = null (synchronously) is not immediately overwritten
-      // by the async onselectionchange deselect event from SvelteFlow.
-      if (selectedNodeId === null && !inspectorOpen) return;
+      // Guard: if nothing is selected, there is nothing to deselect. Skip the
+      // URL update so that a branch navigation that just set selectedNodeId =
+      // null (synchronously) is not immediately overwritten by the async
+      // onselectionchange deselect event from SvelteFlow.
+      if (selectedNodeId === null) return;
       selectedNodeId = null;
       inspectorOpen = false;
       // Stay in the current sub-graph if we navigated into one; only return to
@@ -926,7 +823,7 @@
       {/if}
 
       <Inspector
-        node={selectedNode}
+        node={inspectorOpen ? selectedNode : null}
         {canMoveUp}
         {canMoveDown}
         onmoveup={handleMoveUp}

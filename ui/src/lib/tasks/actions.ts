@@ -176,12 +176,13 @@ export function replaceNode(graph: FlowGraph, node: Node): FlowGraph {
 // ---------------------------------------------------------------------------
 
 export function createTaskNode(name: string, config: TaskConfig): TaskNode {
+  const zid = newId();
   return {
-    id: newId(),
+    id: zid,
     type: 'task',
     name,
     config,
-    metadata: { __zigflow_id: newId() },
+    metadata: { __zigflow_id: zid },
   };
 }
 
@@ -268,12 +269,13 @@ export function createListenNode(
 // ---------------------------------------------------------------------------
 
 export function createSwitchNode(name: string): SwitchNode {
+  const zid = newId();
   return {
-    id: newId(),
+    id: zid,
     type: 'switch',
     name,
     branches: [],
-    metadata: { __zigflow_id: newId() },
+    metadata: { __zigflow_id: zid },
   };
 }
 
@@ -282,12 +284,13 @@ export function addSwitchBranch(
   label: string,
   condition?: string,
 ): SwitchNode {
+  const zid = newId();
   const branch: SwitchBranch = {
-    id: newId(),
+    id: zid,
     label,
     condition,
     graph: emptyFlowGraph(),
-    metadata: { __zigflow_id: newId() },
+    metadata: { __zigflow_id: zid },
   };
   return { ...node, branches: [...node.branches, branch] };
 }
@@ -333,22 +336,24 @@ export function renameSwitchBranch(
 // ---------------------------------------------------------------------------
 
 export function createForkNode(name: string): ForkNode {
+  const zid = newId();
   return {
-    id: newId(),
+    id: zid,
     type: 'fork',
     name,
     compete: false,
     branches: [],
-    metadata: { __zigflow_id: newId() },
+    metadata: { __zigflow_id: zid },
   };
 }
 
 export function addForkBranch(node: ForkNode, label: string): ForkNode {
+  const zid = newId();
   const branch: ForkBranch = {
-    id: newId(),
+    id: zid,
     label,
     graph: emptyFlowGraph(),
-    metadata: { __zigflow_id: newId() },
+    metadata: { __zigflow_id: zid },
   };
   return { ...node, branches: [...node.branches, branch] };
 }
@@ -391,12 +396,13 @@ export function renameForkBranch(
 // ---------------------------------------------------------------------------
 
 export function createTryNode(name: string): TryNode {
+  const zid = newId();
   return {
-    id: newId(),
+    id: zid,
     type: 'try',
     name,
     tryGraph: emptyFlowGraph(),
-    metadata: { __zigflow_id: newId() },
+    metadata: { __zigflow_id: zid },
   };
 }
 
@@ -413,13 +419,14 @@ export function updateTrySection(
 // ---------------------------------------------------------------------------
 
 export function createLoopNode(name: string, inExpr: string): LoopNode {
+  const zid = newId();
   return {
-    id: newId(),
+    id: zid,
     type: 'loop',
     name,
     in: inExpr,
     bodyGraph: emptyFlowGraph(),
-    metadata: { __zigflow_id: newId() },
+    metadata: { __zigflow_id: zid },
   };
 }
 
