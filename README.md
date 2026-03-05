@@ -131,10 +131,11 @@ Zigflow is an opinionated, declarative layer on top of Temporal. It trades some
 SDK-level flexibility for faster development and structural guardrails.
 
 | Capability | <img src="./designs/temporal.png#gh-light-mode-only" alt="Temporal SDKs" height="50px" /><img src="./designs/temporal-dark.png#gh-dark-mode-only" alt="Temporal SDKs" height="50px" /> | Custom DSL | <img src="./designs/zigflow.png " alt="Zigflow" height="50px" /> |
-| --- | --- | --- | --- |
+| --- | :--: | :--: | :--: |
 | **Workflow definition model** | Imperative code | Declarative | Declarative |
 | **Control and flexibility** | Maximum | Depends on implementation | Opinionated and constrained |
 | **Retries and durability** | ✅ Native Temporal | ⚠️ You build it | ✅ Native Temporal |
+| **Continue-as-new** | ✅ Supported (you implement and tune it) | ⚠️ You build it | ✅ Automatic (Zigflow continues as new for you) |
 | **CNCF spec alignment** | ❌ | ❌ Usually bespoke | ✅ Serverless Workflow v1.0+ |
 | **Validation before execution** | Manual or custom | Depends on implementation | ✅ Built-in validation |
 | **Boilerplate and worker setup** | Required | Depends on implementation | Minimal |
