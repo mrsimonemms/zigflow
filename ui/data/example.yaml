@@ -1,0 +1,47 @@
+# This is a simple Serverless Workflow that will be
+# translated into a Temporal workflow
+document:
+  dsl: 1.0.0
+  namespace: zigflow # Mapped to the task queue
+  name: example # Workflow name
+  version: 0.0.1
+  title: Example Workflow
+  summary: An example of how to use Serverless Workflow to define Temporal Workflows
+timeout:
+  after:
+    minutes: 1
+# Validate the input schema
+input:
+  schema:
+    format: json
+    document:
+      type: object
+      required:
+        - userId
+      properties:
+        userId:
+          type: number
+do:
+  # Set some data to the state
+  - step1:
+      export:
+        as:
+          data: ${ . }
+      set:
+        # Set a variable from an envvar
+        envvar: ${ $env.EXAMPLE_ENVVAR }
+        # Generate a UUID at a workflow level
+        uuid: ${ uuid }
+  # Pause the workflow
+  - wait:
+      wait:
+        seconds: 5
+  # Make an HTTP call, using the userId received from the input
+  - getUser:
+      call: http
+      # Expose the response to the output
+      output:
+        as: '${ $context + { user: . }}'
+      with:
+        method: get
+        endpoint: ${ "https://jsonplaceholder.typicode.com/users/" + ($input.userId | tostring) }
