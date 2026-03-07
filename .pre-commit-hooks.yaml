@@ -1,10 +1,10 @@
 #############################
 # Installation instructions #
 #                           #
-# Requires at least v0.8.1  #
+# Requires at least v0.8.2  #
 #############################
 # - repo: https://github.com/mrsimonemms/zigflow
-#   rev: v0.8.1
+#   rev: v0.8.2
 #   hooks:
 #     - id: zigflow-graph-inject
 
