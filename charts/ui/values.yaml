@@ -1,0 +1,98 @@
+# Default values for ui.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# -- Number of replicas
+replicaCount: 1
+
+# -- Path on the container where workflow YAML files are read from
+dataDir: /home/node/data
+
+# -- Additional environment variables
+envvars: []
+# - name: SOME_VAR
+#   value: some-value
+
+image:
+  # -- Image repository
+  repository: ghcr.io/mrsimonemms/zigflow/ui
+  # -- Image pull policy
+  pullPolicy: IfNotPresent
+  # -- Image tag - defaults to the chart's <code>Version</code> if not set
+  tag: ""
+
+# -- Docker registry secret names
+imagePullSecrets: []
+# -- String to partially override name
+nameOverride: ""
+# -- String to fully override names
+fullnameOverride: ""
+
+serviceAccount:
+  # -- Specifies whether a service account should be created
+  create: true
+  # -- Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # -- Annotations to add to the service account
+  annotations: {}
+  # -- The name of the service account to use. If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+# -- Pod <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations" target="_blank">annotations</a>
+podAnnotations: {}
+# -- Pod <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels" target="_blank">labels</a>
+podLabels: {}
+
+# -- Pod's <a href="https://kubernetes.io/docs/tasks/configure-pod-container/security-context" target="_blank">security context</a>
+podSecurityContext: {}
+
+# -- Container's security context
+securityContext: {}
+
+service:
+  # -- Service type
+  type: ClusterIP
+  # -- Service port
+  port: 3000
+
+# -- Configure resources available
+resources: {}
+
+livenessProbe:
+  httpGet:
+    # -- Path to demonstrate app liveness
+    path: /
+    # -- Port to demonstrate app liveness
+    port: http
+readinessProbe:
+  httpGet:
+    # -- Path to demonstrate app readiness
+    path: /
+    # -- Port to demonstrate app readiness
+    port: http
+
+autoscaling:
+  # -- Autoscaling enabled
+  enabled: false
+  # -- Minimum replicas
+  minReplicas: 1
+  # -- Maximum replicas
+  maxReplicas: 100
+  # -- When to trigger a new replica
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+# -- Additional volumes on the output Deployment definition.
+volumes: []
+
+# -- Additional volumeMounts on the output Deployment definition.
+volumeMounts: []
+
+# -- Node selector
+nodeSelector: {}
+
+# -- Node toleration
+tolerations: []
+
+# -- Node affinity
+affinity: {}
