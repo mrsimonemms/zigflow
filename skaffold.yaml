@@ -31,14 +31,15 @@ deploy:
         setValueTemplates:
           image.repository: "{{.IMAGE_REPO_zigflow}}"
           image.tag: "{{.IMAGE_TAG_zigflow}}"
+          config.file: "{{.WORKFLOW_FILE | default \"/go/app/workflow.example.yaml\"}}"
+          workflow.enabled: "{{.WORKFLOW_ENABLED | default false}}"
         setValues:
           image:
             pullPolicy: Never
           config:
-            file: /go/app/workflow.example.yaml
             temporal-address: temporal.temporal.svc.cluster.local:7233
-          workflow:
-            enabled: false
+          securityContext:
+            readOnlyRootFilesystem: false
 
 portForward:
   - resourceType: Service

@@ -17,6 +17,10 @@ ConfigMaps and no inline workflow configuration at runtime.
 - Why this approach works with the official Zigflow base image
 - How to write a Dockerfile that embeds your workflow
 - When this build pattern is useful
+- The security posture of the Zigflow container image
+- How to configure Kubernetes security contexts for the worker
+- How to handle writable paths when using a read-only root filesystem
+- How to verify the image before deploying
 
 ---
 
@@ -75,9 +79,8 @@ reasons:
 built, the image cannot be modified without producing a new build. This
 eliminates drift between the running container and a separately managed file.
 
-**Versioning tied to the image tag.** Rolling back a workflow version is the
-same operation as rolling back an image tag. There is no separate artefact to
-track.
+**Versioning tied to the image tag.** Rolling back a workflow version is the same
+operation as rolling back the image tag. There is no separate artefact to track.
 
 **No runtime file mounts.** Volume mounts and ConfigMap projections introduce
 a dependency between the running container and external configuration. Baking
@@ -85,6 +88,192 @@ the workflow into the image removes that dependency.
 
 **Simpler CI/CD.** The build pipeline produces a single artefact. Deployment
 consists of updating the image reference. There is nothing to synchronise.
+
+---
+
+## Security posture
+
+The official `ghcr.io/zigflow/zigflow` image is built on
+[Chainguard's Wolfi](https://github.com/chainguard-dev/wolfi-os), a minimal
+Linux distribution with a reduced package surface and a minimal base image
+without a general-purpose shell.
+
+The image runs as a dedicated non-root user (`zigflow`, UID 1000). It contains
+only the Zigflow binary, Node.js and Python for script task support, and the CA
+certificate bundle.
+
+---
+
+## Script and shell task execution
+
+:::warning
+Script and shell tasks execute code directly on the Zigflow worker process.
+:::
+
+Any workflow that uses `run` tasks with a script or shell interpreter runs
+that code inside the worker container, with access to the same environment,
+network and mounted secrets as the worker itself.
+
+Apply least-privilege principles:
+
+- Do not mount credentials or secrets that the workflow does not require.
+- Restrict network egress at the pod or network-policy level if workflows
+  should not make arbitrary outbound connections.
+- Treat the worker with the same trust boundaries you would apply to any
+  code execution environment.
+
+---
+
+## Writable paths
+
+By default, Zigflow writes only to `/tmp` during script task execution.
+
+When `readOnlyRootFilesystem: true` is set, `/tmp` must be provided as a
+writable volume. Mount an `emptyDir` at `/tmp`:
+
+```yaml
+volumes:
+  - name: tmp
+    emptyDir:
+      medium: Memory
+      sizeLimit: 32Mi
+
+# inside the container spec:
+volumeMounts:
+  - mountPath: /tmp
+    name: tmp
+```
+
+The Helm chart configures this volume automatically. If you are writing your
+own manifests, add the mount shown above.
+
+---
+
+## Kubernetes security context
+
+The Helm chart ships with the following security context defaults. If you are
+deploying with the chart, these are applied automatically. If you are writing
+your own manifests, apply these settings directly.
+
+```yaml
+podSecurityContext:
+  runAsNonRoot: true
+  fsGroup: 1000
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  capabilities:
+    drop:
+      - ALL
+  seccompProfile:
+    type: RuntimeDefault
+```
+
+A minimal Kubernetes `Deployment` applying these contexts alongside the
+`/tmp` volume looks like this:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-workflow
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: zigflow
+          image: your-registry/your-image:your-tag
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory
+            sizeLimit: 32Mi
+```
+
+Resource limits should be configured to constrain CPU and memory usage for script
+and shell tasks.
+
+---
+
+## Verifying the image
+
+:::info
+Set the `VERSION` environment variable to the Zigflow version
+you want to use. This requires v0.9.0 or later.
+:::
+
+### Vulnerability scanning
+
+Scan the image for known vulnerabilities before deploying:
+
+```sh
+trivy image \
+  --severity HIGH,CRITICAL \
+  --ignore-unfixed \
+  ghcr.io/zigflow/zigflow:$VERSION
+```
+
+Zigflow's CI pipeline scans each published image at build time. HIGH and CRITICAL
+findings are treated as build failures. Images are only published when that check
+passes.
+
+The `--ignore-unfixed` flag filters out vulnerabilities that do not yet have a
+published fix, reducing noise from upstream issues.
+
+### Helm chart config scanning
+
+To check your Helm chart configuration for security misconfigurations:
+
+```sh
+trivy config \
+  --severity HIGH,CRITICAL \
+  ./charts/zigflow
+```
+
+### Signature verification (optional)
+
+Images published from the main branch are signed with
+[Cosign](https://github.com/sigstore/cosign) using keyless signing via
+GitHub Actions OIDC. A CycloneDX SBOM is generated with Syft and attached
+to the image reference.
+
+To verify the signature:
+
+```sh
+cosign verify ghcr.io/zigflow/zigflow:$VERSION \
+  --certificate-identity-regexp="https://github.com/zigflow/zigflow" \
+  --certificate-oidc-issuer="https://token.actions.githubusercontent.com"
+```
+
+To inspect the attached SBOM:
+
+```sh
+cosign download sbom ghcr.io/zigflow/zigflow:$VERSION
+```
+
+Signature verification is optional but recommended when deploying in
+environments with strict supply chain requirements.
 
 ---
 
